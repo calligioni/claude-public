@@ -6,11 +6,7 @@
           {
             "type": "command",
             "command": "git-autosave > /tmp/git-autosave.log 2>&1 &"
-          }
-        ]
-      },
-      {
-        "hooks": [
+          },
           {
             "type": "command",
             "command": "echo '=== CORE MEMORY ===' && cat \"$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/core-memory.json\" 2>/dev/null || echo 'No core memory found'"
@@ -30,7 +26,25 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Write|Edit|NotebookEdit",
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/hooks/format-file.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/hooks/format-file.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": "NotebookEdit",
         "hooks": [
           {
             "type": "command",
@@ -56,11 +70,7 @@
           {
             "type": "prompt",
             "prompt": "Before ending: If you made code changes, did you verify they compile/pass tests? If not, consider running /verify."
-          }
-        ]
-      },
-      {
-        "hooks": [
+          },
           {
             "type": "command",
             "command": "\"$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/hooks/session-end.sh\""

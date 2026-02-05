@@ -2,6 +2,7 @@
 name: agentmail
 description: "Email inbox management for AI agents using AgentMail API. Create inboxes, send/receive emails, reply, forward, and manage messages. Use when users want to send emails, create agent inboxes, check messages, or set up email automations."
 user-invocable: true
+context: fork
 model: sonnet
 allowed-tools:
   - Bash
@@ -45,6 +46,7 @@ python3.13 -m venv "$SKILL_DIR/.venv"
 ```
 
 Set your API key:
+
 ```bash
 export AGENTMAIL_API_KEY="your_key_here"
 # Or add to ~/.zshrc for persistence
@@ -66,6 +68,7 @@ The AgentMail SDK v0.2.9 has specific attribute names that differ from some docu
 ## How to Execute Operations
 
 All operations MUST use the venv Python interpreter:
+
 ```bash
 PYTHON="/Volumes/AI/Code/agentmail/.venv/bin/python3"
 ```
@@ -84,6 +87,7 @@ print(f'Email: {inbox.inbox_id}')
 ```
 
 Without custom username (auto-generated):
+
 ```bash
 $PYTHON -c "
 from agentmail import AgentMail
@@ -126,6 +130,7 @@ print(f'Thread ID: {msg.thread_id}')
 ```
 
 With HTML body and CC:
+
 ```bash
 $PYTHON -c "
 from agentmail import AgentMail
@@ -195,6 +200,7 @@ print(f'Thread: {reply.thread_id}')
 ```
 
 Reply all:
+
 ```bash
 $PYTHON -c "
 from agentmail import AgentMail
@@ -248,6 +254,7 @@ For complex operations, use the helper module at `/Volumes/AI/Code/agentmail/age
 - CLI commands: `create_inbox`, `list_inboxes`, `send_email`, `check_inbox`, `org_info`
 
 Usage:
+
 ```bash
 $PYTHON "/Volumes/AI/Code/agentmail/agentmail_helper.py" list_inboxes
 $PYTHON "/Volumes/AI/Code/agentmail/agentmail_helper.py" create_inbox [username]
@@ -258,13 +265,13 @@ $PYTHON "/Volumes/AI/Code/agentmail/agentmail_helper.py" org_info
 
 ## Error Handling
 
-| Error | Cause | Fix |
-|-------|-------|-----|
-| 401 Unauthorized | Missing or malformed API key | Check AGENTMAIL_API_KEY is set correctly |
-| 403 Forbidden + `LimitExceededError` | Inbox limit reached on current plan | Upgrade plan or delete unused inboxes |
-| 403 Forbidden | Invalid, expired, or revoked API key | Regenerate key at console.agentmail.to |
-| 404 Not Found | Wrong inbox_id or message_id | Verify IDs with list commands |
-| 429 Rate Limited | Too many requests | Wait and retry, or upgrade plan |
+| Error                                | Cause                                | Fix                                      |
+| ------------------------------------ | ------------------------------------ | ---------------------------------------- |
+| 401 Unauthorized                     | Missing or malformed API key         | Check AGENTMAIL_API_KEY is set correctly |
+| 403 Forbidden + `LimitExceededError` | Inbox limit reached on current plan  | Upgrade plan or delete unused inboxes    |
+| 403 Forbidden                        | Invalid, expired, or revoked API key | Regenerate key at console.agentmail.to   |
+| 404 Not Found                        | Wrong inbox_id or message_id         | Verify IDs with list commands            |
+| 429 Rate Limited                     | Too many requests                    | Wait and retry, or upgrade plan          |
 
 ## API Reference
 
@@ -276,12 +283,12 @@ $PYTHON "/Volumes/AI/Code/agentmail/agentmail_helper.py" org_info
 
 ## Pricing
 
-| Plan | Inboxes | Emails/month | Price |
-|------|---------|--------------|-------|
-| Free | 3 | 3,000 | $0 |
-| Starter | 25 | 25,000 | $25/mo |
-| Pro | 100 | 100,000 | $100/mo |
-| Business | 300 | 300,000 | $500/mo |
+| Plan     | Inboxes | Emails/month | Price   |
+| -------- | ------- | ------------ | ------- |
+| Free     | 3       | 3,000        | $0      |
+| Starter  | 25      | 25,000       | $25/mo  |
+| Pro      | 100     | 100,000      | $100/mo |
+| Business | 300     | 300,000      | $500/mo |
 
 ## Workflow Tips
 

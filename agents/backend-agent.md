@@ -11,6 +11,7 @@ allowed-tools:
   - LSP
 color: #60A5FA
 model: opus
+skills: [verify, test-and-fix]
 ---
 
 # Backend Agent

@@ -25,6 +25,7 @@ allowed-tools:
   - TaskCreate
   - TaskUpdate
   - TaskList
+  - TaskGet
 ---
 
 # M&A Toolkit

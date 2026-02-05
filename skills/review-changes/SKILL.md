@@ -9,6 +9,10 @@ allowed-tools:
   - Read
   - Glob
   - Grep
+inject:
+  - bash: git diff --cached --stat
+  - bash: git diff --stat
+  - bash: git status --short
 ---
 
 # Review Changes
@@ -24,12 +28,14 @@ Pre-commit quality review of staged or unstaged changes.
 ### Checks
 
 **Security**
+
 - Hardcoded secrets, API keys, tokens, passwords
 - SQL injection risks (string concatenation in queries)
 - XSS vectors (unsanitized user input in HTML)
 - Exposed sensitive data in error messages
 
 **Bugs**
+
 - Null/undefined access without checks
 - Off-by-one errors
 - Race conditions
@@ -37,6 +43,7 @@ Pre-commit quality review of staged or unstaged changes.
 - Unreachable code
 
 **Code Quality**
+
 - Leftover debug code (console.log, debugger, print statements)
 - TODO/FIXME/HACK comments that should be addressed
 - Commented-out code that should be deleted
@@ -44,6 +51,7 @@ Pre-commit quality review of staged or unstaged changes.
 - Overly complex logic that could be simplified
 
 **Git Hygiene**
+
 - Files that shouldn't be committed (.env, node_modules, build artifacts)
 - Merge conflict markers
 - Excessively large files
@@ -53,6 +61,7 @@ Pre-commit quality review of staged or unstaged changes.
 ## Output Format
 
 If clean:
+
 ```
 Review: CLEAN
 No issues found in 5 changed files (42 lines added, 12 removed).
@@ -60,6 +69,7 @@ Ready to commit.
 ```
 
 If issues found:
+
 ```
 Review: 2 issues found
 

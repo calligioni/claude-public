@@ -3,10 +3,15 @@ name: cp
 description: Quick commit and push. Use when asked to commit and push, or just "cp".
 argument-hint: "[commit message]"
 user-invocable: true
+context: fork
 model: haiku
 allowed-tools:
   - Bash
 disable-model-invocation: true
+inject:
+  - bash: git diff --stat
+  - bash: git status --short
+  - bash: git branch --show-current
 ---
 
 # CP - Commit and Push

@@ -11,6 +11,8 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
+inject:
+  - bash: ls package.json pyproject.toml go.mod Cargo.toml 2>/dev/null
 ---
 
 # Test and Fix

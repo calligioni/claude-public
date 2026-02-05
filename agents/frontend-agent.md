@@ -11,6 +11,7 @@ allowed-tools:
   - LSP
 color: #34D399
 model: opus
+skills: [verify, test-and-fix]
 ---
 
 # Frontend Agent

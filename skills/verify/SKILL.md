@@ -9,6 +9,8 @@ allowed-tools:
   - Bash
   - Read
   - Glob
+inject:
+  - bash: ls package.json pyproject.toml go.mod Cargo.toml Makefile 2>/dev/null
 ---
 
 # Verify Project Health
@@ -23,22 +25,26 @@ Quick verification that the codebase is healthy after changes.
 ### Detection & Checks
 
 **Node.js/TypeScript** (package.json):
+
 - Type-check: `npx tsc --noEmit` (if tsconfig.json exists)
 - Tests: `pnpm test` or `npm test` (if test script exists)
 - Build: `pnpm build` or `npm run build` (if build script exists)
 - Lint: `pnpm lint` or `npm run lint` (if lint script exists)
 
 **Python** (pyproject.toml / setup.py / requirements.txt):
+
 - Type-check: `mypy .` (if installed)
 - Tests: `pytest` (if installed)
 - Lint: `ruff check .` or `flake8` (if installed)
 
 **Go** (go.mod):
+
 - Type-check + build: `go build ./...`
 - Tests: `go test ./...`
 - Lint: `golangci-lint run` (if installed)
 
 **Rust** (Cargo.toml):
+
 - Build: `cargo build`
 - Tests: `cargo test`
 - Lint: `cargo clippy` (if installed)

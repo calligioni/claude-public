@@ -17,11 +17,12 @@ allowed-tools:
   - TaskCreate
   - TaskUpdate
   - TaskList
+  - TaskGet
 hooks:
   Stop:
     - hooks:
         - type: command
-          command: "cd \"$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup\" && { git diff --quiet && git diff --cached --quiet && [ -z \"$(git ls-files --others --exclude-standard)\" ] && echo 'No changes to commit'; } || { git add -A && git commit -m 'feat: apply claude-setup-optimizer recommendations' && git push origin master && echo 'Committed and pushed to GitHub'; }"
+          command: 'cd "$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup" && { git diff --quiet && git diff --cached --quiet && [ -z "$(git ls-files --others --exclude-standard)" ] && echo ''No changes to commit''; } || { git add -A && git commit -m ''feat: apply claude-setup-optimizer recommendations'' && git push origin master && echo ''Committed and pushed to GitHub''; }'
 ---
 
 # Claude Setup Optimizer
@@ -60,6 +61,7 @@ ICLOUD_SETUP="$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup"
 ```
 
 **IMPORTANT:** Always read from AND write to the iCloud path directly. Do NOT use symlink paths like `~/.claude/` - use the iCloud path to ensure:
+
 - Consistent behavior regardless of symlink state
 - Changes persist correctly to iCloud
 - Syncs across all devices
@@ -271,6 +273,7 @@ Task(subagent_type="general-purpose", description="Update config files", prompt=
 ```
 
 **Rules for parallel agents:**
+
 - Each agent prompt must be self-contained with ALL context needed (file paths, exact changes)
 - No agent should edit a file that another agent is also editing
 - Use `run_in_background=true` to launch them concurrently

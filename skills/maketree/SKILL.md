@@ -2,6 +2,7 @@
 name: maketree
 description: Automatically create and manage git worktrees for any project with intelligent branch discovery.
 user-invocable: true
+context: fork
 model: haiku
 allowed-tools:
   - Bash
@@ -25,6 +26,7 @@ Automatically detect feature branches and create git worktrees for parallel deve
 ## What It Does
 
 This skill automatically:
+
 1. Checks for local `.worktree-scaffold.json` configuration
 2. If no config exists, discovers feature branches and recommends worktrees
 3. Presents a numbered table for user selection
@@ -63,11 +65,11 @@ The skill uses `.worktree-scaffold.json` in the project root:
 
 ### Config Fields
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `worktreeDir` | string | `"../"` | Directory for worktrees relative to repo |
-| `branchPrefix` | string | `"feature/"` | Default prefix for new branches |
-| `worktrees` | array | `[]` | Saved worktree selections from discovery |
+| Field          | Type   | Default      | Description                              |
+| -------------- | ------ | ------------ | ---------------------------------------- |
+| `worktreeDir`  | string | `"../"`      | Directory for worktrees relative to repo |
+| `branchPrefix` | string | `"feature/"` | Default prefix for new branches          |
+| `worktrees`    | array  | `[]`         | Saved worktree selections from discovery |
 
 ## Directory Structure
 

@@ -2,6 +2,7 @@
 name: run-local
 description: Start local development environment with automatic dependency installation, service orchestration, and health checks. Use when developers ask to run locally, start dev server, launch the app, or spin up the development environment.
 user-invocable: true
+context: fork
 model: haiku
 allowed-tools:
   - Bash
@@ -10,6 +11,8 @@ allowed-tools:
   - Glob
   - Grep
   - AskUserQuestion
+inject:
+  - bash: ls package.json pyproject.toml go.mod Cargo.toml docker-compose.yml .run-local.json 2>/dev/null
 ---
 
 # Run Local - Development Environment Manager
@@ -26,6 +29,7 @@ Automatically detect, configure, and start local development environments for an
 ## What It Does
 
 This skill automatically:
+
 1. Checks for existing `.run-local.json` config or `scripts/run-local.sh`
 2. If missing, analyzes the project to detect services and dependencies
 3. Creates a run script tailored to the project
@@ -96,9 +100,7 @@ The skill uses `.run-local.json` in the project root:
       { "path": ".", "command": "pnpm install" },
       { "path": "./apps/api", "command": "pip install -r requirements.txt" }
     ],
-    "preStart": [
-      "docker-compose up -d postgres redis"
-    ]
+    "preStart": ["docker-compose up -d postgres redis"]
   },
   "healthCheck": {
     "timeout": 60,
@@ -109,27 +111,28 @@ The skill uses `.run-local.json` in the project root:
 
 ### Config Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `services` | array | List of services to manage |
-| `services[].name` | string | Service identifier |
-| `services[].type` | string | nodejs, python, nextjs, docker, go, etc. |
-| `services[].path` | string | Working directory for the service |
-| `services[].port` | number | Port the service runs on |
-| `services[].start` | string | Command to start the service |
-| `services[].healthCheck` | string | URL or command to verify service health |
-| `services[].dependsOn` | array | Services that must start first |
-| `services[].env` | object | Environment variables |
-| `dependencies.install` | array | Dependency installation commands |
-| `dependencies.preStart` | array | Commands to run before starting services |
-| `healthCheck.timeout` | number | Max seconds to wait for health checks |
-| `healthCheck.interval` | number | Seconds between health check attempts |
+| Field                    | Type   | Description                              |
+| ------------------------ | ------ | ---------------------------------------- |
+| `services`               | array  | List of services to manage               |
+| `services[].name`        | string | Service identifier                       |
+| `services[].type`        | string | nodejs, python, nextjs, docker, go, etc. |
+| `services[].path`        | string | Working directory for the service        |
+| `services[].port`        | number | Port the service runs on                 |
+| `services[].start`       | string | Command to start the service             |
+| `services[].healthCheck` | string | URL or command to verify service health  |
+| `services[].dependsOn`   | array  | Services that must start first           |
+| `services[].env`         | object | Environment variables                    |
+| `dependencies.install`   | array  | Dependency installation commands         |
+| `dependencies.preStart`  | array  | Commands to run before starting services |
+| `healthCheck.timeout`    | number | Max seconds to wait for health checks    |
+| `healthCheck.interval`   | number | Seconds between health check attempts    |
 
 ## Project Detection
 
 The skill automatically detects:
 
 ### Package Managers
+
 - `package.json` → npm/yarn/pnpm
 - `pnpm-workspace.yaml` → pnpm monorepo
 - `requirements.txt` / `pyproject.toml` → pip/poetry
@@ -137,6 +140,7 @@ The skill automatically detects:
 - `Cargo.toml` → Rust/Cargo
 
 ### Frameworks
+
 - `next.config.*` → Next.js (port 3000)
 - `vite.config.*` → Vite (port 5173)
 - `angular.json` → Angular (port 4200)
@@ -145,6 +149,7 @@ The skill automatically detects:
 - `Dockerfile` / `docker-compose.yml` → Docker services
 
 ### Databases
+
 - `docker-compose.yml` with postgres/mysql/redis → Docker databases
 - `.env` with DATABASE_URL → Database connection
 
@@ -185,19 +190,19 @@ View logs: /run-local logs
 
 ## Service Types
 
-| Type | Detection | Default Port | Health Check |
-|------|-----------|--------------|--------------|
-| `nodejs` | package.json | 3000 | HTTP GET / |
-| `nextjs` | next.config.* | 3000 | HTTP GET / |
-| `vite` | vite.config.* | 5173 | HTTP GET / |
-| `python` | requirements.txt | 8000 | HTTP GET /health |
-| `django` | manage.py | 8000 | HTTP GET /admin |
-| `fastapi` | main.py + fastapi | 8000 | HTTP GET /docs |
-| `go` | go.mod + main.go | 8080 | HTTP GET /health |
-| `docker` | docker-compose.yml | varies | container health |
-| `postgres` | docker/native | 5432 | pg_isready |
-| `redis` | docker/native | 6379 | redis-cli ping |
-| `mysql` | docker/native | 3306 | mysqladmin ping |
+| Type       | Detection          | Default Port | Health Check     |
+| ---------- | ------------------ | ------------ | ---------------- |
+| `nodejs`   | package.json       | 3000         | HTTP GET /       |
+| `nextjs`   | next.config.\*     | 3000         | HTTP GET /       |
+| `vite`     | vite.config.\*     | 5173         | HTTP GET /       |
+| `python`   | requirements.txt   | 8000         | HTTP GET /health |
+| `django`   | manage.py          | 8000         | HTTP GET /admin  |
+| `fastapi`  | main.py + fastapi  | 8000         | HTTP GET /docs   |
+| `go`       | go.mod + main.go   | 8080         | HTTP GET /health |
+| `docker`   | docker-compose.yml | varies       | container health |
+| `postgres` | docker/native      | 5432         | pg_isready       |
+| `redis`    | docker/native      | 6379         | redis-cli ping   |
+| `mysql`    | docker/native      | 3306         | mysqladmin ping  |
 
 ## Requirements
 
