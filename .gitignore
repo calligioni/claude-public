@@ -17,3 +17,10 @@ Thumbs.db
 # Logs
 *.log
 memory/sessions/
+
+# Python
+__pycache__/
+*.pyc
+
+# Backups
+backups/
