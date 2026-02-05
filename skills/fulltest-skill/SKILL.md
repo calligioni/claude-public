@@ -25,6 +25,7 @@ Comprehensive website testing with **true parallel execution** via TeammateTool,
 ## What It Does
 
 When you run `/fulltest`, it will:
+
 1. Map your entire site structure
 2. **Spawn concurrent page testers** via TeammateTool (not sequential Task calls)
 3. **Share failures in real-time** - when one tester finds CSS issue, others check immediately
@@ -36,10 +37,10 @@ When you run `/fulltest`, it will:
 
 ## Execution Modes
 
-| Mode | Description | When to Use |
-|------|-------------|-------------|
-| **Sequential** | Task-based parallel (standard) | Small sites, debugging |
-| **Swarm** | TeammateTool true concurrency | Large sites, speed priority |
+| Mode           | Description                    | When to Use                 |
+| -------------- | ------------------------------ | --------------------------- |
+| **Sequential** | Task-based parallel (standard) | Small sites, debugging      |
+| **Swarm**      | TeammateTool true concurrency  | Large sites, speed priority |
 
 ## Swarm Mode Architecture
 
@@ -85,14 +86,18 @@ When you run `/fulltest`, it will:
 ## New in v3.0: Visual Verification + Learning
 
 ### Visual Verification (Always On)
+
 Every page test now includes:
+
 - **CSS Load Check**: Verify all CSS files return 200 and styles apply
 - **Computed Style Check**: Sample key elements for expected styles (dark background, proper fonts)
 - **Asset Check**: Verify images and fonts load correctly
 - **Screenshot Capture**: On failure only, for debugging
 
 ### Pattern Learning
+
 After each test:
+
 - Extract patterns from failures (visual and functional)
 - Store patterns in MCP memory for future reference
 - Get fix recommendations based on past successful fixes
@@ -117,19 +122,23 @@ You: [Use Task tool with subagent_type="fulltesting-agent" and pass the URL and 
 The fulltesting-agent should now follow this enhanced flow:
 
 ### Phase 1: Discovery
+
 - Navigate to the site
 - Extract all internal links
 - Build page map
 
 ### Phase 2: Parallel Testing (Per Page)
+
 For each page, run these checks:
 
 #### 2a. Basic Checks (existing)
+
 - Console errors
 - Network failures (4xx/5xx)
 - Broken links
 
 #### 2b. Visual Verification (NEW)
+
 Execute this JavaScript via `mcp__chrome-devtools__evaluate_script`:
 
 ```javascript
@@ -140,11 +149,15 @@ Execute this JavaScript via `mcp__chrome-devtools__evaluate_script`:
   const fontFamily = computedStyle.fontFamily;
 
   // Check for unstyled page (CSS not loaded)
-  const defaultBgs = ['rgba(0, 0, 0, 0)', 'rgb(255, 255, 255)', 'transparent'];
-  const defaultFonts = ['times new roman', 'times', 'serif'];
+  const defaultBgs = ["rgba(0, 0, 0, 0)", "rgb(255, 255, 255)", "transparent"];
+  const defaultFonts = ["times new roman", "times", "serif"];
 
-  const bgIsDefault = defaultBgs.some(d => bgColor.toLowerCase().includes(d.toLowerCase()));
-  const fontIsDefault = defaultFonts.some(d => fontFamily.toLowerCase().includes(d.toLowerCase()));
+  const bgIsDefault = defaultBgs.some((d) =>
+    bgColor.toLowerCase().includes(d.toLowerCase()),
+  );
+  const fontIsDefault = defaultFonts.some((d) =>
+    fontFamily.toLowerCase().includes(d.toLowerCase()),
+  );
 
   // Count loaded CSS files
   const cssLinks = document.querySelectorAll('link[rel="stylesheet"]');
@@ -159,14 +172,18 @@ Execute this JavaScript via `mcp__chrome-devtools__evaluate_script`:
     fontFamily: fontFamily,
     cssFileCount: cssCount,
     isUnstyled: bgIsDefault && fontIsDefault,
-    issue: (bgIsDefault && fontIsDefault) ? 'CSS appears not loaded - page has default unstyled appearance' : null
+    issue:
+      bgIsDefault && fontIsDefault
+        ? "CSS appears not loaded - page has default unstyled appearance"
+        : null,
   };
-}
+};
 ```
 
 If `isUnstyled` is true, this is a **CRITICAL** visual issue that should fail the test.
 
 ### Phase 3: Pattern Learning (NEW)
+
 After testing each page, if there are failures:
 
 1. **For console errors**, check if they're visual issues:
@@ -175,6 +192,7 @@ After testing each page, if there are failures:
    - Image broken: `/failed to load resource.*\.(png|jpg|svg)/i`
 
 2. **Store patterns** in MCP memory using `mcp__memory__create_entities`:
+
    ```
    Entity name: failure-pattern:visual:{fingerprint}
    Entity type: failure-pattern
@@ -197,19 +215,24 @@ After testing each page, if there are failures:
    - Include recommendations in the report
 
 ### Phase 4: Screenshot on Failure (NEW)
+
 When visual issues are detected:
+
 ```
 mcp__chrome-devtools__take_screenshot with filePath to save for debugging
 ```
 
 ### Phase 5: Analysis & Auto-Fix
+
 - Aggregate all issues
 - Prioritize by severity (visual issues = critical)
 - Apply fixes for known patterns
 - Re-test affected pages
 
 ### Phase 6: Report Generation
+
 Include in the report:
+
 - All pages tested
 - Visual verification results
 - Pattern matches found
@@ -219,6 +242,7 @@ Include in the report:
 ## Pattern Categories
 
 The system recognizes these visual pattern categories:
+
 - `css-load-error`: CSS file failed to load
 - `style-missing`: Element missing expected styles
 - `layout-error`: Layout/responsive issues
@@ -228,6 +252,7 @@ The system recognizes these visual pattern categories:
 ## Fix Categories
 
 When storing fixes, use these categories:
+
 - `css-fix`: CSS/style changes
 - `layout-fix`: Layout/flexbox/grid fixes
 - `asset-fix`: Image/font path corrections
@@ -236,6 +261,7 @@ When storing fixes, use these categories:
 ## Integration with smart-testing
 
 The testing-learning library at `src/lib/testing-learning/` provides:
+
 - `processBrowserTestResult()`: Main hook for recording results
 - `verifyCSSLoaded()`: Check CSS is properly loaded
 - `hasVisualIssues()`: Quick check for visual problems
@@ -248,19 +274,20 @@ These functions can be called by reading the TypeScript source and understanding
 ## Swarm Mode Summary
 
 ### When Swarm Mode Activates
+
 - Site has >10 pages
 - User requests "swarm test" or "fast test"
 - Explicit `mode: swarm` in config
 
 ### Swarm Capabilities
 
-| Feature | Description |
-|---------|-------------|
-| **Parallel Testers** | One tester per page via TeammateTool |
-| **Failure Broadcast** | CSS issue found → all testers notified |
-| **Pattern Detection** | Same error on 3+ pages = systemic issue |
-| **Parallel Fixers** | CSS, JS, assets, config fixers run concurrently |
-| **Live Dashboard** | Real-time progress during testing |
+| Feature               | Description                                     |
+| --------------------- | ----------------------------------------------- |
+| **Parallel Testers**  | One tester per page via TeammateTool            |
+| **Failure Broadcast** | CSS issue found → all testers notified          |
+| **Pattern Detection** | Same error on 3+ pages = systemic issue         |
+| **Parallel Fixers**   | CSS, JS, assets, config fixers run concurrently |
+| **Live Dashboard**    | Real-time progress during testing               |
 
 ### Example Swarm Output
 
@@ -314,8 +341,8 @@ GET http://localhost:3000/styles/main.css 404 (Not Found)
 \`\`\`
 
 ### Action for Other Testers
-Skip CSS verification until this is fixed - mark as **known_issue**.`
-})
+Skip CSS verification until this is fixed - mark as **known_issue**.`,
+});
 ```
 
 #### Fix Completion Example
@@ -344,8 +371,8 @@ TeammateTool.message({
 - \`src/templates/blog.html\`
 
 ### Verification
-Ready for re-test on affected pages: \`/\`, \`/blog\`, \`/about\``
-})
+Ready for re-test on affected pages: \`/\`, \`/blog\`, \`/about\``,
+});
 ```
 
 #### Pattern Detection Example
@@ -378,8 +405,8 @@ Add null check before accessing \`cart.items\`:
 const items = cart?.items || []
 \`\`\`
 
-**Assigning to:** js-fixer`
-})
+**Assigning to:** js-fixer`,
+});
 ```
 
 ---
@@ -390,6 +417,7 @@ const items = cart?.items || []
 **Last Updated:** January 2026
 
 ### Changelog
+
 - **4.0.0**: Added swarm mode
   - True parallel testers via TeammateTool
   - Real-time failure sharing between testers
@@ -401,6 +429,7 @@ const items = cart?.items || []
 - **1.0.0**: Initial release
 
 ### Requirements
+
 - **Both Modes**: Chrome DevTools MCP, Memory MCP
 - **Sequential Mode**: Standard Claude Code
 - **Swarm Mode**: Requires `claude-sneakpeek` or official TeammateTool support
@@ -432,6 +461,7 @@ At the end of testing, return:
 ```
 
 ### Success Signal (All Tests Pass)
+
 ```json
 {
   "status": "complete",
@@ -457,6 +487,7 @@ At the end of testing, return:
 ```
 
 ### Success Signal (Tests Complete with Fixes Applied)
+
 ```json
 {
   "status": "complete",
@@ -486,6 +517,7 @@ At the end of testing, return:
 ```
 
 ### Partial Completion Signal
+
 ```json
 {
   "status": "partial",
@@ -519,6 +551,7 @@ At the end of testing, return:
 ```
 
 ### Blocked Signal
+
 ```json
 {
   "status": "blocked",
@@ -533,6 +566,18 @@ At the end of testing, return:
   "userInputRequired": "Please start development server and ensure it's running on port 3000"
 }
 ```
+
+### Troubleshooting
+
+If you encounter unexpected test behavior or unclear failures, use the `/debug` command:
+
+```
+/debug
+```
+
+Claude will analyze the current session and help identify configuration issues, MCP connection problems, or other blockers.
+
+````
 
 ### Failed Signal
 ```json
@@ -554,7 +599,7 @@ At the end of testing, return:
     "Clear .testing/ directory and restart"
   ]
 }
-```
+````
 
 ### When to Signal
 
@@ -568,6 +613,7 @@ At the end of testing, return:
 ### Special Cases
 
 **Max iterations reached:**
+
 ```json
 {
   "status": "partial",
@@ -579,13 +625,16 @@ At the end of testing, return:
 ```
 
 **Swarm mode unavailable:**
+
 ```json
 {
   "status": "complete",
   "testingMode": "sequential",
   "summary": "Completed testing in sequential mode (swarm unavailable)",
   "fallbackReason": "TeammateTool not available - used sequential testing",
-  "testMetrics": { /* normal metrics */ }
+  "testMetrics": {
+    /* normal metrics */
+  }
 }
 ```
 
@@ -596,7 +645,7 @@ At the end of testing, return:
 Use `TaskUpdate` with `status: "deleted"` to clean up completed or stale task chains:
 
 ```json
-{"taskId": "1", "status": "deleted"}
+{ "taskId": "1", "status": "deleted" }
 ```
 
 This prevents task list clutter during long testing sessions.

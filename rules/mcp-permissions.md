@@ -41,6 +41,54 @@ This blocks all tools from the specified server.
 }
 ```
 
+## Permission Evaluation Order (v2.1.27+)
+
+Content-level permissions override tool-level permissions. This enables fine-grained control:
+
+```json
+{
+  "permissions": {
+    "allow": ["Bash"], // Allow all bash commands
+    "ask": ["Bash(rm *)"] // EXCEPT: prompt for rm commands
+  }
+}
+```
+
+### Common Override Patterns
+
+**Git with protected commands:**
+
+```json
+{
+  "permissions": {
+    "allow": ["Bash(git *)"],
+    "ask": ["Bash(git push --force *)", "Bash(git reset --hard *)"]
+  }
+}
+```
+
+**File operations with protection:**
+
+```json
+{
+  "permissions": {
+    "allow": ["Bash"],
+    "ask": ["Bash(rm -rf *)", "Bash(chmod 777 *)"]
+  }
+}
+```
+
+**MCP with selective prompts:**
+
+```json
+{
+  "permissions": {
+    "allow": ["mcp__postgres__*"],
+    "ask": ["mcp__postgres__execute"]
+  }
+}
+```
+
 ## Common Permission Patterns
 
 ### Development (Permissive)
