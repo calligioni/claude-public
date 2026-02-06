@@ -4,6 +4,7 @@ description: Multi-perspective code review orchestrator that spawns parallel spe
 allowed-tools: "*"
 color: purple
 model: opus
+memory: user
 skills: [review-changes, verify]
 ---
 

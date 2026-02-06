@@ -10,6 +10,7 @@ allowed-tools:
   - Grep
 color: #FBBF24
 model: sonnet
+memory: project
 ---
 
 # DevOps/Infrastructure Agent

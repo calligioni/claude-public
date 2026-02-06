@@ -11,6 +11,7 @@ allowed-tools:
   - LSP
 color: #60A5FA
 model: opus
+memory: project
 skills: [verify, test-and-fix]
 ---
 

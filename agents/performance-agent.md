@@ -11,6 +11,7 @@ allowed-tools:
   - LSP
 color: #F59E0B
 model: sonnet
+memory: project
 ---
 
 # Performance Agent

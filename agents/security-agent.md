@@ -9,6 +9,7 @@ allowed-tools:
   - LSP
 color: #F87171
 model: sonnet
+memory: user
 disallowedTools:
   - Write
   - Edit

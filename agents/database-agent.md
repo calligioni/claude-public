@@ -10,6 +10,7 @@ allowed-tools:
   - Grep
 color: #8B5CF6
 model: sonnet
+memory: project
 ---
 
 # Database Agent

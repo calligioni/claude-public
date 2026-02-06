@@ -4,6 +4,7 @@ description: Full project orchestrator that analyzes a codebase, creates an impl
 allowed-tools: "*"
 color: magenta
 model: opus
+memory: project
 skills:
   - run-local
   - cp

@@ -644,6 +644,15 @@ mkdir -p "$DEAL_DIR"
 
 ```bash
 # 2. Extract CIM data
+# For large CIMs (>10 pages), use targeted page ranges:
+Read CompanyName_CIM.pdf with pages="1-5"    # Executive summary
+Read CompanyName_CIM.pdf with pages="10-15"  # Financial highlights
+Read CompanyName_CIM.pdf with pages="25-30"  # Management/team
+
+# Then extract structured data
+/mna extract CompanyName_CIM.pdf
+
+# For smaller CIMs (<10 pages):
 /mna extract CompanyName_CIM.pdf
 
 # 3. Optional: AI cost analysis
