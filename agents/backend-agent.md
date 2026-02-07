@@ -10,7 +10,7 @@ allowed-tools:
   - Grep
   - LSP
 color: #60A5FA
-model: opus
+model: sonnet
 memory: project
 skills: [verify, test-and-fix]
 ---

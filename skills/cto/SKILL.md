@@ -13,7 +13,10 @@ allowed-tools:
   - Bash
   - WebSearch
   - WebFetch
-  - Task
+  - Task(agent_type=general-purpose)
+  - Task(agent_type=Explore)
+  - Task(agent_type=security-agent)
+  - Task(agent_type=performance-agent)
   - TaskCreate
   - TaskUpdate
   - TaskList
@@ -21,6 +24,7 @@ allowed-tools:
   - TeammateTool
   - AskUserQuestion
   - mcp__memory__*
+memory: user
 ---
 
 # CTO - Universal AI Technical Advisor
@@ -30,30 +34,35 @@ A comprehensive CTO advisor skill that provides strategic technical leadership f
 ## Core Responsibilities
 
 ### 1. Architecture Review
+
 - Evaluate system design and component relationships
 - Identify architectural anti-patterns
 - Recommend improvements for scalability and maintainability
 - Create Architecture Decision Records (ADRs)
 
 ### 2. Code Quality Assessment
+
 - Review code organization and structure
 - Identify technical debt and code smells
 - Recommend refactoring strategies
 - Evaluate testing coverage and strategy
 
 ### 3. Security Audit
+
 - Review for OWASP Top 10 vulnerabilities
 - Check authentication and authorization patterns
 - Evaluate secrets management
 - Assess input validation and output encoding
 
 ### 4. Performance Analysis
+
 - Identify performance bottlenecks
 - Review database query patterns
 - Evaluate caching strategies
 - Recommend optimization opportunities
 
 ### 5. Tech Stack Evaluation
+
 - Assess current technology choices
 - Recommend alternatives when appropriate
 - Evaluate dependency health and security
@@ -63,10 +72,10 @@ A comprehensive CTO advisor skill that provides strategic technical leadership f
 
 ## Execution Modes
 
-| Mode | Description | When to Use |
-|------|-------------|-------------|
-| **Sequential** | One analysis area at a time | Simple reviews, focused questions |
-| **Swarm** | Parallel specialist analysts via TeammateTool | Full codebase reviews, comprehensive audits |
+| Mode           | Description                                   | When to Use                                 |
+| -------------- | --------------------------------------------- | ------------------------------------------- |
+| **Sequential** | One analysis area at a time                   | Simple reviews, focused questions           |
+| **Swarm**      | Parallel specialist analysts via TeammateTool | Full codebase reviews, comprehensive audits |
 
 ### Swarm Mode Architecture
 
@@ -109,13 +118,13 @@ A comprehensive CTO advisor skill that provides strategic technical leadership f
 
 ### Swarm Specialist Agents
 
-| Agent | Focus | Checks For | Priority |
-|-------|-------|------------|----------|
-| **architecture-analyst** | System design | Patterns, coupling, scalability, separation of concerns | Medium |
-| **security-analyst** | Vulnerabilities | OWASP Top 10, secrets, auth/authz, injection | High |
-| **performance-analyst** | Bottlenecks | N+1 queries, caching, memory, complexity | Medium |
-| **quality-analyst** | Code health | Tech debt, testing, conventions, maintainability | Low |
-| **stack-analyst** | Technology fit | Dependencies, versions, alternatives, migrations | Low |
+| Agent                    | Focus           | Checks For                                              | Priority |
+| ------------------------ | --------------- | ------------------------------------------------------- | -------- |
+| **architecture-analyst** | System design   | Patterns, coupling, scalability, separation of concerns | Medium   |
+| **security-analyst**     | Vulnerabilities | OWASP Top 10, secrets, auth/authz, injection            | High     |
+| **performance-analyst**  | Bottlenecks     | N+1 queries, caching, memory, complexity                | Medium   |
+| **quality-analyst**      | Code health     | Tech debt, testing, conventions, maintainability        | Low      |
+| **stack-analyst**        | Technology fit  | Dependencies, versions, alternatives, migrations        | Low      |
 
 ---
 
@@ -123,12 +132,12 @@ A comprehensive CTO advisor skill that provides strategic technical leadership f
 
 When this skill activates, determine the context:
 
-| Condition | Action |
-|-----------|--------|
-| `cto-requirements.md` exists | Load requirements and focus review |
-| No config, fulltest reports exist | Read reports first for context |
-| No config, no reports | Full codebase exploration |
-| Specific question asked | Answer directly with codebase context |
+| Condition                         | Action                                |
+| --------------------------------- | ------------------------------------- |
+| `cto-requirements.md` exists      | Load requirements and focus review    |
+| No config, fulltest reports exist | Read reports first for context        |
+| No config, no reports             | Full codebase exploration             |
+| Specific question asked           | Answer directly with codebase context |
 
 **First Action:** Check for existing context:
 
@@ -149,6 +158,7 @@ cat cto-requirements.md 2>/dev/null
 ```
 
 If exists, this file defines:
+
 - Focus areas (architecture, security, performance, etc.)
 - Constraints and priorities
 - Known issues to address
@@ -161,6 +171,7 @@ cat fulltest-report*.md 2>/dev/null | head -200
 ```
 
 Test reports provide:
+
 - Known bugs and issues
 - Console errors
 - Failed tests
@@ -173,6 +184,7 @@ cat AGENTS.md 2>/dev/null
 ```
 
 Repository patterns inform:
+
 - Existing conventions
 - Previous architectural decisions
 - Code organization
@@ -456,23 +468,26 @@ npm install lodash@^4.17.21
 ```markdown
 ## CTO Analysis Progress (Live)
 
-| Analyst | Status | Findings | Critical | Duration |
-|---------|--------|----------|----------|----------|
-| security-analyst | ✅ Complete | 5 | 1 | 2m 15s |
-| architecture-analyst | 🔄 Running | 3 | 0 | 2m 45s |
-| performance-analyst | ✅ Complete | 4 | 0 | 1m 58s |
-| quality-analyst | 🔄 Running | 2 | 0 | 2m 10s |
-| stack-analyst | ✅ Complete | 6 | 0 | 1m 30s |
+| Analyst              | Status      | Findings | Critical | Duration |
+| -------------------- | ----------- | -------- | -------- | -------- |
+| security-analyst     | ✅ Complete | 5        | 1        | 2m 15s   |
+| architecture-analyst | 🔄 Running  | 3        | 0        | 2m 45s   |
+| performance-analyst  | ✅ Complete | 4        | 0        | 1m 58s   |
+| quality-analyst      | 🔄 Running  | 2        | 0        | 2m 10s   |
+| stack-analyst        | ✅ Complete | 6        | 0        | 1m 30s   |
 
 ### Critical Findings (Live)
+
 🚨 [security] JWT secret hardcoded in src/api/auth.ts:45
-   └─ Detected 1m 30s ago
+└─ Detected 1m 30s ago
 
 ### Cross-Concern Alerts
+
 ⚠️ architecture → performance: N+1 confirmed in orders service
 ⚠️ stack → security: Vulnerable lodash version detected
 
 ### Emerging Patterns
+
 📊 3 analysts flagged error handling inconsistency
 📊 2 analysts noted missing input validation
 ```
@@ -545,6 +560,7 @@ Merge all analyst findings into unified report:
 ### Step 3-Alt: Sequential Analysis (For Focused Reviews)
 
 Use sequential mode when:
+
 - Answering a specific question ("Should we use GraphQL?")
 - Focused single-area review ("Just check security")
 - Limited context/time available
@@ -552,6 +568,7 @@ Use sequential mode when:
 #### Architecture Review
 
 **Check component organization:**
+
 ```bash
 # Find main source directories
 find . -type d -name "src" -o -name "app" -o -name "lib" -o -name "components" 2>/dev/null | head -10
@@ -561,6 +578,7 @@ grep -r "import.*from" --include="*.ts" --include="*.tsx" --include="*.js" | hea
 ```
 
 **Identify patterns:**
+
 - Circular dependencies
 - God components/modules
 - Proper separation of concerns
@@ -568,24 +586,29 @@ grep -r "import.*from" --include="*.ts" --include="*.tsx" --include="*.js" | hea
 - Database access patterns
 
 **Create findings report:**
+
 ```markdown
 ## Architecture Review Findings
 
 ### Strengths
+
 - [What's done well]
 
 ### Areas for Improvement
-| Area | Current State | Recommendation | Priority |
-|------|---------------|----------------|----------|
-| [Area] | [Issue] | [Fix] | HIGH/MED/LOW |
+
+| Area   | Current State | Recommendation | Priority     |
+| ------ | ------------- | -------------- | ------------ |
+| [Area] | [Issue]       | [Fix]          | HIGH/MED/LOW |
 
 ### Recommended Refactoring
+
 1. [Specific action with rationale]
 ```
 
 #### Code Quality Assessment
 
 **Check for code smells:**
+
 ```bash
 # Large files (potential god objects)
 find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.py" \) ! -path '*/node_modules/*' -exec wc -l {} \; | sort -rn | head -20
@@ -598,6 +621,7 @@ grep -rn "TODO\|FIXME\|HACK\|XXX" --include="*.ts" --include="*.tsx" --include="
 ```
 
 **Review testing:**
+
 ```bash
 # Test file coverage
 find . -type f \( -name "*.test.*" -o -name "*.spec.*" -o -name "*_test.py" \) ! -path '*/node_modules/*' | wc -l
@@ -609,6 +633,7 @@ find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.py" 
 #### Security Audit
 
 **Check for common vulnerabilities:**
+
 ```bash
 # Hardcoded secrets
 grep -rn "password\s*=\|api_key\s*=\|secret\s*=\|token\s*=" --include="*.ts" --include="*.js" --include="*.py" ! -path '*/node_modules/*' | head -20
@@ -621,6 +646,7 @@ grep -rn "\beval\b\|exec\b" --include="*.ts" --include="*.js" --include="*.py" |
 ```
 
 **Check dependencies:**
+
 ```bash
 # Run security audit if available
 npm audit 2>/dev/null | head -50
@@ -630,6 +656,7 @@ pip-audit 2>/dev/null | head -50
 #### Performance Analysis
 
 **Check for performance issues:**
+
 ```bash
 # N+1 query patterns (multiple similar queries)
 grep -rn "\.find\|\.findOne\|\.query\|\.select" --include="*.ts" --include="*.js" | head -30
@@ -662,39 +689,44 @@ cat package.json 2>/dev/null | jq '.dependencies' 2>/dev/null | head -30
 
 ## Tech Stack Overview
 
-| Layer | Technology | Version | Health |
-|-------|------------|---------|--------|
-| Frontend | [Tech] | [Ver] | Good/Fair/Poor |
-| Backend | [Tech] | [Ver] | Good/Fair/Poor |
-| Database | [Tech] | [Ver] | Good/Fair/Poor |
-| Testing | [Tech] | [Ver] | Good/Fair/Poor |
+| Layer    | Technology | Version | Health         |
+| -------- | ---------- | ------- | -------------- |
+| Frontend | [Tech]     | [Ver]   | Good/Fair/Poor |
+| Backend  | [Tech]     | [Ver]   | Good/Fair/Poor |
+| Database | [Tech]     | [Ver]   | Good/Fair/Poor |
+| Testing  | [Tech]     | [Ver]   | Good/Fair/Poor |
 
 ---
 
 ## Architecture Assessment
 
 ### Current State
+
 [Description of current architecture]
 
 ### Strengths
+
 - [Strength 1]
 - [Strength 2]
 
 ### Concerns
-| Issue | Severity | Impact | Effort to Fix |
-|-------|----------|--------|---------------|
-| [Issue] | HIGH/MED/LOW | [Impact] | [Effort] |
+
+| Issue   | Severity     | Impact   | Effort to Fix |
+| ------- | ------------ | -------- | ------------- |
+| [Issue] | HIGH/MED/LOW | [Impact] | [Effort]      |
 
 ---
 
 ## Code Quality
 
 ### Metrics
+
 - Lines of Code: [X]
 - Test Coverage: [X]%
 - Technical Debt: [Low/Medium/High]
 
 ### Key Findings
+
 1. [Finding with recommendation]
 2. [Finding with recommendation]
 
@@ -703,11 +735,13 @@ cat package.json 2>/dev/null | jq '.dependencies' 2>/dev/null | head -30
 ## Security
 
 ### Vulnerabilities Found
-| Issue | Severity | Location | Remediation |
-|-------|----------|----------|-------------|
-| [Issue] | CRITICAL/HIGH/MED/LOW | [File:Line] | [Fix] |
+
+| Issue   | Severity              | Location    | Remediation |
+| ------- | --------------------- | ----------- | ----------- |
+| [Issue] | CRITICAL/HIGH/MED/LOW | [File:Line] | [Fix]       |
 
 ### Recommendations
+
 1. [Security improvement]
 2. [Security improvement]
 
@@ -716,10 +750,12 @@ cat package.json 2>/dev/null | jq '.dependencies' 2>/dev/null | head -30
 ## Performance
 
 ### Bottlenecks Identified
+
 1. [Bottleneck with solution]
 2. [Bottleneck with solution]
 
 ### Optimization Opportunities
+
 1. [Opportunity]
 2. [Opportunity]
 
@@ -728,27 +764,31 @@ cat package.json 2>/dev/null | jq '.dependencies' 2>/dev/null | head -30
 ## Prioritized Action Items
 
 ### Immediate (This Week)
+
 1. [ ] [Critical issue to fix]
 
 ### Short-term (This Month)
+
 1. [ ] [Important improvement]
 
 ### Long-term (This Quarter)
+
 1. [ ] [Strategic initiative]
 
 ---
 
 ## Technical Debt Register
 
-| Item | Origin | Impact | Estimated Effort | Priority |
-|------|--------|--------|------------------|----------|
-| [Debt item] | [When introduced] | [Impact] | [Hours/Days] | 1-5 |
+| Item        | Origin            | Impact   | Estimated Effort | Priority |
+| ----------- | ----------------- | -------- | ---------------- | -------- |
+| [Debt item] | [When introduced] | [Impact] | [Hours/Days]     | 1-5      |
 
 ---
 
 ## Appendix: Architecture Decision Records
 
 ### ADR-001: [Title]
+
 **Status:** Proposed
 **Context:** [Why is this decision needed?]
 **Decision:** [What is the proposed solution?]
@@ -758,6 +798,7 @@ cat package.json 2>/dev/null | jq '.dependencies' 2>/dev/null | head -30
 ### Step 5: Present and Discuss
 
 **Present findings:**
+
 ```
 ## CTO Assessment Complete
 
@@ -798,17 +839,20 @@ options:
 ```
 
 **If user selects "Yes, implement all":**
+
 1. Create a structured PRD from the recommendations
 2. Invoke `/autonomous-dev` skill with the PRD
 3. Let autonomous-dev handle the implementation
 
 **If user selects "Yes, implement selected":**
+
 1. Present numbered list of recommendations
 2. Ask which items to implement
 3. Create focused PRD for selected items
 4. Invoke `/autonomous-dev` with the scoped PRD
 
 **If user selects "No, just the report":**
+
 1. Confirm the report is saved (if written to file)
 2. Offer to answer any questions about findings
 3. End the CTO session
@@ -842,6 +886,7 @@ At the end of analysis, return:
 ```
 
 ### Success Signal (Sequential Mode)
+
 ```json
 {
   "status": "complete",
@@ -864,6 +909,7 @@ At the end of analysis, return:
 ```
 
 ### Success Signal (Swarm Mode)
+
 ```json
 {
   "status": "complete",
@@ -894,6 +940,7 @@ At the end of analysis, return:
 ```
 
 ### Partial Completion Signal
+
 ```json
 {
   "status": "partial",
@@ -914,6 +961,7 @@ At the end of analysis, return:
 ```
 
 ### Blocked Signal
+
 ```json
 {
   "status": "blocked",
@@ -929,6 +977,7 @@ At the end of analysis, return:
 ```
 
 ### Failed Signal
+
 ```json
 {
   "status": "failed",
@@ -966,7 +1015,9 @@ Create this file in your project to guide CTO reviews:
 # CTO Requirements
 
 ## Focus Areas
+
 <!-- Which areas should receive priority attention? -->
+
 - [ ] Architecture review
 - [ ] Code quality
 - [ ] Security audit
@@ -975,23 +1026,31 @@ Create this file in your project to guide CTO reviews:
 - [ ] Testing strategy
 
 ## Constraints
+
 <!-- What should the CTO consider when making recommendations? -->
+
 - Budget: [Limited/Moderate/Flexible]
 - Timeline: [Urgent/Normal/Long-term]
 - Team size: [X developers]
 - Team expertise: [Junior/Mixed/Senior]
 
 ## Known Issues
+
 <!-- Document issues you're already aware of -->
+
 1. [Known issue 1]
 2. [Known issue 2]
 
 ## Out of Scope
+
 <!-- What should NOT be reviewed this time? -->
+
 - [Area to skip]
 
 ## Priority Questions
+
 <!-- Specific questions to answer -->
+
 1. [Question 1]
 2. [Question 2]
 ```
@@ -1002,26 +1061,27 @@ Create this file in your project to guide CTO reviews:
 
 When evaluating technology choices:
 
-| Criterion | Weight | Description |
-|-----------|--------|-------------|
-| **Fit** | 25% | Solves the specific problem well |
-| **Maturity** | 20% | Production-ready, active community |
-| **Team Fit** | 20% | Team can learn/use effectively |
-| **Scalability** | 15% | Handles growth requirements |
-| **Ecosystem** | 10% | Libraries, tools, integrations |
-| **Cost** | 10% | Licensing, hosting, operations |
+| Criterion       | Weight | Description                        |
+| --------------- | ------ | ---------------------------------- |
+| **Fit**         | 25%    | Solves the specific problem well   |
+| **Maturity**    | 20%    | Production-ready, active community |
+| **Team Fit**    | 20%    | Team can learn/use effectively     |
+| **Scalability** | 15%    | Handles growth requirements        |
+| **Ecosystem**   | 10%    | Libraries, tools, integrations     |
+| **Cost**        | 10%    | Licensing, hosting, operations     |
 
 **Scoring Template:**
 
-| Option | Fit | Maturity | Team | Scale | Ecosystem | Cost | **Score** |
-|--------|-----|----------|------|-------|-----------|------|-----------|
-| [Option A] | /10 | /10 | /10 | /10 | /10 | /10 | [Weighted] |
+| Option     | Fit | Maturity | Team | Scale | Ecosystem | Cost | **Score**  |
+| ---------- | --- | -------- | ---- | ----- | --------- | ---- | ---------- |
+| [Option A] | /10 | /10      | /10  | /10   | /10       | /10  | [Weighted] |
 
 ---
 
 ## Security Checklist
 
 ### Application Security
+
 - [ ] Input validation on all user inputs
 - [ ] Output encoding (XSS prevention)
 - [ ] SQL injection prevention (parameterized queries)
@@ -1030,6 +1090,7 @@ When evaluating technology choices:
 - [ ] Secure session management
 
 ### Infrastructure Security
+
 - [ ] HTTPS everywhere (TLS 1.3)
 - [ ] Secrets in environment variables / secret manager
 - [ ] Principle of least privilege (IAM)
@@ -1037,6 +1098,7 @@ When evaluating technology choices:
 - [ ] Security headers configured
 
 ### Data Security
+
 - [ ] Encryption at rest
 - [ ] Encryption in transit
 - [ ] PII handling compliance
@@ -1083,40 +1145,46 @@ Tier 4: 100K+ users
 Save valuable insights to Memory MCP for cross-project learning:
 
 **When to save:**
+
 - Discovered an architectural pattern that worked well
 - Found a security vulnerability pattern to avoid
 - Learned something about a specific technology
 - Made a strategic decision that proved successful
 
 **Entity types:**
+
 ```javascript
 // Save architectural pattern
 mcp__memory__create_entities({
-  entities: [{
-    name: "architecture:pattern-name",
-    entityType: "architecture-decision",
-    observations: [
-      "Context: when to use",
-      "Pattern: what it is",
-      "Benefits: why it works",
-      "Trade-offs: what to watch for"
-    ]
-  }]
-})
+  entities: [
+    {
+      name: "architecture:pattern-name",
+      entityType: "architecture-decision",
+      observations: [
+        "Context: when to use",
+        "Pattern: what it is",
+        "Benefits: why it works",
+        "Trade-offs: what to watch for",
+      ],
+    },
+  ],
+});
 
 // Save security learning
 mcp__memory__create_entities({
-  entities: [{
-    name: "security:vulnerability-type",
-    entityType: "security-insight",
-    observations: [
-      "Vulnerability: description",
-      "Detection: how to find it",
-      "Prevention: how to avoid it",
-      "Applies to: frameworks/languages"
-    ]
-  }]
-})
+  entities: [
+    {
+      name: "security:vulnerability-type",
+      entityType: "security-insight",
+      observations: [
+        "Vulnerability: description",
+        "Detection: how to find it",
+        "Prevention: how to avoid it",
+        "Applies to: frameworks/languages",
+      ],
+    },
+  ],
+});
 ```
 
 ---
@@ -1127,15 +1195,17 @@ Enable swarm mode in your `cto-requirements.md`:
 
 ```markdown
 ## Execution Mode
-mode: swarm  # or "sequential"
+
+mode: swarm # or "sequential"
 
 ## Swarm Configuration
+
 swarm:
-  max_concurrent_analysts: 5
-  timeout_seconds: 300
-  critical_finding_action: immediate_notify
-  cross_concern_detection: true
-  live_dashboard: true
+max_concurrent_analysts: 5
+timeout_seconds: 300
+critical_finding_action: immediate_notify
+cross_concern_detection: true
+live_dashboard: true
 ```
 
 Or configure globally:
@@ -1145,8 +1215,20 @@ Or configure globally:
   "cto": {
     "defaultMode": "swarm",
     "swarmConfig": {
-      "analysts": ["security", "architecture", "performance", "quality", "stack"],
-      "priorityOrder": ["security", "performance", "architecture", "quality", "stack"],
+      "analysts": [
+        "security",
+        "architecture",
+        "performance",
+        "quality",
+        "stack"
+      ],
+      "priorityOrder": [
+        "security",
+        "performance",
+        "architecture",
+        "quality",
+        "stack"
+      ],
       "timeoutSeconds": 300,
       "crossConcernDetection": true
     }
@@ -1156,18 +1238,19 @@ Or configure globally:
 
 ### Swarm vs Sequential Comparison
 
-| Aspect | Sequential | Swarm |
-|--------|------------|-------|
-| Execution | One area at a time | All areas concurrent |
-| Duration | Sum of all analyses | Max of all analyses |
-| Cross-Concerns | Manual correlation | Auto-detected |
+| Aspect            | Sequential               | Swarm                |
+| ----------------- | ------------------------ | -------------------- |
+| Execution         | One area at a time       | All areas concurrent |
+| Duration          | Sum of all analyses      | Max of all analyses  |
+| Cross-Concerns    | Manual correlation       | Auto-detected        |
 | Critical Findings | Found after all complete | Immediately surfaced |
-| Token Usage | Lower (single context) | Higher (5 contexts) |
-| Best For | Focused questions | Full codebase review |
+| Token Usage       | Lower (single context)   | Higher (5 contexts)  |
+| Best For          | Focused questions        | Full codebase review |
 
 ### When to Use Each Mode
 
 **Use Swarm Mode:**
+
 - Full codebase review ("Review this project as CTO")
 - Pre-launch audit
 - New project onboarding
@@ -1175,6 +1258,7 @@ Or configure globally:
 - Due diligence review
 
 **Use Sequential Mode:**
+
 - Specific question ("Is our auth secure?")
 - Single area focus ("Review architecture only")
 - Quick check before PR
@@ -1187,7 +1271,7 @@ Or configure globally:
 Use `TaskUpdate` with `status: "deleted"` to clean up completed or stale task chains:
 
 ```json
-{"taskId": "1", "status": "deleted"}
+{ "taskId": "1", "status": "deleted" }
 ```
 
 This prevents task list clutter during long review sessions.
@@ -1196,35 +1280,42 @@ This prevents task list clutter during long review sessions.
 
 ## Quick Commands
 
-| Command | Action |
-|---------|--------|
-| "status" | Show current review progress |
-| "focus [area]" | Narrow review to specific area (sequential) |
-| "swarm review" | Force swarm mode for full analysis |
-| "deep dive [component]" | Detailed analysis of component |
-| "create adr" | Generate Architecture Decision Record |
-| "implement" | Prompt for /autonomous-dev implementation |
-| "plan refactor" | Create refactoring roadmap |
+| Command                 | Action                                      |
+| ----------------------- | ------------------------------------------- |
+| "status"                | Show current review progress                |
+| "focus [area]"          | Narrow review to specific area (sequential) |
+| "swarm review"          | Force swarm mode for full analysis          |
+| "deep dive [component]" | Detailed analysis of component              |
+| "create adr"            | Generate Architecture Decision Record       |
+| "implement"             | Prompt for /autonomous-dev implementation   |
+| "plan refactor"         | Create refactoring roadmap                  |
 
 ---
 
 ## Integration with Other Skills
 
 ### With autonomous-dev
+
 When CTO review identifies refactoring needs:
+
 ```
 CTO identifies issue → Asks user for approval → Creates refactoring PRD → autonomous-dev implements
 ```
+
 **Note:** CTO always asks before invoking autonomous-dev. Never auto-implement.
 
 ### With fulltest-skill
+
 CTO reads fulltest reports for context:
+
 ```
 fulltest finds bugs → CTO analyzes patterns → Recommends systemic fixes
 ```
 
 ### With cpo-ai-skill
+
 CTO serves as technical advisor during product development:
+
 ```
 CPO defines product → CTO advises architecture → Implementation proceeds
 ```
@@ -1234,6 +1325,7 @@ CPO defines product → CTO advises architecture → Implementation proceeds
 ## Example Invocations
 
 ### Swarm Mode: Full Review
+
 ```
 User: "Review this codebase as a CTO"
 
@@ -1268,6 +1360,7 @@ CTO Advisor (Swarm Mode):
 ```
 
 ### Sequential Mode: Focused Security Audit
+
 ```
 User: "Do a security audit of the authentication system"
 
@@ -1281,6 +1374,7 @@ CTO Advisor (Sequential Mode):
 ```
 
 ### Swarm Mode: Pre-Launch Audit
+
 ```
 User: "We're launching next week - full CTO review please"
 
@@ -1298,6 +1392,7 @@ CTO Advisor (Swarm Mode):
 ```
 
 ### Architecture Decision
+
 ```
 User: "Should we migrate from REST to GraphQL?"
 
@@ -1318,6 +1413,7 @@ CTO Advisor (Sequential - focused question):
 **Last Updated:** January 2026
 
 ### Changelog
+
 - **2.0.0**: Added swarm mode with parallel specialist analysts
   - 5 concurrent analysts (security, architecture, performance, quality, stack)
   - Real-time cross-concern detection
@@ -1326,6 +1422,7 @@ CTO Advisor (Sequential - focused question):
 - **1.0.0**: Initial release with sequential analysis
 
 ### Requirements
+
 - **Sequential Mode**: Standard Claude Code
 - **Swarm Mode**: Requires `claude-sneakpeek` or official TeammateTool support
 

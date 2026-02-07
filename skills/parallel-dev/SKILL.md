@@ -11,7 +11,12 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
-  - Task
+  - Task(agent_type=frontend-agent)
+  - Task(agent_type=backend-agent)
+  - Task(agent_type=database-agent)
+  - Task(agent_type=devops-agent)
+  - Task(agent_type=general-purpose)
+  - Task(agent_type=Explore)
   - TaskCreate
   - TaskUpdate
   - TaskList
@@ -40,22 +45,28 @@ Orchestrates parallel feature development using git worktrees and specialized ag
 /parallel-dev
 
 ## Feature: Authentication
+
 type: backend
 dependsOn: []
+
 - Add OAuth2 login with Google/GitHub
 - Session management with Redis
 - JWT token refresh
 
 ## Feature: Dashboard UI
+
 type: frontend
 dependsOn: [api-endpoints]
+
 - Stats cards with real-time data
 - Charts using Recharts
 - Dark mode support
 
 ## Feature: API Endpoints
+
 type: api
 dependsOn: []
+
 - User CRUD endpoints
 - Rate limiting middleware
 - OpenAPI documentation
@@ -86,36 +97,39 @@ async function verifyFeatureNotImplemented(feature, projectRoot) {
   const checks = [];
 
   // 1. Check master-project.json status
-  const masterProject = JSON.parse(fs.readFileSync('master-project.json'));
+  const masterProject = JSON.parse(fs.readFileSync("master-project.json"));
   const stage = findStage(masterProject, feature.id);
-  if (stage?.status === 'completed' || stage?.status === 'tested') {
-    return { implemented: true, reason: 'Stage marked complete in master-project.json' };
+  if (stage?.status === "completed" || stage?.status === "tested") {
+    return {
+      implemented: true,
+      reason: "Stage marked complete in master-project.json",
+    };
   }
 
   // 2. Check git history for related commits
   const commitSearch = await exec(
     `git log --oneline --grep="${feature.id}" --grep="${feature.name}" -n 5`,
-    { cwd: projectRoot }
+    { cwd: projectRoot },
   );
   if (commitSearch.stdout.trim()) {
     checks.push({
-      type: 'git_commits',
-      found: commitSearch.stdout.trim().split('\n'),
-      warning: 'Related commits found - may be partially implemented'
+      type: "git_commits",
+      found: commitSearch.stdout.trim().split("\n"),
+      warning: "Related commits found - may be partially implemented",
     });
   }
 
   // 3. Check for key files that would indicate implementation
   for (const story of feature.tasks) {
-    const keywords = extractKeywords(story);  // e.g., "Stripe" -> lib/stripe.ts
+    const keywords = extractKeywords(story); // e.g., "Stripe" -> lib/stripe.ts
     for (const keyword of keywords) {
       const files = await glob(`**/*${keyword}*`, { cwd: projectRoot });
       if (files.length > 0) {
         checks.push({
-          type: 'existing_files',
+          type: "existing_files",
           keyword,
           files: files.slice(0, 5),
-          warning: `Files matching "${keyword}" already exist`
+          warning: `Files matching "${keyword}" already exist`,
         });
       }
     }
@@ -127,22 +141,22 @@ async function verifyFeatureNotImplemented(feature, projectRoot) {
       const implemented = await checkCriteriaImplemented(criteria, projectRoot);
       if (implemented) {
         checks.push({
-          type: 'criteria_met',
+          type: "criteria_met",
           criteria,
-          warning: 'Acceptance criteria may already be satisfied'
+          warning: "Acceptance criteria may already be satisfied",
         });
       }
     }
   }
 
   // 5. Check progress.md or similar tracking files
-  const progressFile = path.join(projectRoot, 'progress.md');
+  const progressFile = path.join(projectRoot, "progress.md");
   if (fs.existsSync(progressFile)) {
-    const progress = fs.readFileSync(progressFile, 'utf-8');
+    const progress = fs.readFileSync(progressFile, "utf-8");
     if (progress.includes(feature.id) || progress.includes(feature.name)) {
       checks.push({
-        type: 'progress_tracked',
-        warning: 'Feature mentioned in progress.md'
+        type: "progress_tracked",
+        warning: "Feature mentioned in progress.md",
       });
     }
   }
@@ -150,7 +164,7 @@ async function verifyFeatureNotImplemented(feature, projectRoot) {
   return {
     implemented: false,
     warnings: checks,
-    needsReview: checks.length > 0
+    needsReview: checks.length > 0,
   };
 }
 
@@ -158,11 +172,15 @@ async function verifyFeatureNotImplemented(feature, projectRoot) {
 function extractKeywords(story) {
   const keywords = [];
   // Extract capitalized terms, technical terms
-  const matches = story.match(/\b(Stripe|Sentry|PostHog|OAuth|JWT|CSP|CORS|Prisma|Redis)\b/gi);
-  if (matches) keywords.push(...matches.map(m => m.toLowerCase()));
+  const matches = story.match(
+    /\b(Stripe|Sentry|PostHog|OAuth|JWT|CSP|CORS|Prisma|Redis)\b/gi,
+  );
+  if (matches) keywords.push(...matches.map((m) => m.toLowerCase()));
 
   // Extract file patterns from descriptions
-  const fileMatches = story.match(/(?:create|add|implement)\s+([\/\w-]+\.\w+)/gi);
+  const fileMatches = story.match(
+    /(?:create|add|implement)\s+([\/\w-]+\.\w+)/gi,
+  );
   if (fileMatches) keywords.push(...fileMatches);
 
   return [...new Set(keywords)];
@@ -187,6 +205,7 @@ function extractKeywords(story) {
 ```
 
 If warnings are found, the orchestrator will:
+
 1. **Pause** and show the warnings
 2. **Ask user** whether to proceed, skip, or investigate
 3. **Log** the decision for audit
@@ -230,6 +249,7 @@ git worktree add ../{feature-id} feature/{feature-id}
 ```
 
 Integration with existing `maketree` skill:
+
 - Use `.worktree-scaffold.json` format for compatibility
 - Leverage existing branch detection and cleanup
 
@@ -268,15 +288,15 @@ Spawn specialized agents per worktree using `run_in_background: true`:
 
 **Agent Selection Logic:**
 
-| Feature Type | Agent | Rationale |
-|--------------|-------|-----------|
-| `frontend`, `ui` | frontend-agent | React, Vue, styling expertise |
-| `backend` | backend-agent | Node, Python, Go expertise |
-| `api` | api-agent | REST/GraphQL, OpenAPI |
-| `database`, `schema` | database-agent | Migrations, queries |
-| `testing`, `e2e` | testing-agent | Test writing, coverage |
-| `devops`, `deploy` | devops-agent | CI/CD, Docker, cloud |
-| unspecified | general-purpose | Flexible, all-around |
+| Feature Type         | Agent           | Rationale                     |
+| -------------------- | --------------- | ----------------------------- |
+| `frontend`, `ui`     | frontend-agent  | React, Vue, styling expertise |
+| `backend`            | backend-agent   | Node, Python, Go expertise    |
+| `api`                | api-agent       | REST/GraphQL, OpenAPI         |
+| `database`, `schema` | database-agent  | Migrations, queries           |
+| `testing`, `e2e`     | testing-agent   | Test writing, coverage        |
+| `devops`, `deploy`   | devops-agent    | CI/CD, Docker, cloud          |
+| unspecified          | general-purpose | Flexible, all-around          |
 
 ### Phase 4: Progress Monitoring
 
@@ -293,7 +313,7 @@ while (hasActiveFeatures()) {
     const complete = await checkCompletionMarker(feature.worktree);
 
     if (complete) {
-      feature.status = 'completed';
+      feature.status = "completed";
       await runFeatureTests(feature);
       if (testsPass) {
         await mergeToIntegration(feature);
@@ -310,7 +330,7 @@ while (hasActiveFeatures()) {
     await spawnFeatureAgent(feature);
   }
 
-  await sleep(30000);  // 30 second polling interval
+  await sleep(30000); // 30 second polling interval
 }
 ```
 
@@ -390,50 +410,55 @@ When `--from-cpo` is specified:
 
 ```javascript
 // 1. Read master-project.json
-const project = JSON.parse(fs.readFileSync('master-project.json'));
+const project = JSON.parse(fs.readFileSync("master-project.json"));
 
 // 2. CRITICAL: Filter out already-completed stages
 const pendingStages = [];
 for (const epic of project.epics) {
   for (const stage of epic.stages) {
     // Skip if stage is already done
-    if (stage.status === 'completed' || stage.status === 'tested') {
+    if (stage.status === "completed" || stage.status === "tested") {
       console.log(`Skipping ${stage.name}: already ${stage.status}`);
       continue;
     }
 
     // Skip if all stories in stage are done
     const allStoriesDone = stage.stories.every(
-      s => s.status === 'completed' || s.passes === true
+      (s) => s.status === "completed" || s.passes === true,
     );
     if (allStoriesDone) {
       console.log(`Skipping ${stage.name}: all stories complete`);
       continue;
     }
 
-    pendingStages.push({ ...stage, epicId: epic.id, epicPriority: epic.priority });
+    pendingStages.push({
+      ...stage,
+      epicId: epic.id,
+      epicPriority: epic.priority,
+    });
   }
 }
 
 // 3. Extract stages with their dependencies
-const features = pendingStages.map(stage => ({
+const features = pendingStages.map((stage) => ({
   id: slugify(stage.name),
   name: stage.name,
-  type: inferTypeFromStage(stage),  // Based on stage name/description
-  dependsOn: stage.dependsOn.map(depId => {
-    const depStage = project.stages.find(s => s.id === depId);
+  type: inferTypeFromStage(stage), // Based on stage name/description
+  dependsOn: stage.dependsOn.map((depId) => {
+    const depStage = project.stages.find((s) => s.id === depId);
     return slugify(depStage.name);
   }),
-  tasks: stage.stories.map(s => s.title),
-  status: 'pending'
+  tasks: stage.stories.map((s) => s.title),
+  status: "pending",
 }));
 
 // 3. Respect epic-level dependencies too
 // Stages inherit epic dependencies
 
 // 4. Filter to only stages with status 'pending'
-const pendingFeatures = features.filter(f =>
-  project.stages.find(s => slugify(s.name) === f.id)?.status === 'pending'
+const pendingFeatures = features.filter(
+  (f) =>
+    project.stages.find((s) => slugify(s.name) === f.id)?.status === "pending",
 );
 ```
 
@@ -445,13 +470,14 @@ function inferTypeFromStage(stage) {
   const desc = stage.description.toLowerCase();
   const combined = `${name} ${desc}`;
 
-  if (/frontend|ui|dashboard|component|page|layout/i.test(combined)) return 'frontend';
-  if (/api|endpoint|rest|graphql|route/i.test(combined)) return 'api';
-  if (/backend|server|service|worker/i.test(combined)) return 'backend';
-  if (/database|schema|migration|model/i.test(combined)) return 'database';
-  if (/test|e2e|integration test|coverage/i.test(combined)) return 'testing';
-  if (/deploy|ci|cd|docker|infra/i.test(combined)) return 'devops';
-  return 'general';
+  if (/frontend|ui|dashboard|component|page|layout/i.test(combined))
+    return "frontend";
+  if (/api|endpoint|rest|graphql|route/i.test(combined)) return "api";
+  if (/backend|server|service|worker/i.test(combined)) return "backend";
+  if (/database|schema|migration|model/i.test(combined)) return "database";
+  if (/test|e2e|integration test|coverage/i.test(combined)) return "testing";
+  if (/deploy|ci|cd|docker|infra/i.test(combined)) return "devops";
+  return "general";
 }
 ```
 
@@ -483,7 +509,7 @@ Resume from `.parallel-dev-state.json` after interruption.
 
 ```javascript
 if (agentFailed(feature)) {
-  feature.status = 'failed';
+  feature.status = "failed";
   feature.failureReason = extractFailureReason(output);
 
   // Notify user
@@ -501,7 +527,7 @@ if (agentFailed(feature)) {
 
 ```javascript
 if (mergeConflict(feature)) {
-  feature.status = 'conflict';
+  feature.status = "conflict";
   feature.conflictFiles = getConflictFiles();
 
   // Pause further merges
@@ -509,8 +535,8 @@ if (mergeConflict(feature)) {
 
   // Notify user with details
   console.log(`Conflict in ${feature.name}:`);
-  console.log(feature.conflictFiles.join('\n'));
-  console.log('\nResolve manually, then run: /parallel-dev resume');
+  console.log(feature.conflictFiles.join("\n"));
+  console.log("\nResolve manually, then run: /parallel-dev resume");
 }
 ```
 
@@ -519,7 +545,7 @@ if (mergeConflict(feature)) {
 ```javascript
 if (hasCycle(graph)) {
   const cycle = findCycle(graph);
-  throw new Error(`Dependency cycle detected: ${cycle.join(' -> ')}`);
+  throw new Error(`Dependency cycle detected: ${cycle.join(" -> ")}`);
 }
 ```
 

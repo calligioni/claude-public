@@ -15,6 +15,7 @@ allowed-tools:
   - TaskUpdate
   - TaskList
   - TaskGet
+memory: user
 ---
 
 # Memory Consolidation Skill

@@ -16,6 +16,7 @@ allowed-tools:
   - Grep
   - mcp__chrome-devtools__*
   - mcp__memory__*
+memory: user
 ---
 
 # Full-Spectrum Testing Skill (v4.0 - Swarm Mode)

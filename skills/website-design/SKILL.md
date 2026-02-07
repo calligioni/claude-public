@@ -3,6 +3,7 @@ name: website-design
 description: Create professional B2B SaaS websites, dashboards, landing pages, and web applications with modern UX/UI best practices. Use when Claude needs to design marketing websites, product dashboards, admin panels, landing pages, or any B2B-focused web interface. Covers full-stack design from hero sections to pricing pages, with emphasis on conversion optimization, data visualization, and professional aesthetics using Tailwind CSS, React, and modern web standards.
 user-invocable: true
 context: fork
+model: sonnet
 allowed-tools:
   - Read
   - Write
@@ -13,6 +14,7 @@ allowed-tools:
   - WebFetch
   - WebSearch
   - mcp__memory__*
+memory: user
 ---
 
 # Website Design Skill
@@ -57,7 +59,7 @@ The website-design skill uses these atomic primitives:
 - **Bash** - Run dev servers, build processes, optimization tools
 - **WebFetch** - Analyze competitor sites, gather design inspiration
 - **WebSearch** - Research design trends, accessibility guidelines, component libraries
-- **mcp__memory__*** - Save design decisions, component patterns, client preferences
+- **mcp**memory**\*** - Save design decisions, component patterns, client preferences
 
 **Key insight**: This skill does NOT provide a `design_website(specs)` tool that outputs finished HTML. Instead, it uses atomic tools iteratively to achieve the design outcome.
 
@@ -111,18 +113,21 @@ Add vertical-specific prompts to the skill documentation:
 ### Industry Design Guidelines
 
 **Financial Services**
+
 - Use conservative color palette (navy, gray, white)
 - Emphasize security badges and trust signals prominently
 - Include disclaimer text and regulatory information
 - Minimize flashy animations, prioritize clarity
 
 **Healthcare Tech**
+
 - Use calming colors (soft blue, green, white)
 - Large, readable typography (min 16px body)
 - High contrast for accessibility (WCAG AAA)
 - Patient testimonials with photos for trust
 
 **Developer Tools**
+
 - Dark mode as default
 - Code syntax highlighting in examples
 - Terminal/CLI-style components
@@ -148,7 +153,7 @@ Update the font pairing section with new design philosophies and the agent will 
 function generate_website(pageType, industry) {
   const template = TEMPLATES[pageType]; // Locked templates
   const colors = INDUSTRY_COLORS[industry]; // Fixed palettes
-  const components = template.map(component => {
+  const components = template.map((component) => {
     return renderComponent(component, colors); // Hardcoded rendering
   });
   return assembleHTML(components); // Fixed assembly
@@ -158,11 +163,13 @@ function generate_website(pageType, industry) {
 **What this skill DOES:**
 
 The agent receives outcome-oriented design prompts:
+
 - "Create a B2B SaaS homepage that builds trust and drives demo bookings"
 - "Design a financial dashboard emphasizing key metrics and actionable insights"
 - "Build a landing page optimized for conversion with clear value proposition"
 
 The agent uses atomic tools (Write, Edit, Read, WebFetch) to achieve these outcomes. Design decisions emerge from:
+
 - Best practice prompts in the skill definition
 - Industry context from user input
 - Inspiration from WebFetch competitor analysis
@@ -182,21 +189,23 @@ Save successful design patterns to evolve behavior:
 ```javascript
 // After delivering a high-performing dashboard
 mcp__memory__create_entities({
-  entities: [{
-    name: "component-pattern:analytics-dashboard-header",
-    entityType: "component-pattern",
-    observations: [
-      "Component: Dashboard header with time range selector",
-      "Use case: Analytics dashboards needing date filtering",
-      "Key classes: sticky top-0 z-40 backdrop-blur-xl bg-white/80",
-      "Features: Integrated time range picker, export button, real-time status badge",
-      "Proven in: Contably analytics, MNA portfolio reporter",
-      "User feedback: Sticky header with blur was highly praised",
-      "Variation: Light/dark mode with automatic theme detection",
-      "Accessibility: Keyboard shortcuts for common date ranges (Alt+T)"
-    ]
-  }]
-})
+  entities: [
+    {
+      name: "component-pattern:analytics-dashboard-header",
+      entityType: "component-pattern",
+      observations: [
+        "Component: Dashboard header with time range selector",
+        "Use case: Analytics dashboards needing date filtering",
+        "Key classes: sticky top-0 z-40 backdrop-blur-xl bg-white/80",
+        "Features: Integrated time range picker, export button, real-time status badge",
+        "Proven in: Contably analytics, MNA portfolio reporter",
+        "User feedback: Sticky header with blur was highly praised",
+        "Variation: Light/dark mode with automatic theme detection",
+        "Accessibility: Keyboard shortcuts for common date ranges (Alt+T)",
+      ],
+    },
+  ],
+});
 ```
 
 Next time the agent designs an analytics dashboard, it queries memory and reuses this proven header pattern, applying learned improvements without any code modification.
@@ -209,77 +218,86 @@ This skill uses Memory MCP to learn and improve across design sessions.
 
 ### Memory Entity Types
 
-| Type | Purpose | Example |
-|------|---------|---------|
-| `design-decision` | Color, typography, layout choices per project | `design-decision:contably-colors` |
-| `component-pattern` | Reusable component patterns that worked well | `component-pattern:dashboard-stats-card` |
-| `client-preference` | Client/project-specific preferences | `client-preference:nuvini-brand` |
-| `design-insight` | General learnings about design | `design-insight:dark-mode-contrast` |
+| Type                | Purpose                                       | Example                                  |
+| ------------------- | --------------------------------------------- | ---------------------------------------- |
+| `design-decision`   | Color, typography, layout choices per project | `design-decision:contably-colors`        |
+| `component-pattern` | Reusable component patterns that worked well  | `component-pattern:dashboard-stats-card` |
+| `client-preference` | Client/project-specific preferences           | `client-preference:nuvini-brand`         |
+| `design-insight`    | General learnings about design                | `design-insight:dark-mode-contrast`      |
 
 ### When to Query Memory
 
 **At project start:**
+
 ```javascript
 // Check for existing project preferences
-mcp__memory__search_nodes({ query: "client-preference:{project}" })
-mcp__memory__search_nodes({ query: "design-decision:{project}" })
+mcp__memory__search_nodes({ query: "client-preference:{project}" });
+mcp__memory__search_nodes({ query: "design-decision:{project}" });
 
 // Load successful patterns
-mcp__memory__search_nodes({ query: "component-pattern:dashboard" })
-mcp__memory__search_nodes({ query: "design-insight" })
+mcp__memory__search_nodes({ query: "component-pattern:dashboard" });
+mcp__memory__search_nodes({ query: "design-insight" });
 ```
 
 ### When to Save to Memory
 
 **After successful design delivery:**
+
 ```javascript
 // Save project-specific decisions
 mcp__memory__create_entities({
-  entities: [{
-    name: "design-decision:{project}-{aspect}",
-    entityType: "design-decision",
-    observations: [
-      "Project: {project_name}",
-      "Decision: {what was chosen}",
-      "Rationale: {why}",
-      "Colors: {palette}",
-      "Typography: {fonts}",
-      "Delivered: {date}"
-    ]
-  }]
-})
+  entities: [
+    {
+      name: "design-decision:{project}-{aspect}",
+      entityType: "design-decision",
+      observations: [
+        "Project: {project_name}",
+        "Decision: {what was chosen}",
+        "Rationale: {why}",
+        "Colors: {palette}",
+        "Typography: {fonts}",
+        "Delivered: {date}",
+      ],
+    },
+  ],
+});
 
 // Save reusable component patterns
 mcp__memory__create_entities({
-  entities: [{
-    name: "component-pattern:{component-name}",
-    entityType: "component-pattern",
-    observations: [
-      "Component: {name}",
-      "Use case: {when to use}",
-      "Key classes: {tailwind classes}",
-      "Variations: {light/dark, sizes}",
-      "Proven in: {project_name}"
-    ]
-  }]
-})
+  entities: [
+    {
+      name: "component-pattern:{component-name}",
+      entityType: "component-pattern",
+      observations: [
+        "Component: {name}",
+        "Use case: {when to use}",
+        "Key classes: {tailwind classes}",
+        "Variations: {light/dark, sizes}",
+        "Proven in: {project_name}",
+      ],
+    },
+  ],
+});
 ```
 
 **After learning something new:**
+
 ```javascript
 // Save design insights
 mcp__memory__create_entities({
-  entities: [{
-    name: "design-insight:{topic}",
-    entityType: "design-insight",
-    observations: [
-      "Insight: {what was learned}",
-      "Context: {when it applies}",
-      "Source: {how discovered}",
-      "Discovered: {date}"
-    ]
-  }]
-})
+  entities: [
+    {
+      name: "design-insight:{topic}",
+      entityType: "design-insight",
+      observations: [
+        "Insight: {what was learned}",
+        "Context: {when it applies}",
+        "Source: {how discovered}",
+        "Discovered: {date}",
+      ],
+    },
+  ],
+});
 ```
 
 ### Memory-Enhanced Workflow
@@ -765,6 +783,7 @@ At the end of design work, return:
 ```
 
 ### Success Signal (Complete Design)
+
 ```json
 {
   "status": "complete",
@@ -791,6 +810,7 @@ At the end of design work, return:
 ```
 
 ### Success Signal (Dashboard Design)
+
 ```json
 {
   "status": "complete",
@@ -808,13 +828,19 @@ At the end of design work, return:
     "chartLibrary": "Recharts"
   },
   "componentCount": 12,
-  "dataVisualizationTypes": ["line-chart", "bar-chart", "stat-cards", "data-table"],
+  "dataVisualizationTypes": [
+    "line-chart",
+    "bar-chart",
+    "stat-cards",
+    "data-table"
+  ],
   "darkMode": true,
   "outputLocation": "/mnt/user-data/outputs/"
 }
 ```
 
 ### Partial Completion Signal
+
 ```json
 {
   "status": "partial",
@@ -826,11 +852,7 @@ At the end of design work, return:
     "Social proof section",
     "Testimonial carousel"
   ],
-  "remainingSections": [
-    "Pricing cards",
-    "FAQ accordion",
-    "Footer"
-  ],
+  "remainingSections": ["Pricing cards", "FAQ accordion", "Footer"],
   "deliverables": [
     "/mnt/user-data/outputs/HeroSection.tsx",
     "/mnt/user-data/outputs/FeatureGrid.tsx",
@@ -841,6 +863,7 @@ At the end of design work, return:
 ```
 
 ### Blocked Signal
+
 ```json
 {
   "status": "blocked",
@@ -857,6 +880,7 @@ At the end of design work, return:
 ```
 
 ### Failed Signal
+
 ```json
 {
   "status": "failed",
@@ -887,6 +911,7 @@ At the end of design work, return:
 ### Special Cases
 
 **Iterative design:**
+
 ```json
 {
   "status": "complete",
@@ -903,6 +928,7 @@ At the end of design work, return:
 ```
 
 **Design system only:**
+
 ```json
 {
   "status": "complete",

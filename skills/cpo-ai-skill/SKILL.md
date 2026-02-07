@@ -4,7 +4,12 @@ description: "Chief Product Officer AI that orchestrates entire product lifecycl
 user-invocable: true
 context: fork
 allowed-tools:
-  - Task
+  - Task(agent_type=frontend-agent)
+  - Task(agent_type=backend-agent)
+  - Task(agent_type=database-agent)
+  - Task(agent_type=devops-agent)
+  - Task(agent_type=general-purpose)
+  - Task(agent_type=Explore)
   - TeammateTool
   - TaskCreate
   - TaskUpdate
@@ -12,11 +17,13 @@ allowed-tools:
   - mcp__memory__*
 model: opus
 disable-model-invocation: true
+memory: user
 ---
 
 # Chief Product Officer AI Skill
 
 ## Current Environment
+
 - Node version: !`node --version 2>/dev/null || echo "Not installed"`
 - Package manager: !`pnpm --version 2>/dev/null && echo "(pnpm)" || npm --version 2>/dev/null && echo "(npm)" || echo "None found"`
 - Git status: !`git branch --show-current 2>/dev/null || echo "Not in a git repo"`
@@ -67,6 +74,7 @@ When `/cpo-go` is invoked:
 **"From Vision to Production with Systematic Excellence"**
 
 The CPO AI acts as a virtual Chief Product Officer, combining:
+
 - **Product Strategy**: Qualifying ideas, defining scope, identifying MVP
 - **Market Research**: Analyzing competitors, design patterns, and best practices
 - **Technical Architecture**: Expert tech stack and deployment recommendations
@@ -110,14 +118,14 @@ The CPO AI acts as a virtual Chief Product Officer, combining:
 
 The CPO AI orchestrates **six specialized subagents** for best-in-class results:
 
-| Agent | Phase | Purpose |
-|-------|-------|---------|
-| **Product Research Agent** | 1, 2 | Market research, competitor analysis, design references |
-| **CTO Advisor Agent** | 2, 3.1 | Tech stack, architecture, deployment strategy |
-| **Frontend Design Agent** | 3 (UI) | Distinctive, production-grade interfaces |
-| **Backend API Agent** | 3 (API) | REST/GraphQL design, auth, error handling |
-| **Database Setup Agent** | 3.1 | Schema design, migrations, Supabase/Neon setup |
-| **Deployment Agent** | 5 | Vercel/Railway/DO deployment execution |
+| Agent                      | Phase   | Purpose                                                 |
+| -------------------------- | ------- | ------------------------------------------------------- |
+| **Product Research Agent** | 1, 2    | Market research, competitor analysis, design references |
+| **CTO Advisor Agent**      | 2, 3.1  | Tech stack, architecture, deployment strategy           |
+| **Frontend Design Agent**  | 3 (UI)  | Distinctive, production-grade interfaces                |
+| **Backend API Agent**      | 3 (API) | REST/GraphQL design, auth, error handling               |
+| **Database Setup Agent**   | 3.1     | Schema design, migrations, Supabase/Neon setup          |
+| **Deployment Agent**       | 5       | Vercel/Railway/DO deployment execution                  |
 
 **See:** [subagents/](subagents/) directory for detailed agent definitions.
 
@@ -138,7 +146,7 @@ The CPO AI skill uses these atomic primitives:
 - **Bash** - Execute commands (git, npm, test runners)
 - **TaskCreate/TaskUpdate/TaskList** - Progress tracking
 - **TeammateTool** - Swarm coordination for parallel work
-- **mcp__memory__*** - Research caching and pattern learning
+- **mcp**memory**\*** - Research caching and pattern learning
 
 **Key insight**: The skill does NOT implement custom workflow tools like `analyze_and_plan_product()` or `implement_stage()`. Instead, it uses atomic tools in a loop.
 
@@ -165,6 +173,7 @@ Modify the prompts that guide epic decomposition (Phase 2), or save new patterns
 **Want to customize stage implementation?**
 
 The implementation strategy is controlled by prompts in:
+
 - The subagent definitions in `subagents/` directory
 - The `autonomous-dev` skill invocation parameters
 - Environment variables and project-specific prompts
@@ -185,18 +194,19 @@ Edit the TeammateTool message templates (lines 285-360) to change how the leader
 // Anti-pattern: Hardcoded workflow
 function cpo_workflow(productIdea) {
   const questions = askDiscoveryQuestions(); // Hardcoded Q&A
-  const plan = generatePlan(questions);       // Hardcoded planning
+  const plan = generatePlan(questions); // Hardcoded planning
   for (const stage of plan.stages) {
-    implementStage(stage);                   // Hardcoded implementation
-    runTests(stage);                         // Hardcoded testing
+    implementStage(stage); // Hardcoded implementation
+    runTests(stage); // Hardcoded testing
   }
-  deploy();                                  // Hardcoded deployment
+  deploy(); // Hardcoded deployment
 }
 ```
 
 **What this skill DOES:**
 
 The agent receives outcome-oriented instructions like:
+
 - "Transform the product idea into a qualified definition by asking strategic questions"
 - "Create a staged implementation plan with epics and stories"
 - "Implement each stage, test it, and commit if passing"
@@ -206,6 +216,7 @@ The agent uses atomic tools (Read, Write, Bash, TaskList, etc.) to achieve these
 ### Example: Changing Planning Strategy
 
 **Current behavior** (defined in prompts):
+
 - Break product into 3-6 epics
 - Decompose epics into stages (1-2 days each)
 - Generate stories per stage
@@ -213,13 +224,14 @@ The agent uses atomic tools (Read, Write, Bash, TaskList, etc.) to achieve these
 **To change to feature-first planning**:
 
 Edit the Phase 2 prompt in `references/phase-details.md` to say:
+
 ```
 Instead of epic-based planning, decompose the product into independent features.
 Each feature should be a vertical slice with UI, API, and database components.
 Prioritize features by user value and dependencies.
 ```
 
-The agent will adapt its planning behavior to this new outcome description, using the same atomic tools (Write, mcp__memory__search_nodes, etc.) in different ways.
+The agent will adapt its planning behavior to this new outcome description, using the same atomic tools (Write, mcp**memory**search_nodes, etc.) in different ways.
 
 ### Memory-Driven Behavior Modification
 
@@ -228,22 +240,24 @@ Behavior evolves through Memory MCP without code changes:
 ```javascript
 // Save a new pattern after successful delivery
 mcp__memory__create_entities({
-  entities: [{
-    name: "epic-pattern:marketplace-mvp",
-    entityType: "epic-pattern",
-    observations: [
-      "Product type: Two-sided marketplace",
-      "Epic 1: Seller onboarding and profiles",
-      "Epic 2: Product catalog and search",
-      "Epic 3: Transaction and payment flow",
-      "Epic 4: Buyer discovery and reviews",
-      "Stages: 8 total, foundation-first approach",
-      "Proven in: artmarket project",
-      "Duration: 5 days",
-      "Key insight: Build payment flow before reviews to validate revenue model early"
-    ]
-  }]
-})
+  entities: [
+    {
+      name: "epic-pattern:marketplace-mvp",
+      entityType: "epic-pattern",
+      observations: [
+        "Product type: Two-sided marketplace",
+        "Epic 1: Seller onboarding and profiles",
+        "Epic 2: Product catalog and search",
+        "Epic 3: Transaction and payment flow",
+        "Epic 4: Buyer discovery and reviews",
+        "Stages: 8 total, foundation-first approach",
+        "Proven in: artmarket project",
+        "Duration: 5 days",
+        "Key insight: Build payment flow before reviews to validate revenue model early",
+      ],
+    },
+  ],
+});
 ```
 
 Next time the agent builds a marketplace, it queries memory and adapts its plan based on learned patterns, without any code modification.
@@ -254,13 +268,13 @@ Next time the agent builds a marketplace, it queries memory and adapts its plan 
 
 When this skill activates, check for existing project state:
 
-| Condition | Action |
-|-----------|--------|
-| No `master-project.json` exists | Start Phase 1 (Discovery) |
-| `master-project.json` exists, no stages completed | Start Phase 3 (Execute first stage) |
-| `master-project.json` exists, some stages done | Resume Phase 3 (Next incomplete stage) |
-| All stages complete, not tested | Start Phase 4 (Full Validation) |
-| All complete and tested | Start Phase 5 (Documentation & Delivery) |
+| Condition                                         | Action                                   |
+| ------------------------------------------------- | ---------------------------------------- |
+| No `master-project.json` exists                   | Start Phase 1 (Discovery)                |
+| `master-project.json` exists, no stages completed | Start Phase 3 (Execute first stage)      |
+| `master-project.json` exists, some stages done    | Resume Phase 3 (Next incomplete stage)   |
+| All stages complete, not tested                   | Start Phase 4 (Full Validation)          |
+| All complete and tested                           | Start Phase 5 (Documentation & Delivery) |
 
 **First Action:** Check project state:
 
@@ -277,6 +291,7 @@ ls -la master-project.json cpo-progress.md docs/user-guide.md 2>/dev/null
 **Goal:** Transform a raw product idea into a qualified, scoped product definition.
 
 **Key Steps:**
+
 1. Receive and acknowledge the product idea
 2. Ask 5-8 strategic discovery questions (target users, scope, tech constraints, success criteria)
 3. Synthesize product definition with vision, features, and non-goals
@@ -294,6 +309,7 @@ ls -la master-project.json cpo-progress.md docs/user-guide.md 2>/dev/null
 **Goal:** Create a comprehensive, staged implementation plan.
 
 **Key Steps:**
+
 1. Invoke CTO Advisor Agent for tech stack recommendations and architecture
 2. Decompose product into epics (major feature areas)
 3. Break epics into stages (implementable chunks)
@@ -315,13 +331,14 @@ ls -la master-project.json cpo-progress.md docs/user-guide.md 2>/dev/null
 
 **Execution Modes:**
 
-| Mode | When to Use | Speedup |
-|------|-------------|---------|
-| **Sequential** (default) | Small projects, < 5 stages | 1x |
-| **Parallel** | Independent stages, no shared files | 2-3x |
-| **Swarm** | Large projects, 5+ stages with specialists | 3-5x |
+| Mode                     | When to Use                                | Speedup |
+| ------------------------ | ------------------------------------------ | ------- |
+| **Sequential** (default) | Small projects, < 5 stages                 | 1x      |
+| **Parallel**             | Independent stages, no shared files        | 2-3x    |
+| **Swarm**                | Large projects, 5+ stages with specialists | 3-5x    |
 
 **Enable swarm mode** by setting in `master-project.json`:
+
 ```json
 {
   "executionMode": "swarm",
@@ -337,6 +354,7 @@ ls -la master-project.json cpo-progress.md docs/user-guide.md 2>/dev/null
 ```
 
 **Key Steps:**
+
 1. Load project state and identify next pending stage
 2. **Check execution mode** - sequential, parallel, or swarm
 3. Determine stage type and select appropriate specialized agent
@@ -356,6 +374,7 @@ ls -la master-project.json cpo-progress.md docs/user-guide.md 2>/dev/null
 12. Repeat for all stages (or wait for swarm completion)
 
 **Swarm Workflow Diagram:**
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                CPO AI (LEADER)                          │
@@ -382,10 +401,11 @@ ls -la master-project.json cpo-progress.md docs/user-guide.md 2>/dev/null
 > **Note:** TeammateTool messages support **rich Markdown rendering**. Use headers, bold, code blocks, tables, and lists for clear communication between CPO leader and specialist workers.
 
 **Worker Stage Completion Example:**
+
 ```javascript
 // Frontend worker reports stage completion
 TeammateTool.write({
-  to: 'leader',
+  to: "leader",
   message: `## Stage Complete: User Dashboard UI
 
 ### Worker Status
@@ -416,15 +436,16 @@ src/components/dashboard/
 - Added loading skeletons for async data
 
 ### Ready for Integration
-Stage is ready for fulltest-skill validation.`
-})
+Stage is ready for fulltest-skill validation.`,
+});
 ```
 
 **Leader Task Assignment Example:**
+
 ```javascript
 // CPO leader assigns task to API worker
 TeammateTool.write({
-  to: 'api-worker',
+  to: "api-worker",
   message: `## Task Assignment: Authentication API
 
 ### Stage Details
@@ -455,8 +476,8 @@ Then account is created and JWT returned
 
 ### Dependencies
 - Database schema must be complete (Stage 1.1)
-- Use shared \`/lib/auth\` utilities`
-})
+- Use shared \`/lib/auth\` utilities`,
+});
 ```
 
 **Output:** Fully implemented product with all stages complete and tested
@@ -470,6 +491,7 @@ Then account is created and JWT returned
 **Goal:** Comprehensive testing of the complete integrated product.
 
 **Key Steps:**
+
 1. Merge all stage branches to main
 2. Run full integration testing suite
 3. Verify critical user journeys end-to-end
@@ -487,6 +509,7 @@ Then account is created and JWT returned
 **Goal:** Create user documentation and deploy to production.
 
 **Key Steps:**
+
 1. Generate user guide with getting started, features, troubleshooting
 2. Generate technical documentation with architecture, setup, API reference
 3. Final commit with all documentation
@@ -503,30 +526,31 @@ Then account is created and JWT returned
 
 ## Quick Commands
 
-| Command | Action |
-|---------|--------|
-| "status" | Show current phase and progress |
-| "skip stage" | Skip current stage (mark as skipped) |
-| "pause" | Stop execution, wait for input |
-| "resume" | Continue from last checkpoint |
-| "replan" | Go back to Phase 2 and adjust plan |
-| "test only" | Run tests without implementing |
-| "docs only" | Generate documentation only |
-| "swarm on" | Enable swarm mode for Phase 3 |
-| "swarm off" | Disable swarm, use sequential |
-| "swarm status" | Show team, workers, and task board |
-| "swarm workers" | List active workers and tasks |
-| "parallel on" | Enable parallel mode (no swarm) |
+| Command         | Action                               |
+| --------------- | ------------------------------------ |
+| "status"        | Show current phase and progress      |
+| "skip stage"    | Skip current stage (mark as skipped) |
+| "pause"         | Stop execution, wait for input       |
+| "resume"        | Continue from last checkpoint        |
+| "replan"        | Go back to Phase 2 and adjust plan   |
+| "test only"     | Run tests without implementing       |
+| "docs only"     | Generate documentation only          |
+| "swarm on"      | Enable swarm mode for Phase 3        |
+| "swarm off"     | Disable swarm, use sequential        |
+| "swarm status"  | Show team, workers, and task board   |
+| "swarm workers" | List active workers and tasks        |
+| "parallel on"   | Enable parallel mode (no swarm)      |
 
 ## Task Cleanup
 
 Use `TaskUpdate` with `status: "deleted"` to clean up completed or stale task chains:
 
 ```json
-{"taskId": "1", "status": "deleted"}
+{ "taskId": "1", "status": "deleted" }
 ```
 
 This prevents task list clutter during long sessions. Clean up task chains after:
+
 - All stages complete and verified
 - User cancels a workflow
 - Starting a fresh PRD cycle
@@ -554,6 +578,7 @@ At the end of each phase or when blocked, return:
 ```
 
 ### Success Signal
+
 ```json
 {
   "status": "complete",
@@ -576,6 +601,7 @@ At the end of each phase or when blocked, return:
 ```
 
 ### Partial Completion Signal
+
 ```json
 {
   "status": "partial",
@@ -589,6 +615,7 @@ At the end of each phase or when blocked, return:
 ```
 
 ### Blocked Signal
+
 ```json
 {
   "status": "blocked",
@@ -605,6 +632,7 @@ At the end of each phase or when blocked, return:
 ```
 
 ### Failed Signal
+
 ```json
 {
   "status": "failed",
@@ -641,6 +669,7 @@ At the end of each phase or when blocked, return:
 ### Stage Implementation Fails
 
 After max attempts, offer options:
+
 1. Simplify stage (split into smaller stages)
 2. Get manual assistance with blockers
 3. Skip stage and continue (mark incomplete)
@@ -649,6 +678,7 @@ After max attempts, offer options:
 ### Testing Keeps Failing
 
 After 3 fix iterations, offer options:
+
 1. Review test expectations (may be incorrect)
 2. Simplify acceptance criteria
 3. Get user input on expected behavior
@@ -657,6 +687,7 @@ After 3 fix iterations, offer options:
 ### Scope Creep Detected
 
 If implementation expands beyond plan:
+
 1. Return to plan (drop extra work)
 2. Update plan to include new scope
 3. Move extra work to future stage
@@ -667,14 +698,14 @@ If implementation expands beyond plan:
 
 ## Key Files Reference
 
-| File | Purpose | Created | Template |
-|------|---------|---------|----------|
-| `master-project.json` | Complete project state | Phase 2 | [templates.md](references/templates.md) |
-| `cpo-progress.md` | Progress log | Phase 2 | [templates.md](references/templates.md) |
-| `prd.json` | Current stage stories | Phase 3 (per stage) | [templates.md](references/templates.md) |
-| `progress.md` | Stage-level progress | Phase 3 (per stage) | autonomous-dev format |
-| `docs/user-guide.md` | End-user documentation | Phase 5 | [templates.md](references/templates.md) |
-| `docs/technical-docs.md` | Developer documentation | Phase 5 | [templates.md](references/templates.md) |
+| File                     | Purpose                 | Created             | Template                                |
+| ------------------------ | ----------------------- | ------------------- | --------------------------------------- |
+| `master-project.json`    | Complete project state  | Phase 2             | [templates.md](references/templates.md) |
+| `cpo-progress.md`        | Progress log            | Phase 2             | [templates.md](references/templates.md) |
+| `prd.json`               | Current stage stories   | Phase 3 (per stage) | [templates.md](references/templates.md) |
+| `progress.md`            | Stage-level progress    | Phase 3 (per stage) | autonomous-dev format                   |
+| `docs/user-guide.md`     | End-user documentation  | Phase 5             | [templates.md](references/templates.md) |
+| `docs/technical-docs.md` | Developer documentation | Phase 5             | [templates.md](references/templates.md) |
 
 ---
 
@@ -682,40 +713,41 @@ If implementation expands beyond plan:
 
 ### Specialized Subagents
 
-| Agent | When Invoked | Input | Output |
-|-------|--------------|-------|--------|
-| Product Research Agent | Phase 1, 2 | Product idea, market | competitor-analysis.md, design-references.md |
-| CTO Advisor Agent | Phase 2, 3.1 | Product requirements | tech-stack-recommendation.md, adr/ |
-| Frontend Design Agent | Phase 3 (UI) | Components, research | React/Vue component code |
-| Backend API Agent | Phase 3 (API) | Endpoints, auth | API routes, middleware |
-| Database Setup Agent | Phase 3.1 | Schema requirements | Prisma/Drizzle schema, migrations |
-| Deployment Agent | Phase 5 | Platform, env vars | Live URL, health checks |
+| Agent                  | When Invoked  | Input                | Output                                       |
+| ---------------------- | ------------- | -------------------- | -------------------------------------------- |
+| Product Research Agent | Phase 1, 2    | Product idea, market | competitor-analysis.md, design-references.md |
+| CTO Advisor Agent      | Phase 2, 3.1  | Product requirements | tech-stack-recommendation.md, adr/           |
+| Frontend Design Agent  | Phase 3 (UI)  | Components, research | React/Vue component code                     |
+| Backend API Agent      | Phase 3 (API) | Endpoints, auth      | API routes, middleware                       |
+| Database Setup Agent   | Phase 3.1     | Schema requirements  | Prisma/Drizzle schema, migrations            |
+| Deployment Agent       | Phase 5       | Platform, env vars   | Live URL, health checks                      |
 
 **Details:** [subagents/](subagents/) directory
 
 ### Dependent Skills
 
-| Skill | Purpose | When Used |
-|-------|---------|-----------|
-| autonomous-dev | Story-level implementation | Phase 3 (every stage) |
-| fulltest-skill | E2E testing | Phase 3 (after each stage), Phase 4 |
+| Skill          | Purpose                    | When Used                           |
+| -------------- | -------------------------- | ----------------------------------- |
+| autonomous-dev | Story-level implementation | Phase 3 (every stage)               |
+| fulltest-skill | E2E testing                | Phase 3 (after each stage), Phase 4 |
 
 ### Reference Documents
 
-| Reference | Purpose | Link |
-|-----------|---------|------|
-| Phase Details | Complete step-by-step instructions | [references/phase-details.md](references/phase-details.md) |
-| Templates | JSON/Markdown templates | [references/templates.md](references/templates.md) |
-| Environment Config | .env templates for different stacks | [references/environment-config.md](references/environment-config.md) |
-| Testing Integration | Testing strategy and commands | [references/testing-integration.md](references/testing-integration.md) |
-| Cost Estimation | Infrastructure cost calculations | [references/cost-estimation.md](references/cost-estimation.md) |
-| Examples | Complete workflow examples | [references/examples.md](references/examples.md) |
+| Reference           | Purpose                             | Link                                                                   |
+| ------------------- | ----------------------------------- | ---------------------------------------------------------------------- |
+| Phase Details       | Complete step-by-step instructions  | [references/phase-details.md](references/phase-details.md)             |
+| Templates           | JSON/Markdown templates             | [references/templates.md](references/templates.md)                     |
+| Environment Config  | .env templates for different stacks | [references/environment-config.md](references/environment-config.md)   |
+| Testing Integration | Testing strategy and commands       | [references/testing-integration.md](references/testing-integration.md) |
+| Cost Estimation     | Infrastructure cost calculations    | [references/cost-estimation.md](references/cost-estimation.md)         |
+| Examples            | Complete workflow examples          | [references/examples.md](references/examples.md)                       |
 
 ---
 
 ## Examples & Walkthroughs
 
 **Complete Examples:**
+
 - [Simple Game](references/examples.md#simple-game)
 - [SaaS Task Manager](references/examples.md#saas-task-manager)
 - [E-commerce Marketplace](references/examples.md#e-commerce-marketplace)
@@ -740,6 +772,7 @@ This ensures all project-specific instructions are loaded when orchestrating acr
 **Current Version:** 2.2.0
 
 **Recent Changes:**
+
 - Added `/cpo-go` quick-start command
 - Integrated specialized subagents for each domain
 - Added cost estimation in planning phase
@@ -747,6 +780,7 @@ This ensures all project-specific instructions are loaded when orchestrating acr
 - Modular structure with detailed reference docs
 
 **Roadmap:**
+
 - Real-time collaboration features
 - AI-powered cost optimization suggestions
 - Automated monitoring setup post-deployment
@@ -760,87 +794,98 @@ This skill uses Memory MCP to cache research, remember decisions, and improve ov
 
 ### Memory Entity Types
 
-| Type | Purpose | Example |
-|------|---------|---------|
-| `research-cache` | Cached competitor/market research | `research-cache:task-management-competitors` |
-| `product-decision` | Key product decisions made | `product-decision:contably-auth-strategy` |
-| `epic-pattern` | Epic/stage patterns that worked well | `epic-pattern:saas-mvp-stages` |
-| `tech-stack-decision` | Tech stack choices per project | `tech-stack-decision:contably-stack` |
+| Type                  | Purpose                              | Example                                      |
+| --------------------- | ------------------------------------ | -------------------------------------------- |
+| `research-cache`      | Cached competitor/market research    | `research-cache:task-management-competitors` |
+| `product-decision`    | Key product decisions made           | `product-decision:contably-auth-strategy`    |
+| `epic-pattern`        | Epic/stage patterns that worked well | `epic-pattern:saas-mvp-stages`               |
+| `tech-stack-decision` | Tech stack choices per project       | `tech-stack-decision:contably-stack`         |
 
 ### When to Query Memory
 
 **Phase 1 - Discovery:**
+
 ```javascript
 // Check for similar product research
-mcp__memory__search_nodes({ query: "research-cache:{vertical}" })
-mcp__memory__search_nodes({ query: "research-cache:{product-type}" })
+mcp__memory__search_nodes({ query: "research-cache:{vertical}" });
+mcp__memory__search_nodes({ query: "research-cache:{product-type}" });
 ```
 
 **Phase 2 - Planning:**
+
 ```javascript
 // Load successful epic patterns for similar products
-mcp__memory__search_nodes({ query: "epic-pattern:{product-type}" })
+mcp__memory__search_nodes({ query: "epic-pattern:{product-type}" });
 
 // Check past tech stack decisions
-mcp__memory__search_nodes({ query: "tech-stack-decision" })
+mcp__memory__search_nodes({ query: "tech-stack-decision" });
 ```
 
 ### When to Save to Memory
 
 **After Phase 1 Research:**
+
 ```javascript
 // Cache competitor research (expensive to regenerate)
 mcp__memory__create_entities({
-  entities: [{
-    name: "research-cache:{vertical}-{date}",
-    entityType: "research-cache",
-    observations: [
-      "Vertical: {vertical}",
-      "Competitors: {list}",
-      "Key findings: {summary}",
-      "Design patterns: {patterns}",
-      "Researched: {date}"
-    ]
-  }]
-})
+  entities: [
+    {
+      name: "research-cache:{vertical}-{date}",
+      entityType: "research-cache",
+      observations: [
+        "Vertical: {vertical}",
+        "Competitors: {list}",
+        "Key findings: {summary}",
+        "Design patterns: {patterns}",
+        "Researched: {date}",
+      ],
+    },
+  ],
+});
 ```
 
 **After Phase 2 Planning:**
+
 ```javascript
 // Save epic structure that was approved
 mcp__memory__create_entities({
-  entities: [{
-    name: "epic-pattern:{product-type}",
-    entityType: "epic-pattern",
-    observations: [
-      "Product type: {type}",
-      "Epic count: {count}",
-      "Stage breakdown: {stages}",
-      "Proven in: {project}",
-      "Created: {date}"
-    ]
-  }]
-})
+  entities: [
+    {
+      name: "epic-pattern:{product-type}",
+      entityType: "epic-pattern",
+      observations: [
+        "Product type: {type}",
+        "Epic count: {count}",
+        "Stage breakdown: {stages}",
+        "Proven in: {project}",
+        "Created: {date}",
+      ],
+    },
+  ],
+});
 ```
 
 **After Phase 5 Delivery:**
+
 ```javascript
 // Save successful project as reference
 mcp__memory__create_entities({
-  entities: [{
-    name: "product-decision:{project}-summary",
-    entityType: "product-decision",
-    observations: [
-      "Project: {name}",
-      "Type: {product-type}",
-      "Stack: {tech-stack}",
-      "Epics: {epic-count}",
-      "Duration: {time-to-deliver}",
-      "Lessons: {key-learnings}",
-      "Completed: {date}"
-    ]
-  }]
-})
+  entities: [
+    {
+      name: "product-decision:{project}-summary",
+      entityType: "product-decision",
+      observations: [
+        "Project: {name}",
+        "Type: {product-type}",
+        "Stack: {tech-stack}",
+        "Epics: {epic-count}",
+        "Duration: {time-to-deliver}",
+        "Lessons: {key-learnings}",
+        "Completed: {date}",
+      ],
+    },
+  ],
+});
 ```
 
 ### Research Cache Strategy
@@ -848,14 +893,15 @@ mcp__memory__create_entities({
 To avoid redundant research:
 
 1. **Before invoking Product Research Agent**, check memory:
+
    ```javascript
    const cached = await mcp__memory__search_nodes({
-     query: "research-cache:{vertical}"
-   })
+     query: "research-cache:{vertical}",
+   });
 
    // If cache exists and < 30 days old, use it
    if (cached && daysSince(cached.researched) < 30) {
-     return cached.observations
+     return cached.observations;
    }
    ```
 
