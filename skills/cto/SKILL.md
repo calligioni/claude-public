@@ -13,6 +13,7 @@ allowed-tools:
   - Bash
   - WebSearch
   - WebFetch
+  - mcp__firecrawl__*
   - Task(agent_type=general-purpose)
   - Task(agent_type=Explore)
   - Task(agent_type=security-agent)
@@ -39,6 +40,11 @@ A comprehensive CTO advisor skill that provides strategic technical leadership f
 - Identify architectural anti-patterns
 - Recommend improvements for scalability and maintainability
 - Create Architecture Decision Records (ADRs)
+- Use multi-perspective investigation for major decisions:
+  - Primary analysis (direct codebase evidence)
+  - Literature review (established patterns and best practices via WebSearch)
+  - Expert consensus (what domain experts recommend)
+  - Contrarian view (what could go wrong, who disagrees and why)
 
 ### 2. Code Quality Assessment
 
@@ -758,6 +764,18 @@ cat package.json 2>/dev/null | jq '.dependencies' 2>/dev/null | head -30
 
 1. [Opportunity]
 2. [Opportunity]
+
+---
+
+## Confidence Assessment
+
+- **Overall Confidence:** [X]%
+- **Strongest evidence:** [what supports conclusions most]
+- **What would change our recommendations:**
+  - [Factor] → would shift to [alternative recommendation]
+- **Assumptions made:**
+  - ⚠️ [Assumption] — [why we believe this holds]
+- **Known Unknowns:** [what we couldn't determine from static analysis]
 
 ---
 
