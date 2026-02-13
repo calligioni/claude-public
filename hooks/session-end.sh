@@ -42,19 +42,8 @@ cat > "$SESSION_FILE" << EOF
 }
 EOF
 
-# Output reminder for memory capture
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "📝 SESSION ENDED - Memory Capture Reminder"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
-echo "Project: $PROJECT"
-echo "Session logged: $SESSION_FILE"
-echo ""
-echo "To capture learnings from this session:"
-echo "  • Run /consolidate --health to check memory status"
-echo "  • Or manually add to Memory MCP with mcp__memory__create_entities"
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+# Log reminder to stderr (stdout must be valid JSON for Claude Code hooks)
+echo "" >&2
+echo "Session logged: $SESSION_FILE" >&2
 
 exit 0

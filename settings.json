@@ -100,11 +100,15 @@
           },
           {
             "type": "prompt",
-            "prompt": "Task completed. Check if any blocked tasks can now proceed."
+            "prompt": "Task completed. Use TaskList to check for unblocked tasks, then automatically assign the next available task to idle teammates."
           }
         ]
       }
     ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.sh"
   },
   "spinnerVerbs": {
     "mode": "append",
@@ -247,7 +251,19 @@
           "@presto-ai/google-workspace-mcp"
         ],
         "description": "Gmail, Calendar, Drive, Docs, Sheets - OAuth authenticated"
+      },
+      "firecrawl": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "firecrawl-mcp"
+        ],
+        "env": {
+          "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
+        },
+        "description": "Web scraping, crawling, search, and autonomous data extraction via Firecrawl"
       }
     }
-  }
+  },
+  "skipDangerousModePermissionPrompt": true
 }

@@ -13,6 +13,7 @@ allowed-tools:
   - Bash
   - WebFetch
   - WebSearch
+  - mcp__firecrawl__*
   - mcp__memory__*
 memory: user
 ---

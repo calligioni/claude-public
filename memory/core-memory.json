@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-02-03",
-  "lastConsolidation": "2026-02-03T14:03:09Z",
+  "lastUpdated": "2026-02-12",
+  "lastConsolidation": "2026-02-12T01:29:10Z",
   "criticalContext": {
     "iCloudSetup": "ALL Claude setup files are stored in iCloud. Always check these paths first.",
     "importance": "This is the source of truth for all Claude Code configuration"
@@ -19,13 +19,7 @@
     "name": "Pierre Schurmann",
     "username": "psm2",
     "role": "Software developer / M&A analyst at Nuvini Group",
-    "expertise": [
-      "TypeScript",
-      "React",
-      "Next.js",
-      "Supabase",
-      "Claude Code"
-    ],
+    "expertise": ["TypeScript", "React", "Next.js", "Supabase", "Claude Code"],
     "workContext": "Building AI-powered tools, M&A analysis systems, and autonomous coding agents",
     "communicationStyle": "direct, technical, minimal"
   },
@@ -34,16 +28,11 @@
     "deployment": {
       "primary": "Railway",
       "static": "Vercel",
-      "alternatives": [
-        "Cloudflare Workers"
-      ]
+      "alternatives": ["Cloudflare Workers"]
     },
     "database": {
       "primary": "Supabase (PostgreSQL)",
-      "alternatives": [
-        "Neon",
-        "PlanetScale"
-      ]
+      "alternatives": ["Neon", "PlanetScale"]
     },
     "codeStyle": {
       "principle": "minimal, no over-engineering",
@@ -90,11 +79,7 @@
     "Three similar lines of code is better than a premature abstraction"
   ],
   "projectContext": {
-    "activeProjects": [
-      "Contably",
-      "AgentCreator",
-      "M&A Toolkit"
-    ],
+    "activeProjects": ["Contably", "AgentCreator", "M&A Toolkit"],
     "techStack": {
       "Contably": "Next.js + Supabase + Brazil accounting integrations",
       "AgentCreator": "Agent orchestration platform",
@@ -122,10 +107,7 @@
     "supabase": {
       "configured": true,
       "usage": "Database, auth, storage for projects",
-      "projects": [
-        "Contably",
-        "AgentCreator"
-      ]
+      "projects": ["Contably", "AgentCreator"]
     },
     "railway": {
       "configured": true,
@@ -143,10 +125,7 @@
     "resend": {
       "configured": true,
       "usage": "Transactional email sending",
-      "verifiedDomains": [
-        "nuvini.ai",
-        "contably.ai"
-      ],
+      "verifiedDomains": ["nuvini.ai", "contably.ai"],
       "fromAddresses": [
         "claudia@nuvini.ai",
         "cris@nuvini.ai",
@@ -167,14 +146,8 @@
     "cloudflare": {
       "configured": true,
       "usage": "DNS management",
-      "profiles": [
-        "business",
-        "personal"
-      ],
-      "managedDomains": [
-        "contably.ai",
-        "nuvini.ai"
-      ]
+      "profiles": ["business", "personal"],
+      "managedDomains": ["contably.ai", "nuvini.ai"]
     }
   },
   "mcpServers": {

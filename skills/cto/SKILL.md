@@ -3,7 +3,7 @@ name: cto
 description: "Swarm-enabled AI CTO advisor for any project. Uses TeammateTool for parallel technical analysis across architecture, security, performance, and code quality. Spawns concurrent specialist reviewers that share findings in real-time. On first run, checks for cto-requirements.md config file. Triggers on: CTO advice, architecture review, tech stack decision, system design, code quality review, security audit, performance review, technical roadmap, refactoring strategy."
 user-invocable: true
 context: fork
-model: opus
+model: opus # Complex technical decisions require deep reasoning
 allowed-tools:
   - Read
   - Write
@@ -27,6 +27,8 @@ allowed-tools:
   - mcp__memory__*
 memory: user
 ---
+
+> **Fast Mode:** This skill uses Claude Opus 4.6. Use `/fast` to toggle faster responses when speed is critical.
 
 # CTO - Universal AI Technical Advisor
 

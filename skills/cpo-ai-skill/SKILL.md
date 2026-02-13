@@ -10,6 +10,7 @@ allowed-tools:
   - Task(agent_type=devops-agent)
   - Task(agent_type=general-purpose)
   - Task(agent_type=Explore)
+  - mcp__firecrawl__*
   - TeammateTool
   - TaskCreate
   - TaskUpdate

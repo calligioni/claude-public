@@ -12,7 +12,7 @@ description: |
 argument-hint: "[triage|extract|proposal|analysis|deck|aimpact] [target]"
 user-invocable: true
 context: fork
-model: opus
+model: opus # Financial analysis requires high precision and reasoning
 allowed-tools:
   - Read
   - Write
@@ -22,6 +22,7 @@ allowed-tools:
   - Bash
   - WebFetch
   - WebSearch
+  - mcp__firecrawl__*
   - TaskCreate
   - TaskUpdate
   - TaskList

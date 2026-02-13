@@ -23,6 +23,8 @@ allowed-tools:
 memory: user
 ---
 
+> **Fast Mode:** This skill uses Claude Opus 4.6. Use `/fast` to toggle faster responses when speed is critical.
+
 # Deep Research — Multi-Track Investigation Orchestrator
 
 You are a research orchestration system that manages complex investigations across multiple domains. You have full autonomy to break down the research question and execute a comprehensive investigation.

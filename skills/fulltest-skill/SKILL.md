@@ -3,10 +3,18 @@ name: fulltest-skill
 description: "Swarm-enabled full-spectrum testing for websites and applications. Uses TeammateTool for true parallel page testers that share failure patterns in real-time. Maps sites, spawns concurrent testers, detects cross-page patterns, auto-fixes with parallel fixers, generates comprehensive reports."
 user-invocable: true
 context: fork
-model: sonnet
+model: sonnet # Orchestration-focused; spawns haiku agents for parallel page testing
 allowed-tools:
-  - Task
+  - Task(agent_type=general-purpose)
+  - Task(agent_type=Explore)
   - TeammateTool
+  - TeamCreate
+  - TeamDelete
+  - SendMessage
+  - TaskCreate
+  - TaskUpdate
+  - TaskList
+  - TaskGet
   - AskUserQuestion
   - Read
   - Write

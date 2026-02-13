@@ -498,6 +498,43 @@ Generate a comprehensive report:
 4. **Iterate on failures**: Re-run agents to fix issues found by testing
 5. **Know when to stop**: Max 5 orchestration iterations to prevent loops
 
+## When to Use Agent Teams vs Task Tool
+
+You have access to both `Task` (fire-and-forget agents) and `TeamCreate/SendMessage` (persistent coordinated agents). Choose based on the work:
+
+### Use Task Tool (default)
+
+- Independent parallel work with no shared state needed
+- One-shot jobs: "analyze this", "fix that", "run tests"
+- Agents don't need to communicate with each other
+
+### Use TeamCreate + SendMessage (for complex coordination)
+
+- Agents need to share findings in real-time (e.g., backend discovers a schema issue that affects frontend)
+- Long-running phases where agents iterate together
+- When you need a shared task list across agents (TeamCreate creates a shared TaskList)
+
+### Team Pattern Example
+
+```
+# Create a team for coordinated implementation
+TeamCreate(team_name="project-impl", description="Coordinated project build")
+
+# Create shared tasks
+TaskCreate(subject="Database schema", ...)  # task-1
+TaskCreate(subject="Backend API", ..., addBlockedBy=["task-1"])  # task-2
+TaskCreate(subject="Frontend UI", ..., addBlockedBy=["task-2"])  # task-3
+
+# Spawn teammates that share the task list
+Task(subagent_type="database-agent", team_name="project-impl", name="db-agent", ...)
+Task(subagent_type="backend-agent", team_name="project-impl", name="api-agent", ...)
+
+# Teammates pick up tasks, coordinate via SendMessage, mark tasks complete
+# You (orchestrator) monitor progress and resolve blockers
+```
+
+**Rule of thumb**: Start with Task tool. Escalate to TeamCreate when agents need to talk to each other or share a task backlog.
+
 ## Task Dependencies
 
 Use TaskCreate with dependency tracking for phased execution. This enables the orchestrator to manage complex workflows where tasks must complete in a specific order.
