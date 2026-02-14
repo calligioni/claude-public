@@ -72,24 +72,32 @@ A disciplined 7-phase skill that takes a feature from idea to production. Each p
 ## Architecture
 
 ```
-┌────────────────────────────────────────────────────────────────────────────┐
-│                           /ship ORCHESTRATOR                                │
-│                                                                             │
-│  Phase 1        Phase 2        Phase 3          Phase 4         Phase 5    │
-│  ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌─────────┐ │
-│  │ PRODUCT  │──▶│  TECH    │──▶│  PLAN    │──▶│ EXECUTE  │──▶│   QA    │ │
-│  │  SPEC    │   │  SPEC    │   │          │   │ (Swarm)  │   │  TEST   │ │
-│  │          │   │          │   │ Seq.     │   │          │   │         │ │
-│  │ CPO mind │   │ CTO mind │   │ Thinking │   │ haiku +  │   │  QA     │ │
-│  └──────────┘   └──────────┘   └──────────┘   │ sonnet   │   └────┬────┘ │
-│                                                └──────────┘        │      │
-│                                                     ▲              │      │
-│  Phase 7        Phase 6                             │              │      │
-│  ┌──────────┐   ┌──────────┐                        └──────────────┘      │
-│  │   DOC    │◀──│   FIX    │◀── if issues found                          │
-│  │          │   │  CYCLE   │                                              │
-│  └──────────┘   └──────────┘                                              │
-└────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                              /ship ORCHESTRATOR                                      │
+│                                                                                      │
+│  Phase -1       Phase 0       Phase 1        Phase 2        Phase 3                 │
+│  ┌──────────┐   ┌──────────┐  ┌──────────┐   ┌──────────┐   ┌──────────┐           │
+│  │ PROJECT  │──▶│ PROJECT  │─▶│ PRODUCT  │──▶│  TECH    │──▶│  PLAN    │           │
+│  │  INIT    │   │ DETECT   │  │  SPEC    │   │  SPEC    │   │          │           │
+│  │          │   │          │  │          │   │          │   │ Seq.     │           │
+│  │ git init │   │ Auto     │  │ CPO mind │   │ CTO mind │   │ Thinking │           │
+│  │ scaffold │   │          │  └──────────┘   └──────────┘   └─────┬────┘           │
+│  └──────────┘   └──────────┘                                      │                 │
+│  (conditional)                                                    ▼                 │
+│                                 Phase 4         Phase 5                             │
+│                                 ┌──────────┐   ┌─────────┐                          │
+│                                 │ EXECUTE  │──▶│   QA    │                          │
+│                                 │ (Swarm)  │   │  TEST   │                          │
+│                                 │ haiku +  │   │         │                          │
+│                                 │ sonnet   │   └────┬────┘                          │
+│                                 └──────────┘        │                               │
+│                                      ▲              │                               │
+│  Phase 7        Phase 6              │              │                               │
+│  ┌──────────┐   ┌──────────┐         └──────────────┘                               │
+│  │   DOC    │◀──│   FIX    │◀── if issues found                                    │
+│  │          │   │  CYCLE   │                                                        │
+│  └──────────┘   └──────────┘                                                        │
+└─────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -123,6 +131,10 @@ All state is persisted to `.claude/ship/{feature-slug}/`. This enables resuming 
     "conventions": ""
   },
   "phases": {
+    "project-init": {
+      "status": "skipped",
+      "reason": "existing project detected"
+    },
     "product-spec": { "status": "complete", "artifact": "product-spec.md" },
     "tech-spec": { "status": "complete", "artifact": "tech-spec.md" },
     "plan": { "status": "complete", "artifact": "plan.md" },
@@ -149,8 +161,39 @@ All state is persisted to `.claude/ship/{feature-slug}/`. This enables resuming 
 1. Check for .claude/ship/*/state.json
 2. If found and not complete → ask user: "Resume {feature}?" or "Start new?"
 3. If --resume flag → auto-resume
-4. If new → create directory and state.json
+4. If new → check for existing project files
+   a. No project files found → run Phase -1 (ask for directory, git init, scaffold)
+   b. Project files found → skip to Phase 0
+5. Create .claude/ship/{feature-slug}/ directory and state.json
 ```
+
+---
+
+## Phase -1: Project Init (Conditional)
+
+Runs when no existing project is detected in the current directory (no package.json, Cargo.toml, go.mod, pyproject.toml, etc.) OR when the user explicitly wants to start a new project.
+
+### Process
+
+1. **Detect existing project:** Check current directory for project files. If found → skip to Phase 0.
+2. **Ask for directory:** Use AskUserQuestion to ask the user where to create the project:
+   - Suggest `./` (current directory) as default
+   - Let user provide a custom path (e.g., `~/code/my-project`)
+3. **Ask for project name** if not already provided in the feature description
+4. **Create directory** if it doesn't exist: `mkdir -p {path}`
+5. **Initialize git:** `cd {path} && git init`
+6. **Create initial structure** based on detected intent from feature description:
+   - If TypeScript/Next.js → scaffold with `pnpm create next-app` or equivalent
+   - If plain TypeScript → `pnpm init` + tsconfig
+   - If Python → `uv init` or basic pyproject.toml
+   - If user specified a framework → use that framework's init command
+7. **Initial commit:** `git add -A && git commit -m "chore: initial project scaffold"`
+8. **Set working directory** to the new project path for all subsequent phases
+9. **Update state.json** with the project path
+
+### Skip Condition
+
+If the current directory already has a git repo with project files, skip entirely and proceed to Phase 0.
 
 ---
 
@@ -868,5 +911,6 @@ After writing ship-log.md, automatically run a retrospective:
 
 ## Version
 
+**v3.0.0** — Added Phase -1: Project Init. When no existing project is detected, asks for directory, initializes git, and scaffolds the project before proceeding.
 **v2.1.0** — Added two-layer learnings system: project-local learnings.json + cross-project MCP Memory. Each run gets smarter from past runs via model routing corrections, QA failure patterns, fix solutions, and dependency gotchas.
 **v2.0.0** — Project-agnostic: auto-detects project type, package manager, commands, and QA skill via Phase 0
