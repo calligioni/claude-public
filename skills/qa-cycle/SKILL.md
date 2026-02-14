@@ -3,7 +3,7 @@ name: qa-cycle
 description: "Full QA cycle orchestrator: discover bugs via virtual user testing, report from DB, fix issues via CTO/dev patterns, and verify fixes via browser testing. Accepts flags for running individual phases or the complete cycle. Handles regression detection across sessions. Triggers on: qa cycle, full qa, run qa, continuous qa, qa pipeline."
 user-invocable: true
 context: fork
-model: sonnet # Orchestration-focused; coordinates discovery/fix/verify phases
+model: sonnet # Orchestrator on sonnet; persona testers on haiku
 allowed-tools:
   - Task(agent_type=general-purpose)
   - Task(agent_type=Explore)
@@ -14,7 +14,6 @@ allowed-tools:
   - TeamCreate
   - TeamDelete
   - SendMessage
-  - AskUserQuestion
   - Read
   - Write
   - Edit
@@ -25,6 +24,26 @@ allowed-tools:
   - mcp__chrome-devtools__*
   - mcp__memory__*
 memory: user
+tool-annotations:
+  Bash: { destructiveHint: true, idempotentHint: false }
+  Write: { destructiveHint: false, idempotentHint: true }
+  Edit: { destructiveHint: false, idempotentHint: true }
+  mcp__chrome-devtools__click: { destructiveHint: false, idempotentHint: false }
+  mcp__chrome-devtools__fill: { destructiveHint: false, idempotentHint: false }
+  mcp__chrome-devtools__navigate_page:
+    { readOnlyHint: false, idempotentHint: true }
+  mcp__memory__delete_entities: { destructiveHint: true, idempotentHint: true }
+  SendMessage: { openWorldHint: true, idempotentHint: false }
+  TeamDelete: { destructiveHint: true, idempotentHint: true }
+invocation-contexts:
+  user-direct:
+    verbosity: high
+    confirmDestructive: true
+    outputFormat: markdown
+  agent-spawned:
+    verbosity: minimal
+    confirmDestructive: false
+    outputFormat: structured
 ---
 
 # QA Cycle Skill (v1.0 - Full Orchestrator)
@@ -148,12 +167,11 @@ python apps/api/scripts/qa_manager.py session start \
 
 Then spawns persona agents using `model: "haiku"` (same as virtual-user-testing):
 
-**MODEL RULES:**
+**MODEL RULES (3-tier):**
 
-- **Discovery personas: `model: "haiku"`** - navigation, bug reporting, verification
-- **Fix phase: `model: "sonnet"`** - codebase investigation, code changes
-- **Verify phase: `model: "haiku"`** - browser re-testing of fixes
-- **Orchestrator: sonnet** (this skill's YAML header)
+- **Strategic decisions: `model: "opus"`** - triage, prioritization, architectural analysis, root cause reasoning
+- **Orchestrator + Fix phase: `model: "sonnet"`** - orchestration, codebase investigation, code changes
+- **Discovery personas + Verify phase: `model: "haiku"`** - browser navigation, bug reporting, verification
 
 - Each persona loads history, open issues, and verification queue from DB
 - Each persona tests the app via Chrome DevTools MCP
@@ -172,17 +190,7 @@ python apps/api/scripts/qa_manager.py report cto --session-id {session_id}
 python apps/api/scripts/qa_manager.py report cpo --session-id {session_id}
 ```
 
-Present reports to user and ask whether to proceed with fixes:
-
-```
-AskUserQuestion:
-  question: "Discovery found X new issues (Y critical). Proceed with auto-fix phase?"
-  options:
-    - "Yes, fix all" → continue to Phase 3
-    - "Fix P0 only" → Phase 3 with severity filter
-    - "Skip fix, just verify" → jump to Phase 4
-    - "Stop here" → complete session with discovery-only results
-```
+After generating reports, automatically proceed to the next phase without asking the user. Log the report summary and continue.
 
 ### Phase 3: FIX
 
@@ -290,7 +298,7 @@ python apps/api/scripts/qa_manager.py session complete \
     "trend": "improving",
     "avgSatisfaction": 6.8
   },
-  "nextStep": "Review reports and schedule next cycle"
+  "nextStep": "Cycle complete. Output summary and stop."
 }
 ```
 
@@ -321,6 +329,149 @@ The cycle detects regressions at multiple levels:
    - Time-to-fix for issues (shorter = better process)
    - Regression rate (regressions / total closed issues)
 
+## Autonomous Operation
+
+This skill runs as a **continuous autonomous loop** until all issues are resolved:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                   CONTINUOUS QA LOOP                     │
+│                                                          │
+│   discover → report → fix → commit → verify →            │
+│   regression → deploy → confirm deploy →                 │
+│                                                          │
+│   ┌─── open issues remaining? ───┐                      │
+│   │ YES → start new cycle        │                      │
+│   │ NO  → output final summary   │                      │
+│   └──────────────────────────────┘                      │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Rules
+
+- **Never ask the user** for confirmation, next steps, or permission at any point
+- **Never stop between phases** — the full pipeline runs end-to-end
+- After deploy, **verify the deployment succeeded** (check production endpoints)
+- After confirming deploy, **query DB for remaining open issues**
+- If open issues remain → **start a new cycle automatically** (re-discover, fix, verify, deploy)
+- If zero open issues → **output a final summary and stop**
+- Each cycle should focus on progressively lower severity: P0 first cycle, P1 second, P2/P3 later
+- **Max 5 cycles** per invocation to prevent infinite loops (if issues keep recurring, stop and report)
+- The only exception: if `--discover-only`, `--fix-only`, or `--verify-only` flags are set, run only that phase then stop
+
+### Cycle Tracking
+
+Track cycle count and log progress:
+
+```
+Cycle 1: Discovered 33 issues, fixed 17 (P0+P1), deployed, 12 remaining
+Cycle 2: Discovered 3 new issues, fixed 10 (P1+P2), deployed, 5 remaining
+Cycle 3: Fixed 5 (P2+P3), deployed, 0 remaining → DONE
+```
+
+**IMPORTANT:** The orchestrator must never output messages like "Want me to continue?", "Should I proceed?", "Next step would be...", or any phrasing that implies waiting for user input. Just do it.
+
+## Opus-for-Decisions Pattern
+
+Use opus briefly for strategic thinking, then hand execution back to sonnet/haiku.
+Opus calls should be short, focused prompts — ask one question, get one answer.
+
+### When to Escalate to Opus
+
+Spawn a `Task(model: "opus")` at these decision points:
+
+1. **Post-Discovery Triage** (between Phase 2 and Phase 3):
+
+   ```
+   Task(model: "opus", prompt: "Given these {N} QA issues from discovery:
+   {issue_list_with_titles_severity_endpoints}
+
+   Determine:
+   1. Which are real bugs vs expected behavior or test environment artifacts?
+   2. Priority order for fixing (considering dependencies between issues)
+   3. Which issues likely share a root cause and should be fixed together?
+   4. Any issues that are deployment/infra problems vs code bugs?
+
+   Return a structured fix plan as JSON.")
+   ```
+
+2. **Complex Root Cause Analysis** (during Phase 3, when a fix isn't obvious):
+
+   ```
+   Task(model: "opus", prompt: "Issue: {title}
+   Reproduction: {steps}
+   Error: {error_details}
+   Relevant code: {code_snippets}
+
+   What is the root cause and what is the minimal fix?")
+   ```
+
+3. **Regression Analysis** (Phase 5):
+
+   ```
+   Task(model: "opus", prompt: "Compare these sessions:
+   Previous: {prev_session_summary}
+   Current: {current_session_summary}
+
+   Are any regressions real, or are they flaky/environment-dependent?
+   What systemic patterns do you see across sessions?")
+   ```
+
+4. **Deploy + Continue Decision** (after Phase 5):
+
+   ```
+   Task(model: "opus", prompt: "QA cycle {N} summary:
+   {fixes_applied}
+   {verification_results}
+   {regression_status}
+   {remaining_open_issues}
+
+   1. Should we deploy these changes to production? (YES/NO + reasoning)
+   2. Are there remaining open issues worth fixing in another cycle? (YES/NO)
+   Consider: risky changes, unverified fixes, regressions, diminishing returns.")
+   ```
+
+   - If deploy YES → commit, push, deploy, verify production endpoints
+   - If deploy NO → commit locally only
+   - If continue YES + open issues remain → start next cycle automatically
+   - If continue NO or zero open issues or cycle >= 5 → output final summary, stop
+
+### Cost Control
+
+- Opus calls should be **rare** — 1-3 per full cycle, not per issue
+- Keep opus prompts **concise** — include only relevant data, not full file contents
+- Opus returns a **decision/plan**, sonnet **executes** it, haiku **verifies** it
+- Never use opus for: browser navigation, file reading, running commands, writing code
+
+### Model Flow per Phase
+
+```
+  ┌──────────────────────────────────────────────────────────┐
+  │                                                          │
+  ▼                                                          │
+Phase 1 DISCOVER:  haiku × 5 personas (parallel browser testing)  │
+                      ↓                                      │
+Phase 2 REPORT:    sonnet (generate reports from DB)         │
+                      ↓                                      │
+     ┌─── TRIAGE:  opus × 1 call (prioritize, plan fixes)   │
+     ↓                                                       │
+Phase 3 FIX:       sonnet × N tasks (code changes)           │
+     │                 ↑                                     │
+     │    ESCALATE: opus × 0-2 calls (hard root causes)     │
+     ↓                                                       │
+Phase 4 VERIFY:    haiku × N tasks (browser re-testing)      │
+                      ↓                                      │
+Phase 5 REGRESS:   opus × 1 call (cross-session analysis)   │
+                      ↓                                      │
+     ┌─── DEPLOY:  opus × 1 call (deploy + continue?)       │
+     ↓                                                       │
+                   sonnet (commit, push, deploy)             │
+                      ↓                                      │
+              open issues remaining?                         │
+              YES + cycle < 5 ──────────────────────────────┘
+              NO  → output final summary, stop
+```
+
 ## Integration with Other Skills
 
 ```
@@ -346,6 +497,116 @@ The cycle detects regressions at multiple levels:
 - Running Contably environment (admin + client portal + API)
 - QA database schema (migration 029_qa_schema)
 - qa_manager.py CLI script (apps/api/scripts/qa_manager.py)
+- kubectl access to OKE cluster (context: context-ckxzb7tcsvq)
+- OCI CLI (`~/bin/oci`) for infrastructure management
+
+## Production & Staging Server Management
+
+The QA cycle has **full authority** to manage production and staging infrastructure.
+
+### Infrastructure Access
+
+```
+Kubernetes:  kubectl (context: context-ckxzb7tcsvq)
+Namespace:   contably
+OCI CLI:     ~/bin/oci
+Docker:      docker (for building images)
+Registry:    OCI Container Registry
+```
+
+### Deployments
+
+| Service         | Deployment             | Replicas |
+| --------------- | ---------------------- | -------- |
+| API             | contably-api           | 2        |
+| Admin Dashboard | contably-dashboard     | 2        |
+| Client Portal   | contably-portal        | 2        |
+| Celery Worker   | contably-celery-worker | 3        |
+| Celery Beat     | contably-celery-beat   | 1        |
+| Flower          | contably-flower        | 1        |
+
+### Deploy Commands
+
+Images are tagged with the git commit hash. Registry: `sa-saopaulo-1.ocir.io/gr5ovmlswwos/`
+
+```bash
+# Get current commit hash for tagging
+COMMIT=$(git rev-parse --short HEAD)
+
+# Build and push images (only for services with code changes)
+docker build -t sa-saopaulo-1.ocir.io/gr5ovmlswwos/contably-api:$COMMIT -f apps/api/Dockerfile .
+docker push sa-saopaulo-1.ocir.io/gr5ovmlswwos/contably-api:$COMMIT
+
+docker build -t sa-saopaulo-1.ocir.io/gr5ovmlswwos/contably-admin:$COMMIT -f apps/admin/Dockerfile .
+docker push sa-saopaulo-1.ocir.io/gr5ovmlswwos/contably-admin:$COMMIT
+
+docker build -t sa-saopaulo-1.ocir.io/gr5ovmlswwos/contably-portal:$COMMIT -f apps/client-portal/Dockerfile .
+docker push sa-saopaulo-1.ocir.io/gr5ovmlswwos/contably-portal:$COMMIT
+
+# Update deployments with new image tag
+kubectl set image deployment/contably-api contably-api=sa-saopaulo-1.ocir.io/gr5ovmlswwos/contably-api:$COMMIT -n contably
+kubectl set image deployment/contably-dashboard contably-admin=sa-saopaulo-1.ocir.io/gr5ovmlswwos/contably-admin:$COMMIT -n contably
+kubectl set image deployment/contably-portal contably-portal=sa-saopaulo-1.ocir.io/gr5ovmlswwos/contably-portal:$COMMIT -n contably
+
+# Check rollout status
+kubectl rollout status deployment/contably-api -n contably --timeout=120s
+kubectl rollout status deployment/contably-dashboard -n contably --timeout=120s
+kubectl rollout status deployment/contably-portal -n contably --timeout=120s
+
+# Verify pods are healthy
+kubectl get pods -n contably
+```
+
+### Post-Deploy Verification
+
+After deploying, verify production endpoints:
+
+```bash
+# Check API health
+curl -s https://api.contably.ai/health
+
+# Check admin dashboard
+curl -s -o /dev/null -w '%{http_code}' https://contably.ai
+
+# Check client portal
+curl -s -o /dev/null -w '%{http_code}' https://portal.contably.ai
+
+# Check pod logs for errors
+kubectl logs -n contably -l app=contably-api --tail=20 --since=2m
+```
+
+### Database Migrations
+
+```bash
+# Run migrations on production DB
+kubectl exec -n contably deployment/contably-api -- alembic upgrade head
+
+# Check current migration
+kubectl exec -n contably deployment/contably-api -- alembic current
+```
+
+### Rollback
+
+If deployment fails verification:
+
+```bash
+kubectl rollout undo deployment/contably-api -n contably
+kubectl rollout undo deployment/contably-dashboard -n contably
+kubectl rollout undo deployment/contably-portal -n contably
+```
+
+### Permissions
+
+The QA cycle can autonomously:
+
+- Build and push Docker images
+- Deploy to production and staging
+- Restart services
+- Run database migrations
+- Check logs and health endpoints
+- Rollback failed deployments
+- Scale replicas up/down
+- Exec into pods for debugging
 
 ---
 

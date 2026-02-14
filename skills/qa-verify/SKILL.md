@@ -11,7 +11,6 @@ allowed-tools:
   - TaskUpdate
   - TaskList
   - TaskGet
-  - AskUserQuestion
   - Read
   - Write
   - Bash
@@ -20,6 +19,15 @@ allowed-tools:
   - mcp__chrome-devtools__*
   - mcp__memory__*
 memory: user
+invocation-contexts:
+  user-direct:
+    verbosity: high
+    confirmDestructive: true
+    outputFormat: markdown
+  agent-spawned:
+    verbosity: minimal
+    confirmDestructive: false
+    outputFormat: structured
 ---
 
 # QA Verify Skill (v1.0)
@@ -202,9 +210,20 @@ python apps/api/scripts/qa_manager.py session complete \
   ],
   "verified": 4,
   "failed": 1,
-  "nextStep": "Run /qa-fix for failed verifications, or /virtual-user-testing for full regression check"
+  "nextStep": "Verification complete. Output summary and stop."
 }
 ```
+
+## Autonomous Operation
+
+This skill runs fully autonomously without user interaction:
+
+- **Never ask the user** for confirmation, next steps, or permission to continue
+- Verify ALL issues in TESTING status in a single run without pausing
+- After verifying each issue, immediately move to the next one
+- Complete the session and output a brief summary when done, then stop
+
+**IMPORTANT:** Never output messages like "Want me to continue?", "Should I proceed?", "Next step would be...", or any phrasing that implies waiting for user input. Just do it.
 
 ## Integration with QA Cycle
 

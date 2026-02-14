@@ -10,6 +10,8 @@ allowed-tools:
   - Glob
   - Grep
   - Bash
+tool-annotations:
+  Bash: { readOnlyHint: true, idempotentHint: true }
 ---
 
 # Codebase Cleanup

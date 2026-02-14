@@ -11,7 +11,6 @@ allowed-tools:
   - TaskUpdate
   - TaskList
   - TaskGet
-  - AskUserQuestion
   - Read
   - Write
   - Edit
@@ -21,6 +20,20 @@ allowed-tools:
   - WebSearch
   - mcp__memory__*
 memory: user
+tool-annotations:
+  Bash: { destructiveHint: true, idempotentHint: false }
+  Write: { destructiveHint: false, idempotentHint: true }
+  Edit: { destructiveHint: false, idempotentHint: true }
+  mcp__memory__delete_entities: { destructiveHint: true, idempotentHint: true }
+invocation-contexts:
+  user-direct:
+    verbosity: high
+    confirmDestructive: true
+    outputFormat: markdown
+  agent-spawned:
+    verbosity: minimal
+    confirmDestructive: false
+    outputFormat: structured
 ---
 
 # QA Fix Skill (v1.0)
@@ -39,7 +52,7 @@ When you run `/qa-fix`, it will:
    - **Create a fix** (direct code change or PR)
    - **Update issue status** in DB (assigned → in_progress → pr_created)
    - Add comments documenting the investigation and fix
-4. Present a summary of all fixes to the user
+4. Commit all fixes and output a summary
 
 ## Usage
 
@@ -229,11 +242,22 @@ This signals to `/qa-verify` that these issues are ready for verification.
 /qa-cycle              →  Orchestrates all phases
 ```
 
+## Autonomous Operation
+
+This skill runs fully autonomously without user interaction:
+
+- **Never ask the user** for confirmation, next steps, or permission to continue
+- Process ALL matching issues in a single run without pausing
+- After fixing each issue, immediately move to the next one
+- Commit all changes at the end with a single descriptive commit
+- Output a brief summary when complete, then stop
+
+**IMPORTANT:** Never output messages like "Want me to continue?", "Should I proceed?", "Next step would be...", or any phrasing that implies waiting for user input. Just do it.
+
 ## Safety Checks
 
 - Always reads the full issue context before attempting a fix
 - Adds comments to document investigation trail
-- For P0-critical issues, asks user for confirmation before applying complex fixes
 - Does not push to remote unless explicitly asked
 - Preserves existing tests and does not disable them
 

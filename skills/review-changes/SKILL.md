@@ -13,6 +13,13 @@ inject:
   - bash: git diff --cached --stat
   - bash: git diff --stat
   - bash: git status --short
+invocation-contexts:
+  user-direct:
+    verbosity: high
+    outputFormat: markdown
+  agent-spawned:
+    verbosity: minimal
+    outputFormat: structured
 ---
 
 # Review Changes

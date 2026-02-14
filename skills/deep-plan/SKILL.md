@@ -20,6 +20,12 @@ allowed-tools:
   - mcp__firecrawl__*
   - mcp__memory__*
 memory: user
+tool-annotations:
+  Bash: { destructiveHint: true, idempotentHint: false }
+  Write: { destructiveHint: false, idempotentHint: true }
+  Edit: { destructiveHint: false, idempotentHint: true }
+  mcp__memory__delete_entities: { destructiveHint: true, idempotentHint: true }
+  mcp__firecrawl__*: { readOnlyHint: true, openWorldHint: true }
 ---
 
 # Deep Plan — Research → Plan → Implement

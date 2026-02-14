@@ -26,6 +26,25 @@ allowed-tools:
   - AskUserQuestion
   - mcp__memory__*
 memory: user
+tool-annotations:
+  Bash: { destructiveHint: true, idempotentHint: false }
+  Write: { destructiveHint: false, idempotentHint: true }
+  Edit: { destructiveHint: false, idempotentHint: true }
+  mcp__memory__delete_entities: { destructiveHint: true, idempotentHint: true }
+  mcp__memory__delete_observations:
+    { destructiveHint: true, idempotentHint: true }
+  mcp__memory__delete_relations: { destructiveHint: true, idempotentHint: true }
+  mcp__memory__create_entities: { readOnlyHint: false, idempotentHint: false }
+  mcp__firecrawl__*: { readOnlyHint: true, openWorldHint: true }
+invocation-contexts:
+  user-direct:
+    verbosity: high
+    confirmDestructive: true
+    outputFormat: markdown
+  agent-spawned:
+    verbosity: minimal
+    confirmDestructive: false
+    outputFormat: structured
 ---
 
 > **Fast Mode:** This skill uses Claude Opus 4.6. Use `/fast` to toggle faster responses when speed is critical.

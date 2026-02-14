@@ -13,6 +13,10 @@ allowed-tools:
   - Grep
 inject:
   - bash: ls package.json pyproject.toml go.mod Cargo.toml 2>/dev/null
+tool-annotations:
+  Bash: { destructiveHint: true, idempotentHint: false }
+  Write: { destructiveHint: false, idempotentHint: true }
+  Edit: { destructiveHint: false, idempotentHint: true }
 ---
 
 # Test and Fix

@@ -13,6 +13,8 @@ allowed-tools:
   - Grep
   - Bash
   - mcp__sequential-thinking__sequentialthinking
+tool-annotations:
+  Bash: { destructiveHint: true, idempotentHint: false }
 ---
 
 # First Principles Analysis

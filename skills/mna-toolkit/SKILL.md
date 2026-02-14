@@ -27,6 +27,11 @@ allowed-tools:
   - TaskUpdate
   - TaskList
   - TaskGet
+tool-annotations:
+  Bash: { destructiveHint: true, idempotentHint: false }
+  Write: { destructiveHint: false, idempotentHint: true }
+  Edit: { destructiveHint: false, idempotentHint: true }
+  mcp__firecrawl__*: { readOnlyHint: true, openWorldHint: true }
 ---
 
 # M&A Toolkit

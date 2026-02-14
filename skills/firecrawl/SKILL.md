@@ -16,6 +16,10 @@ allowed-tools:
   - mcp__firecrawl__*
   - mcp__memory__*
 memory: user
+tool-annotations:
+  Bash: { destructiveHint: true, idempotentHint: false }
+  mcp__firecrawl__*: { readOnlyHint: true, openWorldHint: true }
+  mcp__memory__delete_entities: { destructiveHint: true, idempotentHint: true }
 ---
 
 # Firecrawl - Web Data Extraction Skill

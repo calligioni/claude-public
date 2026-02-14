@@ -24,6 +24,24 @@ allowed-tools:
   - mcp__chrome-devtools__*
   - mcp__memory__*
 memory: user
+tool-annotations:
+  Bash: { destructiveHint: true, idempotentHint: false }
+  Write: { destructiveHint: false, idempotentHint: true }
+  Edit: { destructiveHint: false, idempotentHint: true }
+  mcp__chrome-devtools__click: { destructiveHint: false, idempotentHint: false }
+  mcp__chrome-devtools__fill: { destructiveHint: false, idempotentHint: false }
+  mcp__memory__delete_entities: { destructiveHint: true, idempotentHint: true }
+  SendMessage: { openWorldHint: true, idempotentHint: false }
+  TeamDelete: { destructiveHint: true, idempotentHint: true }
+invocation-contexts:
+  user-direct:
+    verbosity: high
+    confirmDestructive: true
+    outputFormat: markdown
+  agent-spawned:
+    verbosity: minimal
+    confirmDestructive: false
+    outputFormat: structured
 ---
 
 # Virtual User Testing Skill (v2.0 - DB-Backed QA Cycle)

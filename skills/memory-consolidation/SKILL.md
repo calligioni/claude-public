@@ -16,6 +16,13 @@ allowed-tools:
   - TaskList
   - TaskGet
 memory: user
+tool-annotations:
+  Bash: { destructiveHint: true, idempotentHint: false }
+  mcp__memory__delete_entities: { destructiveHint: true, idempotentHint: true }
+  mcp__memory__delete_observations:
+    { destructiveHint: true, idempotentHint: true }
+  mcp__memory__delete_relations: { destructiveHint: true, idempotentHint: true }
+  mcp__memory__create_entities: { readOnlyHint: false, idempotentHint: false }
 ---
 
 # Memory Consolidation Skill

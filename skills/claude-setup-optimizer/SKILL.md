@@ -24,6 +24,10 @@ hooks:
     - hooks:
         - type: command
           command: 'cd "$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup" && { git diff --quiet && git diff --cached --quiet && [ -z "$(git ls-files --others --exclude-standard)" ] && echo ''No changes to commit''; } || { git add -A && git commit -m ''feat: apply claude-setup-optimizer recommendations'' && git push origin master && echo ''Committed and pushed to GitHub''; }'
+tool-annotations:
+  Bash: { destructiveHint: true, idempotentHint: false }
+  Write: { destructiveHint: false, idempotentHint: true }
+  Edit: { destructiveHint: false, idempotentHint: true }
 ---
 
 # Claude Setup Optimizer

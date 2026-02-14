@@ -23,6 +23,10 @@ allowed-tools:
   - TaskGet
   - AskUserQuestion
 disable-model-invocation: true
+tool-annotations:
+  Bash: { destructiveHint: true, idempotentHint: false }
+  Write: { destructiveHint: false, idempotentHint: true }
+  Edit: { destructiveHint: false, idempotentHint: true }
 ---
 
 # Parallel Feature Development Skill

@@ -13,6 +13,8 @@ allowed-tools:
   - AskUserQuestion
 inject:
   - bash: ls package.json pyproject.toml go.mod Cargo.toml docker-compose.yml .run-local.json 2>/dev/null
+tool-annotations:
+  Bash: { destructiveHint: true, idempotentHint: false }
 ---
 
 # Run Local - Development Environment Manager

@@ -21,6 +21,13 @@ allowed-tools:
   - mcp__brave-search__*
   - mcp__memory__*
 memory: user
+tool-annotations:
+  Bash: { destructiveHint: true, idempotentHint: false }
+  Write: { destructiveHint: false, idempotentHint: true }
+  Edit: { destructiveHint: false, idempotentHint: true }
+  mcp__memory__delete_entities: { destructiveHint: true, idempotentHint: true }
+  mcp__firecrawl__*: { readOnlyHint: true, openWorldHint: true }
+  mcp__brave-search__*: { readOnlyHint: true, openWorldHint: true }
 ---
 
 > **Fast Mode:** This skill uses Claude Opus 4.6. Use `/fast` to toggle faster responses when speed is critical.

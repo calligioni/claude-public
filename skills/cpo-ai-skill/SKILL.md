@@ -19,6 +19,21 @@ allowed-tools:
 model: opus
 disable-model-invocation: true
 memory: user
+tool-annotations:
+  mcp__memory__delete_entities: { destructiveHint: true, idempotentHint: true }
+  mcp__memory__create_entities: { readOnlyHint: false, idempotentHint: false }
+  mcp__firecrawl__*: { readOnlyHint: true, openWorldHint: true }
+  TeamDelete: { destructiveHint: true, idempotentHint: true }
+  SendMessage: { openWorldHint: true, idempotentHint: false }
+invocation-contexts:
+  user-direct:
+    verbosity: high
+    confirmDestructive: true
+    outputFormat: markdown
+  agent-spawned:
+    verbosity: minimal
+    confirmDestructive: false
+    outputFormat: structured
 ---
 
 # Chief Product Officer AI Skill

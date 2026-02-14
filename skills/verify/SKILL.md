@@ -11,6 +11,13 @@ allowed-tools:
   - Glob
 inject:
   - bash: ls package.json pyproject.toml go.mod Cargo.toml Makefile 2>/dev/null
+invocation-contexts:
+  user-direct:
+    verbosity: high
+    outputFormat: markdown
+  agent-spawned:
+    verbosity: minimal
+    outputFormat: structured
 ---
 
 # Verify Project Health

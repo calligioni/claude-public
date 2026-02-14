@@ -12,6 +12,8 @@ allowed-tools:
   - Glob
   - Grep
   - AskUserQuestion
+tool-annotations:
+  Bash: { destructiveHint: true, idempotentHint: false }
 ---
 
 # AgentMail - Email Inbox Manager for AI Agents
