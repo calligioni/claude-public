@@ -46,22 +46,23 @@ invocation-contexts:
     outputFormat: structured
 ---
 
-# QA SourceRank Skill (v2.0 - Swarm Mode)
+# QA SourceRank Skill (v3.0 - Continuous Coverage)
 
-Full QA lifecycle for SourceRank AI with **true parallel persona testing** via TeamCreate swarm. Discovers bugs via 4 concurrent virtual user personas, generates CTO/CPO reports, fixes issues, verifies fixes via browser testing, and detects regressions across sessions. Composes `/qa-fix` and `/qa-verify` sub-skills for fix and verification phases.
+Full QA lifecycle for SourceRank AI with **coverage-driven continuous testing**. Runs autonomously until **100% of features are tested and approved** across all 4 personas. Uses opus for all bug fixing, haiku for discovery, and tracks per-feature approval status in the database.
 
 ## What It Does
 
-When you run `/qa-sourcerank`, it orchestrates:
+When you run `/qa-sourcerank`, it orchestrates a **continuous loop** that only stops at 100% coverage:
 
-1. **DISCOVER** - Spawn 4 persona agents **in parallel** via TeamCreate swarm that test production and report bugs to QA DB
+1. **DISCOVER** - Spawn 4 persona agents **in parallel** via TeamCreate swarm that test production, track feature coverage, and report bugs to QA DB
 2. **CROSS-PERSONA DETECTION** - Real-time pattern analysis as personas report back (systemic bugs, permission leaks, etc.)
 3. **REPORT** - Generate CTO and CPO reports from QA database
-4. **TRIAGE** - Opus-powered strategic triage of discovered issues
-5. **FIX** - Compose `/qa-fix` to read open issues from DB, investigate codebase, create fixes
-6. **VERIFY** - Compose `/qa-verify` to verify fixes via browser testing on production
-7. **REGRESSION CHECK** - Compare with previous sessions, detect regressions
-8. **DEPLOY + CONTINUE** - Opus-powered deploy decision, then loop if issues remain
+4. **COVERAGE REPORT** - Feature coverage matrix showing approved/blocked/untested per persona
+5. **TRIAGE** - Opus-powered strategic triage of discovered issues
+6. **FIX** - Opus developers fix bugs in parallel (one opus task per fix group)
+7. **VERIFY** - Haiku agents verify fixes via browser testing on production
+8. **REGRESSION CHECK** - Compare with previous sessions, detect regressions
+9. **DEPLOY + CONTINUE** - Opus deploy decision based on coverage %. Loop until 100% approved
 
 ## Architecture
 
@@ -298,15 +299,157 @@ CREATE TABLE IF NOT EXISTS qa_persona_sessions (
   completed_at TIMESTAMPTZ
 );
 
+-- QA Feature Coverage (tracks per-feature approval status)
+CREATE TABLE IF NOT EXISTS qa_feature_coverage (
+  id SERIAL PRIMARY KEY,
+  session_id UUID REFERENCES qa_sessions(id),
+  feature_key VARCHAR(60) NOT NULL,
+  feature_name TEXT NOT NULL,
+  persona VARCHAR(50) NOT NULL,
+  route TEXT NOT NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'untested',
+  -- status: untested | in_progress | tested | approved | blocked
+  workflows_total INTEGER NOT NULL DEFAULT 0,
+  workflows_passed INTEGER NOT NULL DEFAULT 0,
+  workflows_failed INTEGER NOT NULL DEFAULT 0,
+  blocking_issue_ids INTEGER[] DEFAULT '{}',
+  tested_at TIMESTAMPTZ,
+  approved_at TIMESTAMPTZ,
+  notes TEXT,
+  UNIQUE(session_id, feature_key, persona)
+);
+
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_qa_issues_session ON qa_issues(session_id);
 CREATE INDEX IF NOT EXISTS idx_qa_issues_status ON qa_issues(status);
 CREATE INDEX IF NOT EXISTS idx_qa_issues_severity ON qa_issues(severity);
 CREATE INDEX IF NOT EXISTS idx_qa_verifications_issue ON qa_verifications(issue_id);
 CREATE INDEX IF NOT EXISTS idx_qa_persona_sessions_session ON qa_persona_sessions(session_id);
+CREATE INDEX IF NOT EXISTS idx_qa_feature_coverage_session ON qa_feature_coverage(session_id);
+CREATE INDEX IF NOT EXISTS idx_qa_feature_coverage_status ON qa_feature_coverage(status);
 ```
 
-**IMPORTANT:** The QA schema has already been created in the SourceRank Supabase database. No need to run migration again.
+**IMPORTANT:** If `qa_feature_coverage` table does not exist, create it at session start. All other QA tables already exist.
+
+## Feature Registry
+
+The QA skill tracks **feature coverage** to ensure every feature is tested and approved before the cycle ends. Features are seeded into `qa_feature_coverage` at session start.
+
+### Feature Matrix (37 coverage rows across 4 personas)
+
+```
+SARAH (CMO/Admin) — 11 features:
+  landing-page        | /                              | Landing page messaging, CTAs, pricing, demo sections
+  sign-in             | /sign-in                       | Login flow
+  dashboard-overview  | /dashboard                     | Dashboard KPIs and widgets
+  brands-list         | /dashboard/brands              | Brand management and overview
+  brand-detail        | /dashboard/brands/[id]         | Brand detail with AI mentions
+  competitive-analysis| /dashboard/competitive         | Competitive analysis
+  competitive-intel   | /dashboard/competitive-intelligence | Deep competitive intel
+  reports             | /dashboard/reports             | Report generation and export
+  alerts              | /dashboard/alerts              | Alert configuration and review
+  team-management     | /dashboard/team                | Team management
+  settings            | /dashboard/settings            | Organization settings
+
+MARCUS (SEO/Member) — 9 features:
+  dashboard-overview  | /dashboard                     | Daily overview
+  monitor             | /dashboard/monitor             | AI monitoring setup and results
+  content-analysis    | /dashboard/content             | Content analysis and optimization
+  authority           | /dashboard/authority           | Authority scoring and citations
+  quality             | /dashboard/quality             | Content quality scores
+  recommendations     | /dashboard/recommendations     | AI recommendations
+  brand-facts         | /dashboard/brands/[id]/facts   | Brand facts management
+  intelligence        | /dashboard/intelligence        | Intelligence hub
+  integrations        | /dashboard/integrations        | CMS integrations
+
+DIANA (Agency) — 9 features:
+  agency-dashboard    | /dashboard/agency              | Agency dashboard overview
+  agency-clients      | /dashboard/agency/clients      | Client management
+  agency-client-detail| /dashboard/agency/clients/[id] | Client detail
+  agency-revenue      | /dashboard/agency/revenue      | Revenue tracking
+  agency-margins      | /dashboard/agency/margins      | Margin analysis
+  brands-list         | /dashboard/brands              | All brands across clients
+  white-label         | /dashboard/settings/white-label| White label configuration
+  reports             | /dashboard/reports             | Client report generation
+  holding             | /dashboard/holding             | Portfolio/holding view
+
+ALEX (Brand Manager) — 8 features:
+  dashboard-overview  | /dashboard                     | Dashboard overview
+  brand-detail        | /dashboard/brands/[id]         | Brand deep dive
+  alerts              | /dashboard/alerts              | Alert center
+  hallucinations      | /dashboard/alerts/hallucinations | Hallucination detection
+  competitors         | /dashboard/competitors         | Competitor tracking
+  competitive-analysis| /dashboard/competitive         | Competitive landscape
+  recommendations     | /dashboard/recommendations     | Brand recommendations
+  quality             | /dashboard/quality             | Content quality review
+```
+
+### Seeding Feature Coverage (Phase 0)
+
+At session start, seed all features into the coverage table:
+
+```bash
+# Seed Sarah's features
+psql "$SRDB" -t -A -c "
+INSERT INTO qa_feature_coverage (session_id, feature_key, feature_name, persona, route, workflows_total) VALUES
+  ('{sid}', 'landing-page', 'Landing page messaging and CTAs', 'sarah', '/', 3),
+  ('{sid}', 'sign-in', 'Login flow', 'sarah', '/sign-in', 1),
+  ('{sid}', 'dashboard-overview', 'Dashboard KPIs and widgets', 'sarah', '/dashboard', 2),
+  ('{sid}', 'brands-list', 'Brand management and overview', 'sarah', '/dashboard/brands', 2),
+  ('{sid}', 'brand-detail', 'Brand detail with AI mentions', 'sarah', '/dashboard/brands/[id]', 2),
+  ('{sid}', 'competitive-analysis', 'Competitive analysis', 'sarah', '/dashboard/competitive', 1),
+  ('{sid}', 'competitive-intel', 'Deep competitive intel', 'sarah', '/dashboard/competitive-intelligence', 1),
+  ('{sid}', 'reports', 'Report generation and export', 'sarah', '/dashboard/reports', 2),
+  ('{sid}', 'alerts', 'Alert configuration and review', 'sarah', '/dashboard/alerts', 2),
+  ('{sid}', 'team-management', 'Team management', 'sarah', '/dashboard/team', 2),
+  ('{sid}', 'settings', 'Organization settings', 'sarah', '/dashboard/settings', 1)
+ON CONFLICT (session_id, feature_key, persona) DO NOTHING;
+"
+
+# Seed Marcus's features
+psql "$SRDB" -t -A -c "
+INSERT INTO qa_feature_coverage (session_id, feature_key, feature_name, persona, route, workflows_total) VALUES
+  ('{sid}', 'dashboard-overview', 'Daily overview', 'marcus', '/dashboard', 2),
+  ('{sid}', 'monitor', 'AI monitoring setup and results', 'marcus', '/dashboard/monitor', 2),
+  ('{sid}', 'content-analysis', 'Content analysis and optimization', 'marcus', '/dashboard/content', 2),
+  ('{sid}', 'authority', 'Authority scoring and citations', 'marcus', '/dashboard/authority', 2),
+  ('{sid}', 'quality', 'Content quality scores', 'marcus', '/dashboard/quality', 2),
+  ('{sid}', 'recommendations', 'AI recommendations', 'marcus', '/dashboard/recommendations', 1),
+  ('{sid}', 'brand-facts', 'Brand facts management', 'marcus', '/dashboard/brands/[id]/facts', 2),
+  ('{sid}', 'intelligence', 'Intelligence hub', 'marcus', '/dashboard/intelligence', 1),
+  ('{sid}', 'integrations', 'CMS integrations', 'marcus', '/dashboard/integrations', 2)
+ON CONFLICT (session_id, feature_key, persona) DO NOTHING;
+"
+
+# Seed Diana's features
+psql "$SRDB" -t -A -c "
+INSERT INTO qa_feature_coverage (session_id, feature_key, feature_name, persona, route, workflows_total) VALUES
+  ('{sid}', 'agency-dashboard', 'Agency dashboard overview', 'diana', '/dashboard/agency', 2),
+  ('{sid}', 'agency-clients', 'Client management', 'diana', '/dashboard/agency/clients', 2),
+  ('{sid}', 'agency-client-detail', 'Client detail', 'diana', '/dashboard/agency/clients/[id]', 2),
+  ('{sid}', 'agency-revenue', 'Revenue tracking', 'diana', '/dashboard/agency/revenue', 1),
+  ('{sid}', 'agency-margins', 'Margin analysis', 'diana', '/dashboard/agency/margins', 1),
+  ('{sid}', 'brands-list', 'All brands across clients', 'diana', '/dashboard/brands', 1),
+  ('{sid}', 'white-label', 'White label configuration', 'diana', '/dashboard/settings/white-label', 2),
+  ('{sid}', 'reports', 'Client report generation', 'diana', '/dashboard/reports', 1),
+  ('{sid}', 'holding', 'Portfolio/holding view', 'diana', '/dashboard/holding', 1)
+ON CONFLICT (session_id, feature_key, persona) DO NOTHING;
+"
+
+# Seed Alex's features
+psql "$SRDB" -t -A -c "
+INSERT INTO qa_feature_coverage (session_id, feature_key, feature_name, persona, route, workflows_total) VALUES
+  ('{sid}', 'dashboard-overview', 'Dashboard overview', 'alex', '/dashboard', 1),
+  ('{sid}', 'brand-detail', 'Brand deep dive', 'alex', '/dashboard/brands/[id]', 2),
+  ('{sid}', 'alerts', 'Alert center', 'alex', '/dashboard/alerts', 2),
+  ('{sid}', 'hallucinations', 'Hallucination detection', 'alex', '/dashboard/alerts/hallucinations', 2),
+  ('{sid}', 'competitors', 'Competitor tracking', 'alex', '/dashboard/competitors', 1),
+  ('{sid}', 'competitive-analysis', 'Competitive landscape', 'alex', '/dashboard/competitive', 1),
+  ('{sid}', 'recommendations', 'Brand recommendations', 'alex', '/dashboard/recommendations', 1),
+  ('{sid}', 'quality', 'Content quality review', 'alex', '/dashboard/quality', 1)
+ON CONFLICT (session_id, feature_key, persona) DO NOTHING;
+"
+```
 
 ## Database Access
 
@@ -528,10 +671,40 @@ Both accounts share the same password. Sarah/Diana use the admin account, Marcus
 
 ## Execution Flow
 
+### CRITICAL ORCHESTRATOR RULES
+
+1. **The orchestrator NEVER tests features itself.** It ONLY orchestrates: creates sessions, seeds data, spawns personas, collects results, generates reports, spawns fixers, deploys. ALL browser testing is done by spawned persona agents.
+2. **ALL 4 personas MUST be spawned in a SINGLE message** with 4 parallel Task calls. NEVER spawn them sequentially or test features inline.
+3. **The orchestrator MUST loop autonomously** after each deploy: check coverage → if < 100%, spawn the next cycle's personas immediately. Never output a report and stop unless coverage = 100% or cycle = 10.
+4. **Keep orchestrator turns lean.** Each turn should do ONE phase, not multiple phases. This preserves context for the full cycle.
+
 ### Phase 0: Initialize QA Session
 
 ```bash
 export SRDB="postgresql://postgres.swpznmoctbtnmspmyrfu:Lmk48ZJTjRzCp4xh@aws-1-us-east-1.pooler.supabase.com:5432/postgres"
+
+# Ensure qa_feature_coverage table exists
+psql "$SRDB" -c "
+CREATE TABLE IF NOT EXISTS qa_feature_coverage (
+  id SERIAL PRIMARY KEY,
+  session_id UUID REFERENCES qa_sessions(id),
+  feature_key VARCHAR(60) NOT NULL,
+  feature_name TEXT NOT NULL,
+  persona VARCHAR(50) NOT NULL,
+  route TEXT NOT NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'untested',
+  workflows_total INTEGER NOT NULL DEFAULT 0,
+  workflows_passed INTEGER NOT NULL DEFAULT 0,
+  workflows_failed INTEGER NOT NULL DEFAULT 0,
+  blocking_issue_ids INTEGER[] DEFAULT '{}',
+  tested_at TIMESTAMPTZ,
+  approved_at TIMESTAMPTZ,
+  notes TEXT,
+  UNIQUE(session_id, feature_key, persona)
+);
+CREATE INDEX IF NOT EXISTS idx_qa_feature_coverage_session ON qa_feature_coverage(session_id);
+CREATE INDEX IF NOT EXISTS idx_qa_feature_coverage_status ON qa_feature_coverage(status);
+"
 
 # Create a new QA session
 SESSION_ID=$(psql "$SRDB" -t -A -c "
@@ -540,9 +713,23 @@ SESSION_ID=$(psql "$SRDB" -t -A -c "
   RETURNING id
 ")
 echo "Session: $SESSION_ID"
+
+# Seed feature coverage matrix (see Feature Registry section for full INSERT statements)
+# Run all 4 persona seed INSERTs here using $SESSION_ID
 ```
 
-Also check if the QA schema exists. If not, create it (see QA Database Schema section above).
+Also check if the other QA tables exist. If not, create them (see QA Database Schema section above).
+
+After seeding, verify coverage:
+
+```bash
+psql "$SRDB" -t -A -c "
+  SELECT persona, COUNT(*) as features, COUNT(*) FILTER (WHERE status = 'untested') as untested
+  FROM qa_feature_coverage WHERE session_id = '{sid}'
+  GROUP BY persona ORDER BY persona
+"
+# Expected: sarah=11, marcus=9, diana=9, alex=8 — all untested
+```
 
 ### Phase 1: Environment Discovery
 
@@ -669,15 +856,29 @@ STEP 1: Start your persona session:
 psql "$SRDB" -t -A -c "INSERT INTO qa_persona_sessions (session_id, persona) VALUES ('{session_id}', '{slug}') RETURNING id"
 SAVE the returned persona_session_id.
 
-STEP 2: Navigate to {url} and test these workflows: {workflow list}.
-Use mcp__chrome-devtools to navigate, click, fill forms, take snapshots.
-For each page/action, evaluate:
-1. FUNCTIONALITY - Does it work? Any errors? Console errors?
-2. UX/USABILITY - Is it intuitive? Confusing? Too many clicks?
-3. PERFORMANCE - Is it fast? Any loading delays > 3s?
-4. DATA ACCURACY - Do numbers/dates/statuses look correct?
-5. VISUAL - Do charts render? Are layouts broken? CSS loaded?
-6. PERMISSIONS - Can you access only what your role allows?
+STEP 2: Test ALL your assigned features systematically.
+
+YOUR FEATURE ASSIGNMENTS (you MUST test every one):
+{feature_list_from_qa_feature_coverage}
+
+For EACH feature in your assignment list:
+a) Mark it as in_progress:
+   psql "$SRDB" -t -A -c "UPDATE qa_feature_coverage SET status = 'in_progress', tested_at = NOW() WHERE session_id = '{session_id}' AND feature_key = '{feature_key}' AND persona = '{slug}'"
+b) Navigate to the feature's route using mcp__chrome-devtools
+c) Test ALL workflows for that feature. For each page/action, evaluate:
+   1. FUNCTIONALITY - Does it work? Any errors? Console errors?
+   2. UX/USABILITY - Is it intuitive? Confusing? Too many clicks?
+   3. PERFORMANCE - Is it fast? Any loading delays > 3s?
+   4. DATA ACCURACY - Do numbers/dates/statuses look correct?
+   5. VISUAL - Do charts render? Are layouts broken? CSS loaded?
+   6. PERMISSIONS - Can you access only what your role allows?
+d) After testing all workflows for that feature:
+   - If ALL workflows pass (no bugs): Mark APPROVED:
+     psql "$SRDB" -t -A -c "UPDATE qa_feature_coverage SET status = 'approved', approved_at = NOW(), workflows_passed = {passed}, workflows_failed = 0, notes = '{observations}' WHERE session_id = '{session_id}' AND feature_key = '{feature_key}' AND persona = '{slug}'"
+   - If ANY workflow has a bug: Mark BLOCKED with the issue IDs:
+     psql "$SRDB" -t -A -c "UPDATE qa_feature_coverage SET status = 'blocked', workflows_passed = {passed}, workflows_failed = {failed}, blocking_issue_ids = ARRAY[{issue_ids}], notes = '{observations}' WHERE session_id = '{session_id}' AND feature_key = '{feature_key}' AND persona = '{slug}'"
+
+IMPORTANT: Do NOT skip any feature. Every feature must end with status 'approved' or 'blocked'.
 
 STEP 3: For each bug found:
 a) Check for duplicates FIRST:
@@ -699,12 +900,16 @@ If failed: psql "$SRDB" -t -A -c "UPDATE qa_issues SET status = 'in_progress', u
 STEP 5: Complete your persona session:
 psql "$SRDB" -t -A -c "UPDATE qa_persona_sessions SET satisfaction = {score}, pages_visited = ARRAY[{pages}], workflows_tested = ARRAY[{workflows}], completed_at = NOW(), observations = '{observations}' WHERE id = '{persona_session_id}'"
 
-STEP 6: Send your final report to the orchestrator:
+STEP 6: Get your coverage summary:
+psql "$SRDB" -t -A -c "SELECT feature_key, status FROM qa_feature_coverage WHERE session_id = '{session_id}' AND persona = '{slug}' ORDER BY feature_key"
+Count: approved, blocked, untested.
+
+STEP 7: Send your final report to the orchestrator:
 SendMessage({
   type: "message",
   recipient: "orchestrator",
-  content: "PERSONA COMPLETE: {slug}\nBugs found: {count}\nVerifications: {pass}/{total}\nSatisfaction: {score}/10\nKey observations: {observations}",
-  summary: "{slug} complete: {bug_count} bugs, {satisfaction}/10"
+  content: "PERSONA COMPLETE: {slug}\nFeatures approved: {approved}/{total}\nFeatures blocked: {blocked}/{total}\nBugs found: {count}\nVerifications: {pass}/{total}\nSatisfaction: {score}/10\nKey observations: {observations}",
+  summary: "{slug} complete: {approved}/{total} approved, {bug_count} bugs"
 })
 
 Write feedback AS THE PERSONA - first person, with their frustrations and satisfaction level.
@@ -876,6 +1081,68 @@ Format as:
 {UX improvements, feature gaps, workflow friction}
 ```
 
+### Phase 4.5: Coverage Report
+
+After persona reports, generate a coverage matrix showing approval status:
+
+```bash
+# Feature coverage summary
+psql "$SRDB" -t -A -c "
+  SELECT
+    persona,
+    COUNT(*) as total,
+    COUNT(*) FILTER (WHERE status = 'approved') as approved,
+    COUNT(*) FILTER (WHERE status = 'blocked') as blocked,
+    COUNT(*) FILTER (WHERE status = 'untested') as untested,
+    ROUND(COUNT(*) FILTER (WHERE status = 'approved') * 100.0 / COUNT(*)) as pct_approved
+  FROM qa_feature_coverage
+  WHERE session_id = '{session_id}'
+  GROUP BY persona
+  ORDER BY persona
+"
+
+# Overall coverage
+psql "$SRDB" -t -A -c "
+  SELECT
+    COUNT(*) as total_features,
+    COUNT(*) FILTER (WHERE status = 'approved') as approved,
+    COUNT(*) FILTER (WHERE status = 'blocked') as blocked,
+    COUNT(*) FILTER (WHERE status = 'untested') as untested,
+    ROUND(COUNT(*) FILTER (WHERE status = 'approved') * 100.0 / COUNT(*)) as overall_pct
+  FROM qa_feature_coverage
+  WHERE session_id = '{session_id}'
+"
+
+# Blocked features with their blocking issues
+psql "$SRDB" -t -A -c "
+  SELECT fc.feature_key, fc.persona, fc.blocking_issue_ids, fc.notes
+  FROM qa_feature_coverage fc
+  WHERE fc.session_id = '{session_id}' AND fc.status = 'blocked'
+  ORDER BY fc.persona, fc.feature_key
+"
+```
+
+Format as:
+
+```markdown
+## Coverage Report — QA Session {session_id}
+
+### Overall: {approved}/{total} features approved ({pct}%)
+
+| Persona | Approved | Blocked | Untested | Coverage |
+| ------- | -------- | ------- | -------- | -------- |
+| sarah   | {n}      | {n}     | {n}      | {pct}%   |
+| marcus  | {n}      | {n}     | {n}      | {pct}%   |
+| diana   | {n}      | {n}     | {n}      | {pct}%   |
+| alex    | {n}      | {n}     | {n}      | {pct}%   |
+
+### Blocked Features
+
+{feature_key} ({persona}): blocked by issues #{ids} — {notes}
+```
+
+**IMPORTANT:** The cycle does NOT end until overall coverage = 100% approved.
+
 ### Phase 5: Triage (Opus)
 
 After reports, escalate to opus for strategic triage:
@@ -907,54 +1174,43 @@ Task({
 })
 ```
 
-### Phase 6: Fix (Compose /qa-fix or Inline)
+### Phase 6: Fix (Always Opus)
 
-Execute the triage plan. For each fix group (sorted by priority):
+Execute the triage plan. **All bug fixing uses opus** for highest-quality root cause analysis and fixes.
 
-**Option A: Compose `/qa-fix` sub-skill** (preferred for complex fixes):
+For each fix group (sorted by priority):
 
 ```
 Task({
   subagent_type: "general-purpose",
-  model: "sonnet",
-  prompt: "/qa-fix --severity {severity} --limit {count}
-
-  Additional context from triage:
-  - Root cause: {root_cause}
-  - Issue IDs to fix together: {issue_ids}
-  - Approach: {approach}
-
-  Database: Use psql with SRDB env var.
-  Codebase: /Users/ps/code/Sourcerankai"
-})
-```
-
-**Option B: Inline fix** (for simple fixes):
-
-For each issue:
-
-1. Claim: `UPDATE qa_issues SET status = 'assigned', assigned_to = 'qa-agent', updated_at = NOW() WHERE id = {id}`
-2. Investigate the codebase using Explore agent or direct file reads
-3. Apply fix using Edit/Write tools
-4. Update: `UPDATE qa_issues SET status = 'testing', fixed_by = 'qa-agent', commit_hash = '{hash}', updated_at = NOW() WHERE id = {id}`
-5. Add comment: `INSERT INTO qa_issue_comments (issue_id, author, comment_type, content) VALUES ({id}, 'qa-agent', 'fix', '{description}')`
-
-**For complex root causes, escalate to opus:**
-
-```
-Task({
   model: "opus",
-  subagent_type: "general-purpose",
-  prompt: "Issue: {title}
-  Reproduction: {steps}
-  Error: {error_details}
-  Relevant code: {code_snippets}
+  prompt: "You are a senior developer fixing QA issues in SourceRank AI.
 
-  What is the root cause and what is the minimal fix?"
+  CODEBASE: /Users/ps/code/Sourcerankai (pnpm monorepo: apps/web, apps/api, packages/database)
+  DATABASE CONNECTION: export SRDB=\"postgresql://postgres.swpznmoctbtnmspmyrfu:Lmk48ZJTjRzCp4xh@aws-1-us-east-1.pooler.supabase.com:5432/postgres\"
+
+  FIX GROUP (from triage):
+  - Root cause: {root_cause}
+  - Issue IDs: {issue_ids}
+  - Approach: {approach}
+  - Issues:
+    {issue_details_with_titles_errors_reproduction_steps}
+
+  INSTRUCTIONS:
+  1. Claim all issues:
+     psql \"$SRDB\" -t -A -c \"UPDATE qa_issues SET status = 'assigned', assigned_to = 'opus-dev', updated_at = NOW() WHERE id IN ({ids})\"
+  2. Investigate the codebase — read relevant files, trace the bug
+  3. Apply the minimal fix using Edit/Write tools
+  4. For each fixed issue, update DB:
+     psql \"$SRDB\" -t -A -c \"UPDATE qa_issues SET status = 'testing', fixed_by = 'opus-dev', updated_at = NOW() WHERE id = {id}\"
+     psql \"$SRDB\" -t -A -c \"INSERT INTO qa_issue_comments (issue_id, author, comment_type, content) VALUES ({id}, 'opus-dev', 'fix', '{description}')\"
+  5. Return a summary: which issues were fixed, what files were changed, and any issues you could not fix (with reason).
+
+  IMPORTANT: Make minimal, focused fixes. Do not refactor surrounding code. Do not add unnecessary comments or type annotations."
 })
 ```
 
-Keep opus escalations to **0-2 per cycle**.
+Spawn one opus Task per fix group. If fix groups are independent, spawn them in **parallel**.
 
 ### Phase 7: Verify (Compose /qa-verify or Parallel)
 
@@ -1055,22 +1311,26 @@ Task({
     Fixes applied: {fixes_list}
     Verification results: {verification_summary}
     Regression status: {regression_info}
+    Feature coverage: {approved}/{total} approved ({pct}%)
+    Blocked features: {blocked_features_list}
     Remaining open issues: {open_count} ({open_list})
 
     1. Should we deploy these changes to production? (YES/NO + reasoning)
        Consider: risky changes, unverified fixes, regressions
-    2. Are remaining open issues worth fixing in another cycle? (YES/NO)
-       Consider: diminishing returns, severity of remaining issues
+    2. Feature coverage is {pct}%. Should we continue to reach 100%? (YES/NO)
+       Consider: blocked features, open issues that block approval, diminishing returns only if coverage > 95%
 
     Return JSON:
-    { 'deploy': true/false, 'deploy_reason': '...', 'continue': true/false, 'continue_reason': '...' }"
+    { 'deploy': true/false, 'deploy_reason': '...', 'continue': true/false, 'continue_reason': '...', 'coverage_pct': {pct} }"
 })
 ```
 
 - If deploy YES → commit, push, verify production endpoints
 - If deploy NO → commit locally only
-- If continue YES + open issues remain + cycle < 5 → start next cycle automatically
-- If continue NO or zero open issues or cycle >= 5 → output final summary, stop
+- After deploy, run the Post-Fix Coverage Update to unblock features
+- If coverage < 100% + cycle < 10 → start next cycle automatically (re-test only blocked/untested features)
+- If coverage = 100% AND zero open issues → output final summary, stop
+- If cycle >= 10 → output final summary with remaining unapproved features, stop
 
 ### Session Completion
 
@@ -1108,22 +1368,43 @@ TeamDelete()
 
 ## Autonomous Operation
 
-This skill runs as a **continuous autonomous loop** until all issues are resolved:
+This skill runs as a **continuous autonomous loop** until **all features are tested and approved**:
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                   CONTINUOUS QA LOOP                      │
-│                                                           │
-│   discover (swarm) → cross-persona → report →             │
-│   triage (opus) → fix → commit → verify →                 │
-│   regression → deploy decision (opus) →                   │
-│   confirm deploy →                                        │
-│                                                           │
-│   ┌─── open issues remaining? ───┐                       │
-│   │ YES + cycle < 5 → new cycle  │                       │
-│   │ NO  → final summary + stop   │                       │
-│   └──────────────────────────────┘                       │
-└─────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────────┐
+│                   CONTINUOUS QA LOOP                                │
+│                                                                     │
+│   discover (swarm) → cross-persona → report → coverage report →    │
+│   triage (opus) → fix → commit → verify →                          │
+│   re-test blocked features → update coverage →                     │
+│   regression → deploy decision (opus) →                            │
+│   confirm deploy →                                                  │
+│                                                                     │
+│   ┌─── 100% features approved? ───┐                                │
+│   │ NO  + cycle < 10 → new cycle  │                                │
+│   │ YES → final summary + stop    │                                │
+│   └───────────────────────────────┘                                │
+└───────────────────────────────────────────────────────────────────┘
+```
+
+### Stop Condition
+
+The cycle stops ONLY when:
+
+```bash
+# Check if all features are approved
+UNAPPROVED=$(psql "$SRDB" -t -A -c "
+  SELECT COUNT(*) FROM qa_feature_coverage
+  WHERE session_id = '{session_id}' AND status != 'approved'
+")
+
+OPEN_ISSUES=$(psql "$SRDB" -t -A -c "
+  SELECT COUNT(*) FROM qa_issues
+  WHERE session_id = '{session_id}' AND status NOT IN ('closed', 'verified')
+")
+
+# STOP when: unapproved = 0 AND open_issues = 0
+# CONTINUE when: unapproved > 0 OR open_issues > 0 (and cycle < 10)
 ```
 
 ### Rules
@@ -1131,23 +1412,62 @@ This skill runs as a **continuous autonomous loop** until all issues are resolve
 - **Never ask the user** for confirmation, next steps, or permission at any point
 - **Never stop between phases** — the full pipeline runs end-to-end
 - After deploy, **verify the deployment succeeded** (check production endpoints)
-- After confirming deploy, **query DB for remaining open issues**
-- If open issues remain → **start a new cycle automatically** (re-discover, fix, verify, deploy)
-- If zero open issues → **output a final summary and stop**
+- After confirming deploy, **check feature coverage** — if any features are NOT approved, continue
+- If unapproved features remain → **start a new cycle automatically**
+  - Cycle 2+ personas ONLY re-test features with status 'blocked' or 'untested' (not already approved)
+  - After fixes are deployed, update blocked features back to 'untested' so they get re-tested
+- If 100% features approved AND zero open issues → **output a final summary and stop**
 - Each cycle focuses on progressively lower severity: P0 first cycle, P1 second, P2/P3 later
-- **Max 5 cycles** per invocation to prevent infinite loops (if issues keep recurring, stop and report)
+- **Max 10 cycles** per invocation to prevent infinite loops (if issues keep recurring, stop and report)
 - The only exception: if `--discover-only`, `--fix-only`, `--verify-only`, or `--skip-fix` flags are set, run only those phases then stop
 
 **IMPORTANT:** Never output messages like "Want me to continue?", "Should I proceed?", "Next step would be...", or any phrasing that implies waiting for user input. Just do it.
 
+### Post-Fix Coverage Update
+
+After fixes are deployed and verified, unblock features whose blocking issues are now resolved:
+
+```bash
+# Reset blocked features to 'untested' when their blocking issues are fixed
+psql "$SRDB" -c "
+  UPDATE qa_feature_coverage fc
+  SET status = 'untested', blocking_issue_ids = '{}'
+  WHERE fc.session_id = '{session_id}'
+    AND fc.status = 'blocked'
+    AND NOT EXISTS (
+      SELECT 1 FROM unnest(fc.blocking_issue_ids) AS bid
+      JOIN qa_issues i ON i.id = bid
+      WHERE i.status NOT IN ('closed', 'verified', 'testing')
+    )
+"
+```
+
+### Cycle 2+ Persona Prompts
+
+On subsequent cycles, personas only test features that are NOT approved:
+
+```bash
+# Get features that still need testing for this persona
+psql "$SRDB" -t -A -c "
+  SELECT feature_key, feature_name, route, status
+  FROM qa_feature_coverage
+  WHERE session_id = '{session_id}'
+    AND persona = '{slug}'
+    AND status != 'approved'
+  ORDER BY feature_key
+"
+```
+
+If a persona has ALL features approved, do NOT spawn that persona again.
+
 ### Cycle Tracking
 
-Track cycle count and log progress:
+Track cycle count, coverage progress, and log:
 
 ```
-Cycle 1: Discovered 12 issues (swarm), fixed 6 (P0+P1), deployed, 6 remaining
-Cycle 2: Discovered 2 new issues, fixed 5 (P1+P2), deployed, 3 remaining
-Cycle 3: Fixed 3 (P2+P3), deployed, 0 remaining → DONE
+Cycle 1: 37 features tested → 28 approved, 9 blocked (75%). Fixed 6 P0+P1 bugs. Deployed.
+Cycle 2: Re-tested 9 blocked → 7 approved, 2 blocked (95%). Fixed 2 P2 bugs. Deployed.
+Cycle 3: Re-tested 2 blocked → 2 approved (100%). 0 open issues. DONE.
 ```
 
 ## Deployment (Render.com)
@@ -1191,86 +1511,56 @@ git push origin master
 Use opus briefly for strategic thinking, then hand execution back to sonnet/haiku.
 Opus calls should be short, focused prompts — ask one question, get one answer.
 
-### When to Escalate to Opus
+### When Opus Is Used
 
-Spawn a `Task(model: "opus")` at these decision points:
+Opus is the primary model for all decision-making AND bug fixing:
 
-1. **Post-Discovery Triage** (between Report and Fix):
+1. **Post-Discovery Triage** (Phase 5) — Prioritize, group, filter artifacts
+2. **All Bug Fixing** (Phase 6) — Root cause analysis + code changes (one opus task per fix group, parallel)
+3. **Regression Analysis** (Phase 8) — Cross-session comparison
+4. **Deploy + Coverage Decision** (Phase 9) — Deploy yes/no + continue based on coverage %
 
-   ```
-   Task(model: "opus", prompt: "Given these {N} QA issues from discovery:
-   {issue_list}
-   Determine: real bugs vs artifacts, priority order, shared root causes, infra vs code.
-   Return structured fix plan as JSON.")
-   ```
+### Cost vs Quality Trade-off
 
-2. **Complex Root Cause Analysis** (during Fix, when a fix isn't obvious):
-
-   ```
-   Task(model: "opus", prompt: "Issue: {title}
-   Reproduction: {steps}
-   Error: {error_details}
-   Relevant code: {code_snippets}
-   What is the root cause and what is the minimal fix?")
-   ```
-
-3. **Regression Analysis** (Phase 8):
-
-   ```
-   Task(model: "opus", prompt: "Compare sessions:
-   Previous: {prev_summary}
-   Current: {current_summary}
-   Are regressions real or flaky? What systemic patterns across sessions?")
-   ```
-
-4. **Deploy + Continue Decision** (Phase 9):
-
-   ```
-   Task(model: "opus", prompt: "QA cycle {N} summary:
-   {fixes}, {verifications}, {regressions}, {remaining}
-   1. Deploy to production? (YES/NO + reasoning)
-   2. Continue with another cycle? (YES/NO)
-   Return JSON: { deploy, deploy_reason, continue, continue_reason }")
-   ```
-
-### Cost Control
-
-- Opus calls should be **rare** — 1-3 per full cycle, not per issue
+- **Opus is the primary developer** — all bug fixes use opus for highest-quality root cause analysis
+- **Opus also handles decisions** — triage, regression analysis, deploy decisions
+- **Haiku handles discovery** — 4 persona testers (cost-efficient browser exploration)
+- **Haiku handles verification** — re-testing fixed bugs (simple pass/fail checks)
+- **Sonnet orchestrates** — session setup, reports, cross-persona detection, deploy mechanics
 - Keep opus prompts **concise** — include only relevant data, not full file contents
-- Opus returns a **decision/plan**, sonnet **executes** it, haiku **verifies** it
-- Never use opus for: browser navigation, file reading, running commands, writing code
+- Group related bugs into fix groups so opus solves them together (fewer calls, better context)
 
 ### Model Flow per Phase
 
 ```
-  ┌──────────────────────────────────────────────────────────┐
-  │                                                          │
-  ▼                                                          │
-Phase 0-1:  INIT+DISCOVER ENV:  sonnet (setup, psql)         │
-                  ↓                                          │
-Phase 2:    DISCOVER:  haiku × 4 personas (PARALLEL swarm)   │
-                  ↓                                          │
-Phase 3:    CROSS-PERSONA:  sonnet (pattern detection)       │
-                  ↓                                          │
-Phase 4:    REPORT:  sonnet (CTO + CPO from DB)              │
-                  ↓                                          │
-     ┌── Phase 5 TRIAGE:  opus × 1 call (prioritize)        │
-     ↓                                                       │
-Phase 6:    FIX:  sonnet × N tasks (code changes)            │
-     │               ↑                                       │
-     │    ESCALATE: opus × 0-2 calls (hard root causes)      │
-     ↓                                                       │
-Phase 7:    VERIFY:  haiku × N tasks (browser re-testing)    │
-                  ↓                                          │
-Phase 8:    REGRESS:  opus × 1 call (cross-session)          │
-                  ↓                                          │
-     ┌── Phase 9 DEPLOY:  opus × 1 call (deploy + continue?) │
-     ↓                                                       │
-              sonnet (commit, push, verify deploy)           │
-                  ↓                                          │
-            open issues remaining?                           │
-            YES + cycle < 5 ─────────────────────────────────┘
-            NO  → output final summary, stop
+  ┌───────────────────────────────────────────────────────────────┐
+  │                                                               │
+  ▼                                                               │
+Phase 0-1:  INIT+DISCOVER ENV:  sonnet (setup, psql, seed)        │
+                  ↓                                               │
+Phase 2:    DISCOVER:  haiku × 4 personas (PARALLEL swarm)        │
+                  ↓                                               │
+Phase 3:    CROSS-PERSONA:  sonnet (pattern detection)            │
+                  ↓                                               │
+Phase 4:    REPORT:  sonnet (CTO + CPO from DB)                   │
+                  ↓                                               │
+Phase 4.5:  COVERAGE:  sonnet (coverage matrix from DB)           │
+                  ↓                                               │
+     ┌── Phase 5 TRIAGE:  opus × 1 call (prioritize)             │
+     ↓                                                            │
+Phase 6:    FIX:  opus × N tasks (PARALLEL, one per fix group)    │
+     ↓                                                            │
+Phase 7:    VERIFY:  haiku × N tasks (browser re-testing)         │
+                  ↓                                               │
+Phase 8:    REGRESS:  opus × 1 call (cross-session)               │
+                  ↓                                               │
+     ┌── Phase 9 DEPLOY:  opus × 1 call (deploy + coverage?)     │
+     ↓                                                            │
+              sonnet (commit, push, verify deploy, unblock)       │
+                  ↓                                               │
+            100% features approved?                               │
+            NO  + cycle < 10 ─────────────────────────────────────┘
+            YES → output final summary, stop
 ```
 
 ## Swarm Communication Protocol
@@ -1376,8 +1666,15 @@ SendMessage({
       "stillClosed": 15
     }
   },
+  "coverage": {
+    "totalFeatures": 37,
+    "approved": 37,
+    "blocked": 0,
+    "untested": 0,
+    "coveragePct": 100
+  },
   "overallHealth": {
-    "totalOpenIssues": 3,
+    "totalOpenIssues": 0,
     "criticalOpen": 0,
     "trend": "improving",
     "avgSatisfaction": 7.2
@@ -1401,11 +1698,22 @@ SendMessage({
 
 ## Version
 
-**Current Version:** 2.0.0
+**Current Version:** 3.0.0
 **Last Updated:** February 2026
 
 ### Changelog
 
+- **3.0.0**: Continuous coverage-driven QA + opus developer
+  - Feature coverage tracking via `qa_feature_coverage` table (37 features across 4 personas)
+  - Stop condition changed: cycle continues until 100% features approved (not just zero bugs)
+  - Opus is now the primary developer for ALL bug fixes (parallel opus tasks per fix group)
+  - Coverage report phase (Phase 4.5) between reports and triage
+  - Post-fix coverage update: automatically unblock features when blocking issues are resolved
+  - Cycle 2+ efficiency: personas only re-test blocked/untested features (skip approved)
+  - Personas that have 100% coverage are not re-spawned in subsequent cycles
+  - Max cycles increased from 5 to 10
+  - Feature registry with 37 coverage rows seeded at session start
+  - Coverage matrix in deploy decision (opus considers coverage % for continue decision)
 - **2.0.0**: Swarm mode + full qa-cycle parity
   - True parallel persona testing via TeamCreate swarm
   - Real-time failure broadcasting between personas
