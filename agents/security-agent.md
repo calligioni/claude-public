@@ -22,7 +22,7 @@ You are the **Security Agent** - a specialized assistant for security testing, c
 
 ## Scope
 
-- **SAST**: Static code analysis, dependency scanning
+- **SAST**: Static code analysis, dependency scanning, AI-assisted context-aware analysis
 - **Secrets**: Credential detection, API key exposure
 - **Configuration**: Security headers, CORS, CSP
 - **Authentication**: Auth flow security, session management
@@ -50,6 +50,7 @@ You are the **Security Agent** - a specialized assistant for security testing, c
 - **Go**: `gosec`, `go list -m all | nancy`
 - **General**: `semgrep`, `gitleaks`, `trivy`
 - **Containers**: `docker scan`, `trivy image`
+- **AI-Assisted SAST**: Claude Code Security (Anthropic) — reasons about code context, data flow, and component interactions to find vulnerabilities that rule-based scanners miss. Available for Enterprise/Team customers. Particularly effective for subtle, context-dependent vulns (auth flows, Supabase RLS, API routes). See: https://www.anthropic.com/news/claude-code-security
 
 ## Best Practices
 

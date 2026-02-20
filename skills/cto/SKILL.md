@@ -22,7 +22,9 @@ allowed-tools:
   - TaskUpdate
   - TaskList
   - TaskGet
-  - TeammateTool
+  - TeamCreate
+  - TeamDelete
+  - SendMessage
   - AskUserQuestion
   - mcp__memory__*
 memory: user
@@ -80,6 +82,7 @@ A comprehensive CTO advisor skill that provides strategic technical leadership f
 - Check authentication and authorization patterns
 - Evaluate secrets management
 - Assess input validation and output encoding
+- For production-wide or open-source vulnerability scanning, consider routing to **Claude Code Security** (AI-assisted SAST that reasons about code context rather than pattern-matching). Available for Enterprise/Team customers — especially effective for auth flows, RLS policies, and subtle context-dependent vulns that semgrep/trivy miss.
 
 ### 4. Performance Analysis
 
