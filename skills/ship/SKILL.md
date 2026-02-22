@@ -489,9 +489,11 @@ For each execution group:
 
 a. **Spawn agents** based on task complexity:
 
-- Simple tasks → `Task(model=haiku, subagent_type=general-purpose)`
-- Moderate tasks → `Task(model=sonnet, subagent_type=general-purpose)` or `Task(model=sonnet, subagent_type=frontend-agent)` / `backend-agent` based on type
-- Complex tasks → Keep in main context (opus) or `Task(model=sonnet, subagent_type=general-purpose)` with detailed prompt
+- Simple tasks → `Task(model=haiku, subagent_type=general-purpose, isolation=worktree)`
+- Moderate tasks → `Task(model=sonnet, subagent_type=general-purpose, isolation=worktree)` or `Task(model=sonnet, subagent_type=frontend-agent, isolation=worktree)` / `backend-agent` based on type
+- Complex tasks → Keep in main context (opus) or `Task(model=sonnet, subagent_type=general-purpose, isolation=worktree)` with detailed prompt
+
+> **Isolation Note:** The `isolation=worktree` parameter prevents parallel agents from clobbering each other's file edits. Each agent works in its own worktree, eliminating conflicts when multiple agents run concurrently.
 
 b. **Each agent gets:**
 

@@ -1,6 +1,6 @@
 ---
 name: maketree
-description: Automatically create and manage git worktrees for any project with intelligent branch discovery.
+description: Create and manage git worktrees via native Claude CLI flag or config-driven bulk setups.
 user-invocable: true
 context: fork
 model: haiku
@@ -14,18 +14,38 @@ tool-annotations:
   Bash: { destructiveHint: false, idempotentHint: false }
 ---
 
-# Maketree - Global Worktree Manager
+# Maketree - Worktree Manager
 
-Automatically detect feature branches and create git worktrees for parallel development in any project.
+Create git worktrees for parallel development. Use the native `claude --worktree` flag for most cases, or this skill for batch/config-driven setups.
 
-## Commands
+## Quick Start (Recommended)
+
+Use the native Claude CLI flag for single worktrees:
+
+```bash
+claude --worktree                 # Auto-named worktree
+claude --worktree feature-name    # Named worktree
+claude --worktree feature-name --tmux  # With terminal isolation
+```
+
+## Skill Commands (Config-Driven)
 
 - `/maketree` - Detect local config or run discovery, then create worktrees
 - `/maketree list` - List all active worktrees
 - `/maketree clean` - Remove all feature worktrees (keeps main repo)
 - `/maketree discover` - Force re-discovery even if config exists
 
-## What It Does
+## When to Use This Skill
+
+Use `/maketree` commands for:
+
+- **Bulk setup**: Creating multiple worktrees at once from config
+- **Repeated workflows**: Saving branch discovery preferences for your team
+- **Complex projects**: Managing many feature branches with a single command
+
+For single worktrees or quick exploration, prefer the native `claude --worktree` flag above.
+
+## Config-Driven Workflow
 
 This skill automatically:
 
@@ -35,7 +55,7 @@ This skill automatically:
 4. Saves preferences to `.worktree-scaffold.json`
 5. Creates worktrees for selected branches
 
-## Discovery Flow
+### Discovery Flow
 
 When run in a project without configuration:
 

@@ -403,9 +403,12 @@ TeammateTool.spawn({
       priority: "low"
     }
   ],
-  coordination: "async"
+  coordination: "async",
+  isolation: "worktree"  // Each analyst works in isolated worktree to prevent file edit conflicts
 })
 ```
+
+> **Isolation Note:** When using Task-based spawning for analysts, add `isolation=worktree` to each Task call. This ensures each specialist agent works in its own worktree, preventing parallel agents from clobbering each other's file modifications during concurrent analysis and review phases.
 
 #### 3.2: Inter-Analyst Communication
 

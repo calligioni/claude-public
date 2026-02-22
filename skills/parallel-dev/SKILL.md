@@ -254,32 +254,31 @@ const ready = graph.getReadyFeatures();  // Features with all deps met
 
 ### Phase 2: Worktree Creation
 
-For each feature, create an isolated worktree:
+For each feature, create an isolated worktree using the native CLI:
 
 ```bash
 # Create feature branch if not exists
 git checkout -b feature/{feature-id} main
 
-# Create worktree in parent directory
-git worktree add ../{feature-id} feature/{feature-id}
+# Create worktree using claude CLI
+claude --worktree feature/{feature-id}
 ```
 
-Integration with existing `maketree` skill:
+The `claude --worktree` flag is the native CLI mechanism for launching isolated worktrees. Integration with existing `maketree` skill:
 
 - Use `.worktree-scaffold.json` format for compatibility
 - Leverage existing branch detection and cleanup
 
 ### Phase 3: Agent Dispatch
 
-Spawn specialized agents per worktree using `run_in_background: true`:
+Spawn specialized agents per worktree using `run_in_background: true` with `isolation: "worktree"`:
 
 ```xml
 <Task
   subagent_type="{selected-agent}"
   run_in_background="true"
+  isolation="worktree"
   prompt="
-    WORKING DIRECTORY: {worktree-path}
-
     ## Feature: {feature-name}
 
     You are developing this feature in an isolated git worktree.
@@ -301,6 +300,8 @@ Spawn specialized agents per worktree using `run_in_background: true`:
   "
 />
 ```
+
+The `isolation: "worktree"` parameter is the officially supported pattern for agent isolation in parallel development workflows. It ensures each agent operates in its own isolated worktree context.
 
 **Agent Selection Logic:**
 
