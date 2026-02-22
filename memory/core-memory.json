@@ -24,6 +24,12 @@
     "documentation": "only when explicitly requested",
     "commits": "type(scope): description (conventional commits)"
   },
+  "lastConsolidation": "2026-02-22",
+  "memoryConfig": {
+    "relevanceThreshold": 5,
+    "decayThresholdDays": 90,
+    "minUsesToRetain": 3
+  },
   "activeProjects": ["Contably", "AgentCreator", "M&A Toolkit"],
   "integrations": {
     "github": "escotilha",

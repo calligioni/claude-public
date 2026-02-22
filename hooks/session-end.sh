@@ -43,7 +43,9 @@ cat > "$SESSION_FILE" << EOF
 EOF
 
 # Log reminder to stderr (stdout must be valid JSON for Claude Code hooks)
-echo "" >&2
 echo "Session logged: $SESSION_FILE" >&2
+
+# Must output valid JSON to stdout for Claude Code hook validation
+echo '{}'
 
 exit 0

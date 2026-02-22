@@ -71,10 +71,6 @@
       {
         "hooks": [
           {
-            "type": "prompt",
-            "prompt": "Before ending: If you made code changes, did you verify they compile/pass tests? If not, consider running /verify."
-          },
-          {
             "type": "command",
             "command": "\"$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/hooks/session-end.sh\""
           }
@@ -149,12 +145,17 @@
   "plansDirectory": "~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/plans",
   "skipDangerousModePermissionPrompt": true,
   "mcpSearchAutoThreshold": 15,
-  "default_arguments": ["--dangerously-skip-permissions"],
+  "default_arguments": [
+    "--dangerously-skip-permissions"
+  ],
   "mcp": {
     "mcpServers": {
       "sequential-thinking": {
         "command": "npx",
-        "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-sequential-thinking"
+        ],
         "description": "Sequential thinking and problem solving"
       },
       "memory": {
@@ -171,12 +172,18 @@
       },
       "playwright": {
         "command": "npx",
-        "args": ["-y", "@anthropic/mcp-playwright"],
+        "args": [
+          "-y",
+          "@anthropic/mcp-playwright"
+        ],
         "description": "Browser automation with Playwright"
       },
       "github": {
         "command": "npx",
-        "args": ["-y", "@modelcontextprotocol/server-github"],
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-github"
+        ],
         "env": {
           "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
         },
@@ -184,7 +191,10 @@
       },
       "brave-search": {
         "command": "npx",
-        "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-brave-search"
+        ],
         "env": {
           "BRAVE_API_KEY": "${BRAVE_API_KEY}"
         },
@@ -201,7 +211,10 @@
       },
       "resend": {
         "command": "npx",
-        "args": ["-y", "@modelcontextprotocol/server-resend"],
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-resend"
+        ],
         "env": {
           "RESEND_API_KEY": "${RESEND_API_KEY}"
         },
@@ -209,7 +222,10 @@
       },
       "slack": {
         "command": "npx",
-        "args": ["-y", "@modelcontextprotocol/server-slack"],
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-slack"
+        ],
         "env": {
           "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
           "SLACK_TEAM_ID": "${SLACK_TEAM_ID}"
@@ -218,7 +234,10 @@
       },
       "notion": {
         "command": "npx",
-        "args": ["-y", "@modelcontextprotocol/server-notion"],
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-notion"
+        ],
         "env": {
           "NOTION_API_KEY": "${NOTION_API_KEY}"
         },
@@ -239,17 +258,26 @@
       },
       "chrome-devtools": {
         "command": "npx",
-        "args": ["-y", "chrome-devtools-mcp@latest"],
+        "args": [
+          "-y",
+          "chrome-devtools-mcp@latest"
+        ],
         "description": "Chrome DevTools for browser automation and testing"
       },
       "google-workspace": {
         "command": "npx",
-        "args": ["-y", "@presto-ai/google-workspace-mcp"],
+        "args": [
+          "-y",
+          "@presto-ai/google-workspace-mcp"
+        ],
         "description": "Gmail, Calendar, Drive, Docs, Sheets - OAuth authenticated"
       },
       "firecrawl": {
         "command": "npx",
-        "args": ["-y", "firecrawl-mcp"],
+        "args": [
+          "-y",
+          "firecrawl-mcp"
+        ],
         "env": {
           "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
         },
