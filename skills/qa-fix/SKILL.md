@@ -119,6 +119,8 @@ python apps/api/scripts/qa_manager.py issue update \
 
 Apply the fix directly to the codebase using Edit/Write tools.
 
+When spawning multiple Task agents to fix different issues in parallel, always use `isolation: "worktree"` to prevent concurrent file edit conflicts between agents.
+
 For complex fixes, consider:
 
 - Impact on other parts of the system

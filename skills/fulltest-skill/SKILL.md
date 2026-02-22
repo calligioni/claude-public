@@ -101,6 +101,7 @@ When you run `/fulltest`, it will:
 │          ▼                                                          │
 │   ┌─────────────────────────────────────────────────────────────┐   │
 │   │              PHASE 3: SWARM PARALLEL FIXING                  │   │
+│   │              (each fixer in isolation: "worktree")           │   │
 │   │                                                              │   │
 │   │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐    │   │
 │   │  │CSS Fixer │  │ JS Fixer │  │Asset Fix │  │Layout Fix│    │   │
@@ -255,6 +256,7 @@ mcp__chrome-devtools__take_screenshot with filePath to save for debugging
 
 - Aggregate all issues
 - Prioritize by severity (visual issues = critical)
+- **Spawn parallel fixers with `isolation: "worktree"`** to prevent concurrent file edit conflicts
 - Apply fixes for known patterns
 - Re-test affected pages
 
@@ -310,13 +312,13 @@ These functions can be called by reading the TypeScript source and understanding
 
 ### Swarm Capabilities
 
-| Feature               | Description                                     |
-| --------------------- | ----------------------------------------------- |
-| **Parallel Testers**  | One tester per page via TeammateTool            |
-| **Failure Broadcast** | CSS issue found → all testers notified          |
-| **Pattern Detection** | Same error on 3+ pages = systemic issue         |
-| **Parallel Fixers**   | CSS, JS, assets, config fixers run concurrently |
-| **Live Dashboard**    | Real-time progress during testing               |
+| Feature               | Description                                                           |
+| --------------------- | --------------------------------------------------------------------- |
+| **Parallel Testers**  | One tester per page via TeammateTool                                  |
+| **Failure Broadcast** | CSS issue found → all testers notified                                |
+| **Pattern Detection** | Same error on 3+ pages = systemic issue                               |
+| **Parallel Fixers**   | CSS, JS, assets, config fixers run concurrently in isolated worktrees |
+| **Live Dashboard**    | Real-time progress during testing                                     |
 
 ### Example Swarm Output
 
@@ -347,6 +349,8 @@ Total: 52 seconds (vs ~3 minutes sequential)
 > **Note:** TeammateTool messages support **rich Markdown rendering**. Use headers, bold, code blocks, tables, and lists for clear communication between testers and fixers.
 
 #### Failure Broadcast Example
+
+> **Isolation Note:** When spawning parallel fixers (CSS fixer, JS fixer, asset fixer, layout fixer) via the Task tool, always use `isolation: "worktree"` to prevent concurrent file edit conflicts. Page testers are read-only (browser testing) and do not need worktree isolation.
 
 ```javascript
 // Tester broadcasts CSS failure to all other testers
