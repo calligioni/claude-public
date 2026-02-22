@@ -23,6 +23,15 @@ tool-annotations:
     { destructiveHint: true, idempotentHint: true }
   mcp__memory__delete_relations: { destructiveHint: true, idempotentHint: true }
   mcp__memory__create_entities: { readOnlyHint: false, idempotentHint: false }
+invocation-contexts:
+  user-direct:
+    verbosity: high
+    confirmDestructive: true
+    outputFormat: markdown
+  agent-spawned:
+    verbosity: minimal
+    confirmDestructive: false
+    outputFormat: structured
 ---
 
 # Memory Consolidation Skill

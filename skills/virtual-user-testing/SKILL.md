@@ -22,6 +22,7 @@ allowed-tools:
   - Glob
   - Grep
   - mcp__chrome-devtools__*
+  - mcp__browserbase__*
   - mcp__memory__*
 memory: user
 tool-annotations:
@@ -739,7 +740,7 @@ Create `virtual-user-testing.config.md` in project root to customize:
 
 ### Requirements
 
-- Chrome DevTools MCP (for browser navigation)
+- Chrome DevTools MCP (for local browser) or Browserbase MCP (for cloud browser sessions — enables true parallel persona testing)
 - Running Contably environment (admin + client portal + API)
 - QA database schema (migration 029_qa_schema)
 - qa_manager.py CLI script (apps/api/scripts/qa_manager.py)

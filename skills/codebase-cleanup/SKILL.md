@@ -12,6 +12,11 @@ allowed-tools:
   - Bash
 tool-annotations:
   Bash: { readOnlyHint: true, idempotentHint: true }
+invocation-contexts:
+  user-direct:
+    verbosity: high
+  agent-spawned:
+    verbosity: minimal
 ---
 
 # Codebase Cleanup

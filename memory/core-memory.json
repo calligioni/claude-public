@@ -1,187 +1,37 @@
 {
-  "version": "1.0.0",
-  "lastUpdated": "2026-02-12",
-  "lastConsolidation": "2026-02-12T01:29:10Z",
-  "criticalContext": {
-    "iCloudSetup": "ALL Claude setup files are stored in iCloud. Always check these paths first.",
-    "importance": "This is the source of truth for all Claude Code configuration"
-  },
   "paths": {
     "root": "~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup",
     "skills": "~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/skills",
     "agents": "~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/agents",
     "memory": "~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory",
     "hooks": "~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/hooks",
-    "rules": "~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/rules",
-    "plans": "~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/plans"
+    "rules": "~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/rules"
   },
   "userProfile": {
     "name": "Pierre Schurmann",
     "username": "psm2",
     "role": "Software developer / M&A analyst at Nuvini Group",
-    "expertise": ["TypeScript", "React", "Next.js", "Supabase", "Claude Code"],
-    "workContext": "Building AI-powered tools, M&A analysis systems, and autonomous coding agents",
     "communicationStyle": "direct, technical, minimal"
   },
   "preferences": {
     "packageManager": "pnpm",
-    "deployment": {
-      "primary": "Railway",
-      "static": "Vercel",
-      "alternatives": ["Cloudflare Workers"]
-    },
-    "database": {
-      "primary": "Supabase (PostgreSQL)",
-      "alternatives": ["Neon", "PlanetScale"]
-    },
-    "codeStyle": {
-      "principle": "minimal, no over-engineering",
-      "avoidPatterns": [
-        "premature abstraction",
-        "unnecessary comments",
-        "feature flags for simple changes"
-      ],
-      "preferPatterns": [
-        "early returns",
-        "explicit over implicit",
-        "composition over inheritance"
-      ]
-    },
-    "testing": {
-      "e2e": "Playwright",
-      "unit": "Vitest",
-      "approach": "test behavior, not implementation"
-    },
+    "deployment": "Railway (primary), Vercel (static)",
+    "database": "Supabase (PostgreSQL)",
+    "styling": "Tailwind + shadcn/ui + Lucide",
+    "stateManagement": "Zustand (not Redux)",
+    "testing": "Playwright (E2E), Vitest (unit)",
+    "codeStyle": "minimal, early returns, explicit over implicit, no premature abstraction",
     "documentation": "only when explicitly requested",
-    "styling": {
-      "css": "Tailwind CSS",
-      "components": "shadcn/ui",
-      "icons": "Lucide"
-    },
-    "stateManagement": {
-      "prefer": "Zustand",
-      "avoid": "Redux (too verbose)"
-    }
+    "commits": "type(scope): description (conventional commits)"
   },
-  "stablePatterns": {
-    "projectStructure": "feature folders with colocation",
-    "apiDesign": "REST with consistent error responses",
-    "authentication": "Supabase Auth or JWT with httpOnly cookies",
-    "errorHandling": "fail fast, explicit error types",
-    "gitWorkflow": "feature branches, atomic commits"
-  },
-  "beliefs": [
-    "Simple solutions are better than clever ones",
-    "Delete code rather than comment it out",
-    "Tests should verify behavior, not implementation details",
-    "Premature optimization is the root of all evil",
-    "Working software over comprehensive documentation",
-    "Three similar lines of code is better than a premature abstraction"
-  ],
-  "projectContext": {
-    "activeProjects": ["Contably", "AgentCreator", "M&A Toolkit"],
-    "techStack": {
-      "Contably": "Next.js + Supabase + Brazil accounting integrations",
-      "AgentCreator": "Agent orchestration platform",
-      "MnA": "Financial analysis and document extraction"
-    }
-  },
-  "toolIntegrations": {
-    "notion": {
-      "configured": true,
-      "workspaceUrl": "https://www.notion.so/e984f53558554276979c043254936e82",
-      "usage": "Documentation, project planning, knowledge base",
-      "mcpServer": "@modelcontextprotocol/server-notion"
-    },
-    "slack": {
-      "configured": true,
-      "usage": "Team communication, notifications",
-      "mcpServer": "@modelcontextprotocol/server-slack"
-    },
-    "github": {
-      "configured": true,
-      "username": "escotilha",
-      "usage": "Code repositories, PRs, issues",
-      "mcpServer": "@modelcontextprotocol/server-github"
-    },
-    "supabase": {
-      "configured": true,
-      "usage": "Database, auth, storage for projects",
-      "projects": ["Contably", "AgentCreator"]
-    },
-    "railway": {
-      "configured": true,
-      "usage": "Primary deployment platform"
-    },
-    "vercel": {
-      "configured": true,
-      "usage": "Static site deployments"
-    },
-    "digitalocean": {
-      "configured": true,
-      "usage": "App Platform, Databases, Spaces",
-      "mcpServer": "@digitalocean/mcp"
-    },
-    "resend": {
-      "configured": true,
-      "usage": "Transactional email sending",
-      "verifiedDomains": ["nuvini.ai", "contably.ai"],
-      "fromAddresses": [
-        "claudia@nuvini.ai",
-        "cris@nuvini.ai",
-        "julia@nuvini.ai",
-        "notifications@nuvini.ai"
-      ]
-    },
-    "agentmail": {
-      "configured": true,
-      "usage": "AI agent email inboxes (receiving)",
-      "inboxes": [
-        "xurman@agentmail.to",
-        "marcopolo@agentmail.to",
-        "cris@agentmail.to"
-      ],
-      "plan": "Free (3 inboxes, 3000 emails/month)"
-    },
-    "cloudflare": {
-      "configured": true,
-      "usage": "DNS management",
-      "profiles": ["business", "personal"],
-      "managedDomains": ["contably.ai", "nuvini.ai"]
-    }
-  },
-  "mcpServers": {
-    "available": [
-      "memory",
-      "github",
-      "notion",
-      "slack",
-      "postgres",
-      "brave-search",
-      "playwright",
-      "chrome-devtools",
-      "digitalocean",
-      "resend",
-      "sequential-thinking"
-    ],
-    "memoryServer": {
-      "name": "memory",
-      "type": "knowledge-graph",
-      "tools": [
-        "create_entities",
-        "search_nodes",
-        "open_nodes",
-        "delete_entities",
-        "add_observations",
-        "create_relations"
-      ]
-    }
-  },
-  "memoryConfig": {
-    "relevanceThreshold": 5,
-    "decayThresholdDays": 90,
-    "minUsesToRetain": 3,
-    "consolidationFrequency": "weekly",
-    "maxMemoriesBeforeConsolidation": 200
+  "activeProjects": ["Contably", "AgentCreator", "M&A Toolkit"],
+  "integrations": {
+    "github": "escotilha",
+    "resend": { "domains": ["nuvini.ai", "contably.ai"] },
+    "agentmail": [
+      "xurman@agentmail.to",
+      "marcopolo@agentmail.to",
+      "cris@agentmail.to"
+    ]
   }
 }

@@ -1,6 +1,6 @@
 ---
 name: qa-conta
-description: "Autonomous Opus orchestrator for Contably QA. Runs discovery on VPS, investigates and fixes code locally, deploys via CI/CD, retests in a loop until 100% pass rate. Never stops unless destructive action needed. Triggers on: qa conta, contably qa, qa runner, ship qa."
+description: "Autonomous Opus orchestrator for Contably QA. Two modes: (1) local — runs here with SSH to VPS for discovery, (2) VPS — triggers the autonomous orchestrator on VPS via systemd, runs headlessly, posts results to Discord. Use --vps flag for headless mode. Triggers on: qa conta, contably qa, qa runner, ship qa."
 user-invocable: true
 context: fork
 model: opus
@@ -23,6 +23,7 @@ allowed-tools:
   - Grep
   - LSP
   - mcp__memory__*
+  - mcp__browserbase__*
   - mcp__postgres__query
 memory: user
 tool-annotations:
@@ -277,6 +278,40 @@ When all cycles are complete, output a final summary:
 - Commit {sha}: {message} — deployed successfully
 ```
 
+## VPS Headless Mode (`--vps`)
+
+When the user runs `/qa-conta --vps`, do NOT run the orchestrator locally. Instead:
+
+1. **Clear any previous state**: `ssh root@100.77.51.51 "rm -f ~/code/contably/contably-qa/qa-state.json"`
+2. **Trigger the VPS orchestrator**: `ssh root@100.77.51.51 "nohup ~/code/contably/contably-qa/qa-orchestrator.sh > /tmp/qa-orchestrator.log 2>&1 &"`
+3. **Report back**: "QA orchestrator launched on VPS. It will run autonomously and post results to Discord #test-results when done."
+4. **Optionally tail the log**: `ssh root@100.77.51.51 "tail -f /tmp/qa-orchestrator.log"` if the user wants to watch
+
+The VPS has:
+
+- Claude Code v2.1.31 with `--dangerously-skip-permissions`
+- Full codebase at `/root/code/contably/`
+- Direct DB access (no SSH needed)
+- State file persistence across context windows
+- Auto-restart wrapper (up to 12 Claude invocations)
+- Discord bot notification on completion
+
+### Checking VPS Status
+
+```bash
+# Check if orchestrator is running
+ssh root@100.77.51.51 "pgrep -f qa-orchestrator && echo 'RUNNING' || echo 'NOT RUNNING'"
+
+# Check current state
+ssh root@100.77.51.51 "cat ~/code/contably/contably-qa/qa-state.json 2>/dev/null | python3 -m json.tool"
+
+# Tail live log
+ssh root@100.77.51.51 "tail -50 ~/code/contably/contably-qa/orchestrator-logs/run_*.log 2>/dev/null | tail -50"
+
+# Check result
+ssh root@100.77.51.51 "cat ~/code/contably/contably-qa/qa-result.txt 2>/dev/null"
+```
+
 ## REMEMBER
 
 - You are AUTONOMOUS. Do not ask "should I continue?" or "want me to fix this?" — JUST DO IT.
@@ -285,3 +320,4 @@ When all cycles are complete, output a final summary:
 - Progress is measured in PASS RATE. Every cycle should improve it.
 - If a fix doesn't work, try a DIFFERENT approach. Never give up after one attempt.
 - Track everything in tasks. The user should be able to see what you did and why.
+- With `--vps` flag: just launch on VPS and let it run headlessly. Results come via Discord.

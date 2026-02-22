@@ -10,6 +10,8 @@ allowed-tools:
   - Write
   - Glob
   - AskUserQuestion
+tool-annotations:
+  Bash: { destructiveHint: false, idempotentHint: false }
 ---
 
 # Maketree - Global Worktree Manager

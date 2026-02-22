@@ -3,7 +3,7 @@ name: qa-sourcerank
 description: "Full QA cycle for SourceRank AI with swarm-parallel persona testing: discover bugs via 4 concurrent virtual user personas on production, generate CTO/CPO reports, fix issues via /qa-fix, verify via /qa-verify, detect regressions. True parallel execution via TeamCreate swarm. Uses psql for QA issue tracking in SourceRank Supabase DB. Triggers on: qa sourcerank, sourcerank qa, test sourcerank, qa cycle sourcerank."
 user-invocable: true
 context: fork
-model: sonnet
+model: opus
 allowed-tools:
   - Task(agent_type=general-purpose)
   - Task(agent_type=Explore)
@@ -22,6 +22,7 @@ allowed-tools:
   - Grep
   - WebSearch
   - mcp__chrome-devtools__*
+  - mcp__browserbase__*
   - mcp__memory__*
 memory: user
 tool-annotations:
@@ -46,35 +47,40 @@ invocation-contexts:
     outputFormat: structured
 ---
 
-# QA SourceRank Skill (v3.0 - Continuous Coverage)
+# QA SourceRank Skill (v4.0 - Self-Healing Autonomous)
 
-Full QA lifecycle for SourceRank AI with **coverage-driven continuous testing**. Runs autonomously until **100% of features are tested and approved** across all 4 personas. Uses opus for all bug fixing, haiku for discovery, and tracks per-feature approval status in the database.
+Full QA lifecycle for SourceRank AI with **self-healing autonomous operation**. Runs end-to-end without stopping — discovers bugs, fixes them, deploys, verifies, and loops until **100% coverage**. Learns from every repair via MCP memory so repeated issues get fixed faster. The orchestrator (opus) **NEVER aborts** — even if 100% of features are broken, it proceeds to fix them.
 
 ## What It Does
 
 When you run `/qa-sourcerank`, it orchestrates a **continuous loop** that only stops at 100% coverage:
 
-1. **DISCOVER** - Spawn 4 persona agents **in parallel** via TeamCreate swarm that test production, track feature coverage, and report bugs to QA DB
-2. **CROSS-PERSONA DETECTION** - Real-time pattern analysis as personas report back (systemic bugs, permission leaks, etc.)
-3. **REPORT** - Generate CTO and CPO reports from QA database
-4. **COVERAGE REPORT** - Feature coverage matrix showing approved/blocked/untested per persona
-5. **TRIAGE** - Opus-powered strategic triage of discovered issues
-6. **FIX** - Opus developers fix bugs in parallel (one opus task per fix group)
-7. **VERIFY** - Haiku agents verify fixes via browser testing on production
-8. **REGRESSION CHECK** - Compare with previous sessions, detect regressions
-9. **DEPLOY + CONTINUE** - Opus deploy decision based on coverage %. Loop until 100% approved
+1. **PRE-FLIGHT** - Check existing open issues, warm up Render, load repair memory patterns
+2. **DISCOVER** - Spawn 4 persona agents **in parallel** via TeamCreate swarm that test production, track feature coverage, and report bugs to QA DB
+3. **CROSS-PERSONA DETECTION** - Real-time pattern analysis as personas report back (systemic bugs, permission leaks, etc.)
+4. **REPORT** - Generate CTO and CPO reports from QA database
+5. **COVERAGE REPORT** - Feature coverage matrix showing approved/blocked/untested per persona
+6. **TRIAGE** - Strategic triage of discovered issues (skip if systemic root cause is obvious)
+7. **FIX** - Opus developers fix bugs in parallel, informed by repair memory from past sessions
+8. **VERIFY** - Haiku agents verify fixes via browser testing on production
+9. **REGRESSION CHECK** - Compare with previous sessions, detect regressions
+10. **DEPLOY + CONTINUE** - Deploy decision based on coverage %. Loop until 100% approved
+11. **LEARN** - Save successful repair patterns to MCP memory for future sessions
 
 ## Architecture
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│               QA SOURCERANK ORCHESTRATOR (sonnet)                         │
+│               QA SOURCERANK ORCHESTRATOR (opus)                           │
 │                                                                           │
+│  PRE-FLIGHT: Render warmup + open issue check + load repair memory       │
+│           │                                                               │
+│           ▼                                                               │
 │  Phase 0-1: Init + Environment Discovery                                  │
 │           │                                                               │
 │           ▼                                                               │
 │  ┌─────────────────────────────────────────────────────────────────────┐  │
-│  │           PHASE 2: PERSONA SWARM (TeamCreate + haiku × 4)          │  │
+│  │           PHASE 2: PERSONA SWARM (TeamCreate + sonnet × 4)         │  │
 │  │                                                                      │  │
 │  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐           │  │
 │  │  │  SARAH   │  │  MARCUS  │  │  DIANA   │  │   ALEX   │           │  │
@@ -93,42 +99,31 @@ When you run `/qa-sourcerank`, it orchestrates a **continuous loop** that only s
 │  └─────────────────────────────────────────────────────────────────────┘  │
 │           │                                                               │
 │           ▼                                                               │
-│  Phase 3: CROSS-PERSONA DETECTION (orchestrator analyzes messages)        │
+│  Phase 3-4: CROSS-PERSONA + REPORTS + COVERAGE                           │
 │           │                                                               │
 │           ▼                                                               │
-│  Phase 4: CTO + CPO REPORTS (from DB via psql)                            │
+│  Phase 5: TRIAGE (inline — skip if systemic root cause obvious)          │
 │           │                                                               │
 │           ▼                                                               │
-│  ┌── Phase 5: TRIAGE (opus × 1 call) ──┐                                 │
-│  │  Prioritize, group root causes,      │                                 │
-│  │  filter environment artifacts         │                                 │
-│  └──────────┬───────────────────────────┘                                 │
-│             │                                                             │
-│             ▼                                                             │
-│  Phase 6: FIX (compose /qa-fix or sonnet inline)                          │
-│      │         ↑                                                          │
-│      │    ESCALATE: opus × 0-2 calls (hard root causes)                   │
-│      ↓                                                                    │
-│  Phase 7: VERIFY (compose /qa-verify or haiku parallel)                   │
+│  Phase 6: FIX (opus × N tasks, informed by repair memory)                │
 │           │                                                               │
 │           ▼                                                               │
-│  Phase 8: REGRESSION (opus × 1 call, cross-session analysis)              │
+│  Phase 6.5: LEARN (save repair patterns to MCP memory)                   │
 │           │                                                               │
 │           ▼                                                               │
-│  ┌── Phase 9: DEPLOY + CONTINUE (opus × 1 call) ──┐                      │
-│  │  Deploy decision + continue-or-stop              │                      │
-│  └──────────┬───────────────────────────────────────┘                     │
-│             │                                                             │
-│         sonnet: commit, push, verify deploy                               │
-│             │                                                             │
-│        open issues remaining?                                             │
-│        YES + cycle < 5 ──────────────────────────────────── (loop back)   │
-│        NO  → output final summary, stop                                   │
+│  Phase 7-8: VERIFY + REGRESSION CHECK                                    │
+│           │                                                               │
+│           ▼                                                               │
+│  Phase 9: DEPLOY + CONTINUE                                              │
+│           │                                                               │
+│        commit, push, verify deploy, unblock features                     │
+│           │                                                               │
+│        100% features approved?                                           │
+│        NO  + cycle < 10 ─────────────────────────────── (loop back)      │
+│        YES → output final summary, stop                                   │
 │                                                                           │
 │  ┌──────────────────────────────────────────────────────────────────────┐ │
-│  │         PostgreSQL via psql (SourceRank Supabase)                     │ │
-│  │    qa_sessions | qa_issues | qa_verifications | qa_persona_sessions   │ │
-│  │    qa_issue_comments                                                   │ │
+│  │  PostgreSQL (psql) │ MCP Memory (repair patterns + fix learnings)    │ │
 │  └──────────────────────────────────────────────────────────────────────┘ │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
@@ -211,7 +206,14 @@ Dashboard (authenticated):
 - `/dashboard/integrations/[id]` - Integration detail
 - `/dashboard/team` - Team management
 - `/dashboard/settings` - Settings
-- `/dashboard/settings/white-label` - White label config
+- `/dashboard/settings/white-label` - White label config (with reports, CSS, email templates)
+- `/dashboard/settings/billing` - Billing and subscription management
+- `/dashboard/settings/ai-models` - AI model configuration
+- `/dashboard/settings/api-keys` - API key management
+- `/dashboard/settings/webhooks` - Webhook configuration
+- `/dashboard/settings/api` - Public API documentation and keys
+- `/dashboard/analytics` - Advanced analytics (trends, attribution, predictions, benchmarks)
+- `/dashboard/stream` - Real-time event stream (mentions, alerts, metrics)
 - `/dashboard/holding` - Holding/portfolio view
 - `/dashboard/agency` - Agency mode
 - `/dashboard/agency/clients` - Agency clients
@@ -335,10 +337,10 @@ CREATE INDEX IF NOT EXISTS idx_qa_feature_coverage_status ON qa_feature_coverage
 
 The QA skill tracks **feature coverage** to ensure every feature is tested and approved before the cycle ends. Features are seeded into `qa_feature_coverage` at session start.
 
-### Feature Matrix (37 coverage rows across 4 personas)
+### Feature Matrix (50 coverage rows across 4 personas)
 
 ```
-SARAH (CMO/Admin) — 11 features:
+SARAH (CMO/Admin) — 16 features:
   landing-page        | /                              | Landing page messaging, CTAs, pricing, demo sections
   sign-in             | /sign-in                       | Login flow
   dashboard-overview  | /dashboard                     | Dashboard KPIs and widgets
@@ -350,10 +352,15 @@ SARAH (CMO/Admin) — 11 features:
   alerts              | /dashboard/alerts              | Alert configuration and review
   team-management     | /dashboard/team                | Team management
   settings            | /dashboard/settings            | Organization settings
+  billing             | /dashboard/settings/billing    | Billing plans, subscription, invoices
+  analytics           | /dashboard/analytics           | Advanced analytics (trends, attribution, predictions, benchmarks)
+  stream              | /dashboard/stream              | Real-time event stream (mentions, alerts, metrics)
+  ai-models           | /dashboard/settings/ai-models  | AI model provider configuration
+  api-keys            | /dashboard/settings/api-keys   | API key creation and management
 
-MARCUS (SEO/Member) — 9 features:
+MARCUS (SEO/Member) — 13 features:
   dashboard-overview  | /dashboard                     | Daily overview
-  monitor             | /dashboard/monitor             | AI monitoring setup and results
+  monitor             | /dashboard/monitor             | AI monitoring (mentions, hallucinations, prompt library, brand facts)
   content-analysis    | /dashboard/content             | Content analysis and optimization
   authority           | /dashboard/authority           | Authority scoring and citations
   quality             | /dashboard/quality             | Content quality scores
@@ -361,19 +368,25 @@ MARCUS (SEO/Member) — 9 features:
   brand-facts         | /dashboard/brands/[id]/facts   | Brand facts management
   intelligence        | /dashboard/intelligence        | Intelligence hub
   integrations        | /dashboard/integrations        | CMS integrations
+  readiness           | /dashboard/readiness           | AI readiness scoring
+  integration-detail  | /dashboard/integrations/[id]   | Integration detail and config
+  analytics           | /dashboard/analytics           | Analytics trends, attribution, predictions
+  stream              | /dashboard/stream              | Real-time event stream monitoring
 
-DIANA (Agency) — 9 features:
+DIANA (Agency) — 11 features:
   agency-dashboard    | /dashboard/agency              | Agency dashboard overview
   agency-clients      | /dashboard/agency/clients      | Client management
   agency-client-detail| /dashboard/agency/clients/[id] | Client detail
   agency-revenue      | /dashboard/agency/revenue      | Revenue tracking
   agency-margins      | /dashboard/agency/margins      | Margin analysis
   brands-list         | /dashboard/brands              | All brands across clients
-  white-label         | /dashboard/settings/white-label| White label configuration
+  white-label         | /dashboard/settings/white-label| White label config (reports branding, CSS, email templates)
   reports             | /dashboard/reports             | Client report generation
   holding             | /dashboard/holding             | Portfolio/holding view
+  webhooks            | /dashboard/settings/webhooks   | Webhook endpoint configuration
+  public-api          | /dashboard/settings/api        | Public API docs and key management
 
-ALEX (Brand Manager) — 8 features:
+ALEX (Brand Manager) — 10 features:
   dashboard-overview  | /dashboard                     | Dashboard overview
   brand-detail        | /dashboard/brands/[id]         | Brand deep dive
   alerts              | /dashboard/alerts              | Alert center
@@ -382,6 +395,8 @@ ALEX (Brand Manager) — 8 features:
   competitive-analysis| /dashboard/competitive         | Competitive landscape
   recommendations     | /dashboard/recommendations     | Brand recommendations
   quality             | /dashboard/quality             | Content quality review
+  analytics           | /dashboard/analytics           | Analytics overview and predictions
+  billing             | /dashboard/settings/billing    | Billing plans and invoices
 ```
 
 ### Seeding Feature Coverage (Phase 0)
@@ -402,7 +417,12 @@ INSERT INTO qa_feature_coverage (session_id, feature_key, feature_name, persona,
   ('{sid}', 'reports', 'Report generation and export', 'sarah', '/dashboard/reports', 2),
   ('{sid}', 'alerts', 'Alert configuration and review', 'sarah', '/dashboard/alerts', 2),
   ('{sid}', 'team-management', 'Team management', 'sarah', '/dashboard/team', 2),
-  ('{sid}', 'settings', 'Organization settings', 'sarah', '/dashboard/settings', 1)
+  ('{sid}', 'settings', 'Organization settings', 'sarah', '/dashboard/settings', 1),
+  ('{sid}', 'billing', 'Billing plans and subscription', 'sarah', '/dashboard/settings/billing', 2),
+  ('{sid}', 'analytics', 'Advanced analytics dashboard', 'sarah', '/dashboard/analytics', 2),
+  ('{sid}', 'stream', 'Real-time event stream', 'sarah', '/dashboard/stream', 1),
+  ('{sid}', 'ai-models', 'AI model configuration', 'sarah', '/dashboard/settings/ai-models', 2),
+  ('{sid}', 'api-keys', 'API key management', 'sarah', '/dashboard/settings/api-keys', 2)
 ON CONFLICT (session_id, feature_key, persona) DO NOTHING;
 "
 
@@ -417,7 +437,11 @@ INSERT INTO qa_feature_coverage (session_id, feature_key, feature_name, persona,
   ('{sid}', 'recommendations', 'AI recommendations', 'marcus', '/dashboard/recommendations', 1),
   ('{sid}', 'brand-facts', 'Brand facts management', 'marcus', '/dashboard/brands/[id]/facts', 2),
   ('{sid}', 'intelligence', 'Intelligence hub', 'marcus', '/dashboard/intelligence', 1),
-  ('{sid}', 'integrations', 'CMS integrations', 'marcus', '/dashboard/integrations', 2)
+  ('{sid}', 'integrations', 'CMS integrations', 'marcus', '/dashboard/integrations', 2),
+  ('{sid}', 'readiness', 'AI readiness scoring', 'marcus', '/dashboard/readiness', 2),
+  ('{sid}', 'integration-detail', 'Integration detail and config', 'marcus', '/dashboard/integrations/[id]', 2),
+  ('{sid}', 'analytics', 'Analytics trends and attribution', 'marcus', '/dashboard/analytics', 2),
+  ('{sid}', 'stream', 'Real-time event stream', 'marcus', '/dashboard/stream', 1)
 ON CONFLICT (session_id, feature_key, persona) DO NOTHING;
 "
 
@@ -432,7 +456,9 @@ INSERT INTO qa_feature_coverage (session_id, feature_key, feature_name, persona,
   ('{sid}', 'brands-list', 'All brands across clients', 'diana', '/dashboard/brands', 1),
   ('{sid}', 'white-label', 'White label configuration', 'diana', '/dashboard/settings/white-label', 2),
   ('{sid}', 'reports', 'Client report generation', 'diana', '/dashboard/reports', 1),
-  ('{sid}', 'holding', 'Portfolio/holding view', 'diana', '/dashboard/holding', 1)
+  ('{sid}', 'holding', 'Portfolio/holding view', 'diana', '/dashboard/holding', 1),
+  ('{sid}', 'webhooks', 'Webhook endpoint configuration', 'diana', '/dashboard/settings/webhooks', 2),
+  ('{sid}', 'public-api', 'Public API docs and key management', 'diana', '/dashboard/settings/api', 2)
 ON CONFLICT (session_id, feature_key, persona) DO NOTHING;
 "
 
@@ -446,7 +472,9 @@ INSERT INTO qa_feature_coverage (session_id, feature_key, feature_name, persona,
   ('{sid}', 'competitors', 'Competitor tracking', 'alex', '/dashboard/competitors', 1),
   ('{sid}', 'competitive-analysis', 'Competitive landscape', 'alex', '/dashboard/competitive', 1),
   ('{sid}', 'recommendations', 'Brand recommendations', 'alex', '/dashboard/recommendations', 1),
-  ('{sid}', 'quality', 'Content quality review', 'alex', '/dashboard/quality', 1)
+  ('{sid}', 'quality', 'Content quality review', 'alex', '/dashboard/quality', 1),
+  ('{sid}', 'analytics', 'Analytics overview and predictions', 'alex', '/dashboard/analytics', 1),
+  ('{sid}', 'billing', 'Billing plans and invoices', 'alex', '/dashboard/settings/billing', 1)
 ON CONFLICT (session_id, feature_key, persona) DO NOTHING;
 "
 ```
@@ -536,6 +564,11 @@ psql "$SRDB" -t -A -c "
 - `/dashboard/alerts` - Alert configuration and review
 - `/dashboard/team` - Team management
 - `/dashboard/settings` - Organization settings
+- `/dashboard/settings/billing` - Billing and subscription management
+- `/dashboard/analytics` - Advanced analytics dashboard
+- `/dashboard/stream` - Real-time event stream
+- `/dashboard/settings/ai-models` - AI model configuration
+- `/dashboard/settings/api-keys` - API key management
 
 **Test Workflows:**
 
@@ -546,6 +579,11 @@ psql "$SRDB" -t -A -c "
 5. Check alerts → Review hallucination alerts → Mark as reviewed
 6. Manage team → Invite new member → Verify invitation flow
 7. Navigate settings → Update organization details → Verify persistence
+8. Open Billing → Check subscription plan details → Review invoice history
+9. Open Analytics → Check trends, attribution, predictions → Verify tab navigation
+10. Open Stream → Connect to real-time feed → Verify events appear
+11. Open AI Models → Check provider configuration → Verify model list loads
+12. Open API Keys → Create key → Verify key appears in list
 
 ---
 
@@ -568,6 +606,8 @@ psql "$SRDB" -t -A -c "
 - `/dashboard/brands/[id]/facts` - Brand facts management
 - `/dashboard/intelligence` - Intelligence hub
 - `/dashboard/integrations` - CMS integrations
+- `/dashboard/analytics` - Analytics trends and attribution
+- `/dashboard/stream` - Real-time event stream monitoring
 
 **Test Workflows:**
 
@@ -578,6 +618,9 @@ psql "$SRDB" -t -A -c "
 5. Manage Brand Facts → Add/edit facts → Verify they persist
 6. Check Integrations → Review connected CMS → Verify sync status
 7. Navigate to Intelligence → Review insights → Verify data accuracy
+8. Open Monitor → Check hallucination alerts tab → Verify prompt library tab → Verify brand facts tab
+9. Open Analytics → Check trends data → Test attribution tab → Review predictions tab
+10. Open Stream → Select channel → Connect → Verify events flow
 
 ---
 
@@ -597,9 +640,11 @@ psql "$SRDB" -t -A -c "
 - `/dashboard/agency/revenue` - Revenue tracking
 - `/dashboard/agency/margins` - Margin analysis
 - `/dashboard/brands` - All brands across clients
-- `/dashboard/settings/white-label` - White label configuration
+- `/dashboard/settings/white-label` - White label configuration (with reports, CSS, email templates)
 - `/dashboard/reports` - Client report generation
 - `/dashboard/holding` - Portfolio/holding view
+- `/dashboard/settings/webhooks` - Webhook endpoint configuration
+- `/dashboard/settings/api` - Public API docs and key management
 
 **Test Workflows:**
 
@@ -610,6 +655,9 @@ psql "$SRDB" -t -A -c "
 5. Switch between client brands → Verify data isolation between clients
 6. Generate multi-client report → Download → Verify all clients included
 7. Holding view → Portfolio overview → Verify aggregated metrics
+8. White Label → Check Reports tab → Check CSS tab → Generate email template preview
+9. Open Webhooks → Create webhook → Verify it appears in list
+10. Open Public API → View API docs → Check key management section
 
 ---
 
@@ -631,6 +679,8 @@ psql "$SRDB" -t -A -c "
 - `/dashboard/competitive` - Competitive landscape
 - `/dashboard/recommendations` - Brand recommendations
 - `/dashboard/quality` - Content quality review
+- `/dashboard/analytics` - Analytics overview and predictions
+- `/dashboard/settings/billing` - Billing plans and invoices
 
 **Test Workflows:**
 
@@ -641,6 +691,8 @@ psql "$SRDB" -t -A -c "
 5. Review Recommendations → Check brand-specific advice → Verify actionability
 6. Check Content Quality → Review scores per platform → Verify scoring logic
 7. Navigate between features → Verify breadcrumbs and navigation consistency
+8. Open Analytics → Check overview metrics → Review predictions tab
+9. Open Billing → View plan details → Check invoices section
 
 ---
 
@@ -674,9 +726,94 @@ Both accounts share the same password. Sarah/Diana use the admin account, Marcus
 ### CRITICAL ORCHESTRATOR RULES
 
 1. **The orchestrator NEVER tests features itself.** It ONLY orchestrates: creates sessions, seeds data, spawns personas, collects results, generates reports, spawns fixers, deploys. ALL browser testing is done by spawned persona agents.
-2. **ALL 4 personas MUST be spawned in a SINGLE message** with 4 parallel Task calls. NEVER spawn them sequentially or test features inline.
+2. **ALL 4 personas MUST be spawned in a SINGLE message** with 4 parallel Task calls. NEVER spawn them sequentially or one-at-a-time. NEVER use TaskCreate for personas — use Task tool with 4 calls in ONE response. Sequential persona spawning is a CRITICAL BUG in the orchestrator.
 3. **The orchestrator MUST loop autonomously** after each deploy: check coverage → if < 100%, spawn the next cycle's personas immediately. Never output a report and stop unless coverage = 100% or cycle = 10.
 4. **Keep orchestrator turns lean.** Each turn should do ONE phase, not multiple phases. This preserves context for the full cycle.
+
+### NEVER ABORT — ALWAYS PROCEED TO FIX
+
+**This is the #1 rule of the skill.** Previous versions aborted when discovery found systemic failures (e.g., "92% of features broken"). This is WRONG. The correct behavior:
+
+1. **If ALL features are blocked by the same systemic issue** — this is actually the BEST case. One fix will unblock everything. Proceed to triage → fix → deploy → verify.
+2. **If personas report empty pages, timeouts, or rendering failures** — these are bugs to fix, NOT reasons to abort. Log them, proceed to Phase 5-6.
+3. **If the same issue was found in previous sessions** — check repair memory for the fix pattern. Apply it immediately.
+4. **The ONLY valid reason to stop** is if Chrome DevTools MCP is completely unavailable (can't test at all). Even then, try curl-based API testing first.
+
+**NEVER:**
+
+- Write "ABORTED" in the session status
+- Output "DO NOT DEPLOY" without first attempting fixes
+- Stop after discovery without proceeding to fix
+- Say "platform is unusable" — your job is to MAKE it usable
+- Create a report and stop. The report is an intermediate step, not the output.
+
+**ALWAYS:**
+
+- Proceed through ALL phases regardless of how many bugs are found
+- If 100% of features are blocked, that means there's likely 1-2 root causes — fix those
+- Complete at least one full discover → fix → deploy → verify cycle before any output
+
+### Pre-Flight Phase (runs before Phase 0)
+
+Before starting any QA cycle, run pre-flight checks:
+
+#### Step 1: Warm up Render (prevent cold-start timeouts)
+
+```bash
+# Wake up both services — Render free tier sleeps after 15min inactivity
+echo "Warming up Render services..."
+curl -s -o /dev/null -w 'Web: %{http_code} (%{time_total}s)\n' https://sourcerank-web.onrender.com
+curl -s -o /dev/null -w 'API: %{http_code} (%{time_total}s)\n' https://sourcerank-api.onrender.com/health
+
+# If either returned non-200, wait 15s and retry (cold start)
+sleep 15
+curl -s -o /dev/null -w 'Web retry: %{http_code} (%{time_total}s)\n' https://sourcerank-web.onrender.com
+curl -s -o /dev/null -w 'API retry: %{http_code} (%{time_total}s)\n' https://sourcerank-api.onrender.com/health
+```
+
+#### Step 2: Check existing open issues from previous sessions
+
+```bash
+export SRDB="postgresql://postgres.swpznmoctbtnmspmyrfu:Lmk48ZJTjRzCp4xh@aws-1-us-east-1.pooler.supabase.com:5432/postgres"
+
+# Check for unresolved systemic issues
+EXISTING_ISSUES=$(psql "$SRDB" -t -A -c "
+  SELECT json_agg(t) FROM (
+    SELECT id, title, severity, status, affected_page, category
+    FROM qa_issues
+    WHERE status NOT IN ('closed', 'verified')
+    ORDER BY severity, created_at DESC
+    LIMIT 20
+  ) t
+")
+echo "Existing open issues: $EXISTING_ISSUES"
+
+# If there are P0/P1 issues that were already identified, we can skip discovery
+# and go straight to fix → deploy → verify for those specific issues
+CRITICAL_COUNT=$(psql "$SRDB" -t -A -c "
+  SELECT COUNT(*) FROM qa_issues
+  WHERE status NOT IN ('closed', 'verified')
+    AND severity IN ('p0-critical', 'p1-high')
+")
+echo "Open critical/high issues: $CRITICAL_COUNT"
+```
+
+**If CRITICAL_COUNT > 0 AND these issues have reproduction steps:** Consider running `--fix-only` first to clear the backlog, then run full discovery. This avoids re-discovering known issues.
+
+#### Step 3: Load repair memory patterns
+
+```bash
+# Search MCP memory for past SourceRank repair patterns
+```
+
+```
+mcp__memory__search_nodes({ query: "repair:sourcerank" })
+mcp__memory__search_nodes({ query: "repair:rendering" })
+mcp__memory__search_nodes({ query: "repair:dashboard" })
+mcp__memory__search_nodes({ query: "repair:api" })
+```
+
+Store the retrieved patterns — pass them to fix agents in Phase 6 so they can apply known solutions.
 
 ### Phase 0: Initialize QA Session
 
@@ -728,7 +865,7 @@ psql "$SRDB" -t -A -c "
   FROM qa_feature_coverage WHERE session_id = '{sid}'
   GROUP BY persona ORDER BY persona
 "
-# Expected: sarah=11, marcus=9, diana=9, alex=8 — all untested
+# Expected: sarah=16, marcus=13, diana=11, alex=10 — all untested
 ```
 
 ### Phase 1: Environment Discovery
@@ -794,14 +931,14 @@ PREV_SESSION=$(psql "$SRDB" -t -A -c "
 
 #### Step 2c: Spawn ALL 4 Personas in Parallel
 
-**CRITICAL: Spawn all 4 in a SINGLE message with 4 parallel Task calls.** Do NOT spawn sequentially.
+**CRITICAL: You MUST include all 4 Task() calls in a SINGLE assistant response.** This is how parallel execution works in Claude Code — multiple Task tool calls in one message run concurrently. If you call Task once, wait for it, then call the next, they run SEQUENTIALLY which defeats the purpose. Put all 4 in ONE response.
 
 ```
-# ALL 4 spawned simultaneously in one message:
+# ALL 4 Task calls in ONE assistant message (they run in parallel automatically):
 
 Task({
   subagent_type: "general-purpose",
-  model: "haiku",
+  model: "sonnet",
   name: "sarah-tester",
   team_name: "qa-sourcerank-{session_id_short}",
   prompt: "{sarah persona prompt with full context}"
@@ -809,7 +946,7 @@ Task({
 
 Task({
   subagent_type: "general-purpose",
-  model: "haiku",
+  model: "sonnet",
   name: "marcus-tester",
   team_name: "qa-sourcerank-{session_id_short}",
   prompt: "{marcus persona prompt with full context}"
@@ -817,7 +954,7 @@ Task({
 
 Task({
   subagent_type: "general-purpose",
-  model: "haiku",
+  model: "sonnet",
   name: "diana-tester",
   team_name: "qa-sourcerank-{session_id_short}",
   prompt: "{diana persona prompt with full context}"
@@ -825,7 +962,7 @@ Task({
 
 Task({
   subagent_type: "general-purpose",
-  model: "haiku",
+  model: "sonnet",
   name: "alex-tester",
   team_name: "qa-sourcerank-{session_id_short}",
   prompt: "{alex persona prompt with full context}"
@@ -913,6 +1050,13 @@ SendMessage({
 })
 
 Write feedback AS THE PERSONA - first person, with their frustrations and satisfaction level.
+
+RESILIENCE RULES:
+- If a page shows empty content or takes >15s to load: wait 5 seconds, then retry ONCE. If still empty, mark as blocked.
+- If Chrome DevTools times out on navigation: try the page URL with curl to check if the server responds. If curl works but browser doesn't, note "client-side rendering failure" in the bug.
+- If you hit a crash or unrecoverable error on one feature: log it, mark it blocked, and CONTINUE to the next feature. NEVER stop early.
+- You MUST complete ALL features and send your final report even if most features are blocked. Partial results are valuable.
+- If you receive a broadcast about a known broken page, you can skip browser testing for that page but MUST still mark it as blocked with the referenced issue ID.
 
 IMPORTANT:
 - ALL bugs go to the database via psql. Do NOT write to files.
@@ -1206,11 +1350,66 @@ Task({
      psql \"$SRDB\" -t -A -c \"INSERT INTO qa_issue_comments (issue_id, author, comment_type, content) VALUES ({id}, 'opus-dev', 'fix', '{description}')\"
   5. Return a summary: which issues were fixed, what files were changed, and any issues you could not fix (with reason).
 
-  IMPORTANT: Make minimal, focused fixes. Do not refactor surrounding code. Do not add unnecessary comments or type annotations."
+  REPAIR MEMORY (patterns from past successful fixes — apply if relevant):
+  {repair_memory_patterns_from_preflight}
+
+  IMPORTANT: Make minimal, focused fixes. Do not refactor surrounding code. Do not add unnecessary comments or type annotations.
+
+  After fixing, return a structured summary:
+  {
+    'fixed_issues': [{ 'id': N, 'root_cause': '...', 'fix_approach': '...', 'files_changed': [...] }],
+    'unfixed_issues': [{ 'id': N, 'reason': '...' }],
+    'repair_pattern': { 'category': '...', 'symptom': '...', 'root_cause': '...', 'fix': '...', 'files': [...] }
+  }"
 })
 ```
 
 Spawn one opus Task per fix group. If fix groups are independent, spawn them in **parallel**.
+
+### Phase 6.5: Learn (Save Repair Patterns to Memory)
+
+After each fix group completes, save the successful repair pattern to MCP memory so future sessions can apply the same fix immediately:
+
+```
+# For each successful fix, create a memory entity
+mcp__memory__create_entities({
+  entities: [{
+    name: "repair:sourcerank:{category}:{short-description}",
+    entityType: "repair-pattern",
+    observations: [
+      "Discovered: {today's date}",
+      "Source: qa-sourcerank-fix",
+      "Project: sourcerank",
+      "Symptom: {what the personas reported — e.g., 'empty dashboard content'}",
+      "Root cause: {what was actually wrong — e.g., 'API response shape mismatch in agency.ts'}",
+      "Fix approach: {how it was fixed — e.g., 'changed destructuring to match {clients, total} shape'}",
+      "Files changed: {list of files}",
+      "Issue IDs: {original issue IDs from QA DB}",
+      "Verified: {true/false — did verification pass?}",
+      "Sessions applied: 1",
+      "Last used: {today's date}"
+    ]
+  }]
+})
+```
+
+**When loading patterns in Pre-Flight (for future sessions):**
+
+If a persona reports a symptom that matches a known repair pattern:
+
+1. Search memory: `mcp__memory__search_nodes({ query: "repair:sourcerank:{symptom_keywords}" })`
+2. If pattern found AND previously verified: apply the fix immediately without full triage
+3. Track usage: `mcp__memory__add_observations({ observations: [{ entityName: "repair:...", contents: ["Applied in: sourcerank - {date} - HELPFUL/NOT HELPFUL", "Sessions applied: {N+1}"] }] })`
+
+**Learning loop:**
+
+```
+Session 1: Discovery finds bug → Fix → Save pattern to memory
+Session 2: Same bug recurs → Pre-flight loads pattern → Fix immediately → Skip triage
+Session 3: Bug doesn't recur → Pattern is validated as permanent fix
+```
+
+This creates a **self-improving QA system** that gets faster at fixing known issue types over time.
 
 ### Phase 7: Verify (Compose /qa-verify or Parallel)
 
@@ -1230,13 +1429,13 @@ Task({
 
 **Option B: Parallel verification via swarm** (for many issues):
 
-Spawn haiku verification agents in parallel, one per issue or batch:
+Spawn sonnet verification agents in parallel, one per issue or batch:
 
 ```
 # Spawn verification agents in parallel
 Task({
   subagent_type: "general-purpose",
-  model: "haiku",
+  model: "sonnet",
   name: "verifier-batch-1",
   prompt: "Verify these QA issues are fixed on {url}:
     {issues_batch_1}
@@ -1245,7 +1444,7 @@ Task({
 
 Task({
   subagent_type: "general-purpose",
-  model: "haiku",
+  model: "sonnet",
   name: "verifier-batch-2",
   prompt: "Verify these QA issues are fixed on {url}:
     {issues_batch_2}
@@ -1506,29 +1705,7 @@ git push origin master
 # Verify production is back to healthy state
 ```
 
-## Opus-for-Decisions Pattern
-
-Use opus briefly for strategic thinking, then hand execution back to sonnet/haiku.
-Opus calls should be short, focused prompts — ask one question, get one answer.
-
-### When Opus Is Used
-
-Opus is the primary model for all decision-making AND bug fixing:
-
-1. **Post-Discovery Triage** (Phase 5) — Prioritize, group, filter artifacts
-2. **All Bug Fixing** (Phase 6) — Root cause analysis + code changes (one opus task per fix group, parallel)
-3. **Regression Analysis** (Phase 8) — Cross-session comparison
-4. **Deploy + Coverage Decision** (Phase 9) — Deploy yes/no + continue based on coverage %
-
-### Cost vs Quality Trade-off
-
-- **Opus is the primary developer** — all bug fixes use opus for highest-quality root cause analysis
-- **Opus also handles decisions** — triage, regression analysis, deploy decisions
-- **Haiku handles discovery** — 4 persona testers (cost-efficient browser exploration)
-- **Haiku handles verification** — re-testing fixed bugs (simple pass/fail checks)
-- **Sonnet orchestrates** — session setup, reports, cross-persona detection, deploy mechanics
-- Keep opus prompts **concise** — include only relevant data, not full file contents
-- Group related bugs into fix groups so opus solves them together (fewer calls, better context)
+## Model Allocation
 
 ### Model Flow per Phase
 
@@ -1536,32 +1713,37 @@ Opus is the primary model for all decision-making AND bug fixing:
   ┌───────────────────────────────────────────────────────────────┐
   │                                                               │
   ▼                                                               │
-Phase 0-1:  INIT+DISCOVER ENV:  sonnet (setup, psql, seed)        │
+PRE-FLIGHT: opus orchestrator (warmup, open issues, load memory)  │
                   ↓                                               │
-Phase 2:    DISCOVER:  haiku × 4 personas (PARALLEL swarm)        │
+Phase 0-1:  opus orchestrator (init session, seed, env discovery) │
                   ↓                                               │
-Phase 3:    CROSS-PERSONA:  sonnet (pattern detection)            │
+Phase 2:    DISCOVER:  sonnet × 4 personas (PARALLEL swarm)       │
                   ↓                                               │
-Phase 4:    REPORT:  sonnet (CTO + CPO from DB)                   │
+Phase 3-4:  opus orchestrator (cross-persona, reports, coverage)  │
                   ↓                                               │
-Phase 4.5:  COVERAGE:  sonnet (coverage matrix from DB)           │
+Phase 5:    TRIAGE:  opus inline (skip if root cause is obvious)  │
                   ↓                                               │
-     ┌── Phase 5 TRIAGE:  opus × 1 call (prioritize)             │
-     ↓                                                            │
-Phase 6:    FIX:  opus × N tasks (PARALLEL, one per fix group)    │
-     ↓                                                            │
-Phase 7:    VERIFY:  haiku × N tasks (browser re-testing)         │
+Phase 6:    FIX:  opus × N tasks (PARALLEL per fix group)         │
                   ↓                                               │
-Phase 8:    REGRESS:  opus × 1 call (cross-session)               │
+Phase 6.5:  LEARN: opus orchestrator (save repair patterns)       │
                   ↓                                               │
-     ┌── Phase 9 DEPLOY:  opus × 1 call (deploy + coverage?)     │
-     ↓                                                            │
-              sonnet (commit, push, verify deploy, unblock)       │
+Phase 7:    VERIFY: sonnet × N tasks (browser re-testing)         │
+                  ↓                                               │
+Phase 8-9:  opus orchestrator (regression, deploy, continue?)     │
                   ↓                                               │
             100% features approved?                               │
             NO  + cycle < 10 ─────────────────────────────────────┘
             YES → output final summary, stop
 ```
+
+### Why This Allocation
+
+- **Opus orchestrates everything** — best reasoning for never-abort behavior, triage, deploy decisions
+- **Opus fixes bugs** — highest-quality root cause analysis and code changes
+- **Sonnet discovers** — 4 persona testers (good enough for browser exploration, much cheaper than opus)
+- **Sonnet verifies** — re-testing fixed bugs (simple pass/fail checks)
+- Keep opus prompts **concise** — include only relevant data, not full file contents
+- Group related bugs into fix groups so opus solves them together (fewer calls, better context)
 
 ## Swarm Communication Protocol
 
@@ -1667,8 +1849,8 @@ SendMessage({
     }
   },
   "coverage": {
-    "totalFeatures": 37,
-    "approved": 37,
+    "totalFeatures": 50,
+    "approved": 50,
     "blocked": 0,
     "untested": 0,
     "coveragePct": 100
@@ -1698,11 +1880,22 @@ SendMessage({
 
 ## Version
 
-**Current Version:** 3.0.0
+**Current Version:** 4.0.0
 **Last Updated:** February 2026
 
 ### Changelog
 
+- **4.0.0**: Self-healing autonomous operation + repair memory
+  - Opus orchestrator (upgraded from sonnet) — better reasoning, never aborts
+  - Sonnet persona agents (upgraded from haiku) — more reliable browser testing
+  - **NEVER ABORT rule** — orchestrator always proceeds to fix phase, even if 100% features blocked
+  - **Pre-flight phase** — Render warmup, open issue check, repair memory loading
+  - **Repair memory** (Phase 6.5) — saves successful fix patterns to MCP memory for future sessions
+  - **Self-healing loop** — loads past repair patterns before fixing, applies known solutions immediately
+  - **Persona resilience** — retry on empty pages, timeout handling, always complete all features
+  - **Smart triage shortcut** — skip opus triage call when systemic root cause is obvious
+  - Architecture diagram updated to reflect opus orchestrator + memory feedback loop
+  - Model flow updated: opus orchestrates, sonnet discovers/verifies, opus fixes
 - **3.0.0**: Continuous coverage-driven QA + opus developer
   - Feature coverage tracking via `qa_feature_coverage` table (37 features across 4 personas)
   - Stop condition changed: cycle continues until 100% features approved (not just zero bugs)
@@ -1733,7 +1926,7 @@ SendMessage({
 
 ### Requirements
 
-- Chrome DevTools MCP (for browser testing)
+- Chrome DevTools MCP (for local browser) or Browserbase MCP (for cloud browser sessions — parallel personas without local Chrome)
 - Memory MCP (for pattern learning)
 - psql CLI (for SourceRank Supabase DB access)
 - Access to SourceRank production or local dev environment

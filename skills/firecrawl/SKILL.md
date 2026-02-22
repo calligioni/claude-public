@@ -20,6 +20,11 @@ tool-annotations:
   Bash: { destructiveHint: true, idempotentHint: false }
   mcp__firecrawl__*: { readOnlyHint: true, openWorldHint: true }
   mcp__memory__delete_entities: { destructiveHint: true, idempotentHint: true }
+invocation-contexts:
+  user-direct:
+    verbosity: high
+  agent-spawned:
+    verbosity: minimal
 ---
 
 # Firecrawl - Web Data Extraction Skill

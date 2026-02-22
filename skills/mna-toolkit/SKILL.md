@@ -32,6 +32,15 @@ tool-annotations:
   Write: { destructiveHint: false, idempotentHint: true }
   Edit: { destructiveHint: false, idempotentHint: true }
   mcp__firecrawl__*: { readOnlyHint: true, openWorldHint: true }
+invocation-contexts:
+  user-direct:
+    verbosity: high
+    confirmDestructive: true
+    outputFormat: markdown
+  agent-spawned:
+    verbosity: minimal
+    confirmDestructive: false
+    outputFormat: structured
 ---
 
 # M&A Toolkit

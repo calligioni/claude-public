@@ -10,6 +10,8 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+tool-annotations:
+  Bash: { readOnlyHint: false, idempotentHint: false }
 ---
 
 # Portfolio Financial Reporter

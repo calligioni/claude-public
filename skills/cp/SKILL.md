@@ -8,6 +8,8 @@ model: haiku
 allowed-tools:
   - Bash
 disable-model-invocation: true
+tool-annotations:
+  Bash: { readOnlyHint: false, idempotentHint: false }
 inject:
   - bash: git diff --stat
   - bash: git status --short

@@ -9,6 +9,8 @@ allowed-tools:
   - Bash
   - Read
   - Glob
+tool-annotations:
+  Bash: { readOnlyHint: true, idempotentHint: true }
 inject:
   - bash: ls package.json pyproject.toml go.mod Cargo.toml Makefile 2>/dev/null
 invocation-contexts:

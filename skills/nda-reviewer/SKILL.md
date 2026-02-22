@@ -12,9 +12,11 @@ allowed-tools:
   - Glob
   - Grep
   - Task
+tool-annotations:
+  Bash: { readOnlyHint: true, idempotentHint: true }
 inject:
-  - bash: ls /Users/ps/code/nuvini-nda/references/ 2>/dev/null | head -20
-  - bash: ls /Users/ps/code/nuvini-nda/output/ 2>/dev/null | head -10
+  - bash: ls "$HOME/code/nuvini-nda/references/" 2>/dev/null | head -20
+  - bash: ls "$HOME/code/nuvini-nda/output/" 2>/dev/null | head -10
 ---
 
 # NDA Reviewer Skill

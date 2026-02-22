@@ -1,6 +1,7 @@
 ---
 name: code-review-agent
 description: Multi-perspective code review orchestrator that spawns parallel specialist reviewers (security, performance, architecture, stack-specific) before PR submission. Use when code is ready for review, before creating PRs, or when you want comprehensive quality analysis.
+isolation: worktree
 allowed-tools: "*"
 color: purple
 model: opus

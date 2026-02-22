@@ -11,10 +11,13 @@ allowed-tools:
   - Task(agent_type=general-purpose)
   - Task(agent_type=Explore)
   - mcp__firecrawl__*
-  - TeammateTool
+  - TeamCreate
+  - TeamDelete
+  - SendMessage
   - TaskCreate
   - TaskUpdate
   - TaskList
+  - TaskGet
   - mcp__memory__*
 model: opus
 disable-model-invocation: true
@@ -161,7 +164,7 @@ The CPO AI skill uses these atomic primitives:
 - **Glob/Grep** - Code search and discovery
 - **Bash** - Execute commands (git, npm, test runners)
 - **TaskCreate/TaskUpdate/TaskList** - Progress tracking
-- **TeammateTool** - Swarm coordination for parallel work
+- **TeamCreate/SendMessage** - Swarm coordination for parallel work
 - **mcp**memory**\*** - Research caching and pattern learning
 
 **Key insight**: The skill does NOT implement custom workflow tools like `analyze_and_plan_product()` or `implement_stage()`. Instead, it uses atomic tools in a loop.

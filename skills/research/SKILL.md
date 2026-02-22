@@ -18,9 +18,16 @@ allowed-tools:
   - Task(agent_type=general-purpose)
   - AskUserQuestion
   - mcp__firecrawl__*
+  - mcp__browserbase__*
   - mcp__brave-search__*
   - mcp__memory__*
 memory: user
+tool-annotations:
+  Bash: { destructiveHint: true, idempotentHint: false }
+  Write: { destructiveHint: false, idempotentHint: true }
+  Edit: { destructiveHint: false, idempotentHint: true }
+  mcp__firecrawl__*: { readOnlyHint: true, openWorldHint: true }
+  mcp__memory__*: { readOnlyHint: false, idempotentHint: false }
 hooks:
   Stop:
     - hooks:

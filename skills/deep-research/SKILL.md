@@ -18,6 +18,7 @@ allowed-tools:
   - Task(agent_type=Explore)
   - AskUserQuestion
   - mcp__firecrawl__*
+  - mcp__browserbase__*
   - mcp__brave-search__*
   - mcp__memory__*
 memory: user
@@ -28,6 +29,15 @@ tool-annotations:
   mcp__memory__delete_entities: { destructiveHint: true, idempotentHint: true }
   mcp__firecrawl__*: { readOnlyHint: true, openWorldHint: true }
   mcp__brave-search__*: { readOnlyHint: true, openWorldHint: true }
+invocation-contexts:
+  user-direct:
+    verbosity: high
+    confirmDestructive: true
+    outputFormat: markdown
+  agent-spawned:
+    verbosity: minimal
+    confirmDestructive: false
+    outputFormat: structured
 ---
 
 > **Fast Mode:** This skill uses Claude Opus 4.6. Use `/fast` to toggle faster responses when speed is critical.

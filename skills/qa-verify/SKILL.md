@@ -17,8 +17,14 @@ allowed-tools:
   - Glob
   - Grep
   - mcp__chrome-devtools__*
+  - mcp__browserbase__*
   - mcp__memory__*
 memory: user
+tool-annotations:
+  Bash: { destructiveHint: true, idempotentHint: false }
+  Write: { destructiveHint: false, idempotentHint: true }
+  mcp__chrome-devtools__*: { readOnlyHint: false, openWorldHint: true }
+  mcp__memory__*: { readOnlyHint: false, idempotentHint: false }
 invocation-contexts:
   user-direct:
     verbosity: high
@@ -243,7 +249,7 @@ This skill runs fully autonomously without user interaction:
 
 ### Requirements
 
-- Chrome DevTools MCP (for browser navigation and verification)
+- Chrome DevTools MCP (for local browser navigation) or Browserbase MCP (for cloud browser sessions)
 - Running Contably environment (admin + client portal + API)
 - QA database schema (migration 029_qa_schema)
 - qa_manager.py CLI script (apps/api/scripts/qa_manager.py)

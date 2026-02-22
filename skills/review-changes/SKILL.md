@@ -9,6 +9,10 @@ allowed-tools:
   - Read
   - Glob
   - Grep
+tool-annotations:
+  Bash: { readOnlyHint: true, idempotentHint: true }
+  Read: { readOnlyHint: true, idempotentHint: true }
+  Grep: { readOnlyHint: true, idempotentHint: true }
 inject:
   - bash: git diff --cached --stat
   - bash: git diff --stat

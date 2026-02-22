@@ -104,11 +104,24 @@
           }
         ]
       }
+    ],
+    "ConfigChange": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p ~/.claude/logs && echo '[$(date)] Config changed: ${CONFIG_FILE}' >> ~/.claude/logs/config-changes.log"
+          }
+        ]
+      }
     ]
   },
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh"
+  },
+  "enabledPlugins": {
+    "swift-lsp@claude-plugins-official": true
   },
   "spinnerVerbs": {
     "mode": "append",
@@ -123,14 +136,14 @@
     ]
   },
   "spinnerTipsOverride": {
+    "excludeDefault": false,
     "tips": [
       "Use /mna triage to score M&A deals 0-10",
       "Use /ship for end-to-end feature delivery",
       "Use /optimize-setup to sync with Claude updates",
       "Use /research to analyze any URL or image",
       "Use /qa-cycle for full QA pass with Playwright"
-    ],
-    "excludeDefault": false
+    ]
   },
   "alwaysThinkingEnabled": false,
   "plansDirectory": "~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/plans",
@@ -243,8 +256,5 @@
         "description": "Web scraping, crawling, search, and autonomous data extraction via Firecrawl"
       }
     }
-  },
-  "enabledPlugins": {
-    "swift-lsp@claude-plugins-official": true
   }
 }

@@ -21,12 +21,24 @@ allowed-tools:
   - TaskUpdate
   - TaskList
   - TaskGet
+  - TeamCreate
+  - TeamDelete
+  - SendMessage
   - AskUserQuestion
 disable-model-invocation: true
 tool-annotations:
   Bash: { destructiveHint: true, idempotentHint: false }
   Write: { destructiveHint: false, idempotentHint: true }
   Edit: { destructiveHint: false, idempotentHint: true }
+invocation-contexts:
+  user-direct:
+    verbosity: high
+    confirmDestructive: true
+    outputFormat: markdown
+  agent-spawned:
+    verbosity: minimal
+    confirmDestructive: false
+    outputFormat: structured
 ---
 
 # Parallel Feature Development Skill

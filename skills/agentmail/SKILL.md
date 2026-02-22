@@ -14,6 +14,11 @@ allowed-tools:
   - AskUserQuestion
 tool-annotations:
   Bash: { destructiveHint: true, idempotentHint: false }
+invocation-contexts:
+  user-direct:
+    verbosity: high
+  agent-spawned:
+    verbosity: minimal
 ---
 
 # AgentMail - Email Inbox Manager for AI Agents

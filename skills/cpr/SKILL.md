@@ -8,6 +8,8 @@ model: haiku
 allowed-tools:
   - Bash
   - Read
+tool-annotations:
+  Bash: { readOnlyHint: false, idempotentHint: false }
 inject:
   - bash: git diff --stat HEAD 2>/dev/null || git diff --stat
   - bash: git log --oneline -5 2>/dev/null
