@@ -18,7 +18,7 @@ allowed-tools:
   - Task(agent_type=general-purpose)
   - AskUserQuestion
   - mcp__firecrawl__*
-  - mcp__browserbase__*
+  - mcp__browserless__*
   - mcp__brave-search__*
   - mcp__memory__*
 memory: user

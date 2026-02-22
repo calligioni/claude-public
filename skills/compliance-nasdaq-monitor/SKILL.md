@@ -20,7 +20,7 @@ allowed-tools:
   - mcp__memory__add_observations
   - mcp__memory__open_nodes
   - mcp__memory__read_graph
-  - mcp__browserbase__*
+  - mcp__browserless__*
 tool-annotations:
   mcp__google-workspace__gmail_send:
     { openWorldHint: true, idempotentHint: false }

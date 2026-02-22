@@ -14,7 +14,7 @@ allowed-tools:
   - WebFetch
   - WebSearch
   - mcp__firecrawl__*
-  - mcp__browserbase__*
+  - mcp__browserless__*
   - mcp__memory__*
 memory: user
 tool-annotations:

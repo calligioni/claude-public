@@ -24,7 +24,7 @@ allowed-tools:
   - Grep
   - WebSearch
   - mcp__chrome-devtools__*
-  - mcp__browserbase__*
+  - mcp__browserless__*
   - mcp__memory__*
   - mcp__postgres__*
 memory: user

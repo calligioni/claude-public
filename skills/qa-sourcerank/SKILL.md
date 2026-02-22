@@ -22,7 +22,7 @@ allowed-tools:
   - Grep
   - WebSearch
   - mcp__chrome-devtools__*
-  - mcp__browserbase__*
+  - mcp__browserless__*
   - mcp__memory__*
 memory: user
 tool-annotations:
@@ -1926,7 +1926,7 @@ SendMessage({
 
 ### Requirements
 
-- Chrome DevTools MCP (for local browser) or Browserbase MCP (for cloud browser sessions — parallel personas without local Chrome)
+- Chrome DevTools MCP (for local browser) or Browserless MCP (for cloud browser sessions — parallel personas without local Chrome)
 - Memory MCP (for pattern learning)
 - psql CLI (for SourceRank Supabase DB access)
 - Access to SourceRank production or local dev environment

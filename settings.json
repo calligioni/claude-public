@@ -254,6 +254,19 @@
           "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
         },
         "description": "Web scraping, crawling, search, and autonomous data extraction via Firecrawl"
+      },
+      "browserless": {
+        "command": "node",
+        "args": [
+          "/Users/ps/.claude/mcp-servers/browserless-mcp/dist/index.js"
+        ],
+        "env": {
+          "BROWSERLESS_HOST": "${BROWSERLESS_HOST}",
+          "BROWSERLESS_PORT": "${BROWSERLESS_PORT}",
+          "BROWSERLESS_TOKEN": "${BROWSERLESS_TOKEN}",
+          "BROWSERLESS_PROTOCOL": "${BROWSERLESS_PROTOCOL}"
+        },
+        "description": "Headless browser automation - PDFs, screenshots, scraping, Lighthouse audits, bot bypass"
       }
     }
   }

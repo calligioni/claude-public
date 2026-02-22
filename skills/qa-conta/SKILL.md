@@ -23,7 +23,7 @@ allowed-tools:
   - Grep
   - LSP
   - mcp__memory__*
-  - mcp__browserbase__*
+  - mcp__browserless__*
   - mcp__postgres__query
 memory: user
 tool-annotations:

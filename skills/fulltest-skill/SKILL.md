@@ -22,7 +22,7 @@ allowed-tools:
   - Glob
   - Grep
   - mcp__chrome-devtools__*
-  - mcp__browserbase__*
+  - mcp__browserless__*
   - mcp__memory__*
 memory: user
 tool-annotations:
@@ -459,7 +459,7 @@ const items = cart?.items || []
 
 ### Requirements
 
-- **Both Modes**: Chrome DevTools MCP or Browserbase MCP (cloud), Memory MCP
+- **Both Modes**: Chrome DevTools MCP or Browserless MCP (cloud), Memory MCP
 - **Sequential Mode**: Standard Claude Code
 - **Swarm Mode**: Requires `claude-sneakpeek` or official TeammateTool support
 

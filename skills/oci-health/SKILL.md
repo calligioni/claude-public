@@ -11,7 +11,7 @@ allowed-tools:
   - Glob
   - Grep
   - Write
-  - mcp__browserbase__*
+  - mcp__browserless__*
 tool-annotations:
   Bash: { readOnlyHint: true, idempotentHint: true, openWorldHint: true }
   Write: { destructiveHint: false, idempotentHint: true }
