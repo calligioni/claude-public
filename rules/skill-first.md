@@ -10,34 +10,37 @@ When you identify a matching skill, tell the user which skill you're invoking an
 
 ### Development Workflow
 
-| Task                          | Skill                   | When                                     |
-| ----------------------------- | ----------------------- | ---------------------------------------- |
-| Build a feature end-to-end    | `/ship`                 | Feature requires spec → implement → test |
-| Plan complex implementation   | `/deep-plan`            | Need research → plan → implement phases  |
-| Quick architecture advice     | `/cto`                  | Technical decision, swarm analysis       |
-| Break down hard problem       | `/first-principles`     | Ambiguous or complex problem             |
-| Run project tests + typecheck | `/verify`               | After making changes, before committing  |
-| Fix failing tests             | `/test-and-fix`         | Tests are broken, need auto-fix loop     |
-| Review code before commit     | `/review-changes`       | Uncommitted changes need review          |
-| Commit + push + PR            | `/cpr`                  | Ready to ship to remote                  |
-| Start local dev server        | `/run-local`            | Need to run project locally              |
-| Parallel feature branches     | `/parallel-dev`         | Multiple independent features            |
-| Clean unused files            | `/codebase-cleanup`     | Project has cruft                        |
-| Design website/landing page   | `/website-design`       | Any web UI design task                   |
-| Full project lifecycle        | `/project-orchestrator` | New project from zero to production      |
+| Task                          | Skill                   | When                                        |
+| ----------------------------- | ----------------------- | ------------------------------------------- |
+| Build a feature end-to-end    | `/ship`                 | Feature requires spec → implement → test    |
+| Plan complex implementation   | `/deep-plan`            | Need research → plan → implement phases     |
+| Quick architecture advice     | `/cto`                  | Technical decision, swarm analysis          |
+| Break down hard problem       | `/first-principles`     | Ambiguous or complex problem                |
+| Run project tests + typecheck | `/verify`               | After making changes, before committing     |
+| Fix failing tests             | `/test-and-fix`         | Tests are broken, need auto-fix loop        |
+| Review code before commit     | `/review-changes`       | Uncommitted changes need review             |
+| Commit + push + PR            | `/cpr`                  | Ready to ship to remote                     |
+| Start local dev server        | `/run-local`            | Need to run project locally                 |
+| Parallel feature branches     | `/parallel-dev`         | Multiple independent features               |
+| Clean unused files            | `/codebase-cleanup`     | Project has cruft                           |
+| Design website/landing page   | `/website-design`       | Any web UI design task                      |
+| Full project lifecycle        | `/project-orchestrator` | New project from zero to production         |
+| Commit + push (no PR)         | `/cp`                   | Ready to push, no PR needed                 |
+| Full product from idea        | `/cpo`                  | Product lifecycle: discovery → spec → build |
+| Git worktree management       | `/maketree`             | Create/manage isolated worktrees            |
 
 ### QA & Testing
 
-| Task                        | Skill                   | When                                       |
-| --------------------------- | ----------------------- | ------------------------------------------ |
-| Full QA cycle (any project) | `/qa-cycle`             | Master orchestrator — auto-detects project |
-| Contably QA specifically    | `/qa-conta`             | Contably-specific testing                  |
-| SourceRank QA specifically  | `/qa-sourcerank`        | SourceRank-specific testing                |
-| Fix issues from QA DB       | `/qa-fix`               | Open QA issues need fixing                 |
-| Verify fixed issues         | `/qa-verify`            | Issues in TESTING status                   |
-| Full-spectrum site testing  | `/fulltest-skill`       | Comprehensive swarm testing                |
-| Persona-based user testing  | `/virtual-user-testing` | Simulate real user journeys                |
-| Check Contably on OCI       | `/oci-health`           | Is Contably up?                            |
+| Task                        | Skill                   | When                                                                |
+| --------------------------- | ----------------------- | ------------------------------------------------------------------- |
+| Full QA cycle (any project) | `/qa-cycle`             | Master orchestrator — auto-detects project                          |
+| Contably QA specifically    | `/qa-conta`             | Contably-specific testing                                           |
+| SourceRank QA specifically  | `/qa-sourcerank`        | SourceRank-specific testing                                         |
+| Fix issues from QA DB       | `/qa-fix`               | Open QA issues need fixing                                          |
+| Verify fixed issues         | `/qa-verify`            | Issues in TESTING status                                            |
+| Full-spectrum site testing  | `/fulltest-skill`       | Sub-skill called by qa-cycle; or direct for standalone site testing |
+| Persona-based user testing  | `/virtual-user-testing` | Simulate real user journeys                                         |
+| Check Contably on OCI       | `/oci-health`           | Is Contably up?                                                     |
 
 ### Research & Analysis
 
@@ -64,6 +67,8 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Market scanning          | `/mna-market-scan`                     | Proactive deal sourcing         |
 | Financial model/proposal | `/financial-model`                     | IRR/MOIC analysis               |
 | Board presentation       | `/generate-deck`                       | M&A board deck                  |
+
+> **NDA Routing:** Use `/mna-nda-gen` to _generate_ outbound M&A NDAs. Use `/nda-reviewer` to _review_ incoming NDAs against templates. Use `/legal-contract-reviewer` for general contract review (including NDAs outside M&A context).
 
 ### Finance (Nuvini)
 

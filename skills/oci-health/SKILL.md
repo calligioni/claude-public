@@ -4,7 +4,7 @@ description: "Check if Contably on OCI is up. Tests API, admin dashboard, client
 argument-hint: "[environment: staging|production|both]"
 user-invocable: true
 context: fork
-model: sonnet
+model: haiku
 allowed-tools:
   - Bash
   - Read

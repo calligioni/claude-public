@@ -33,6 +33,39 @@ allowed-tools:
   - mcp__chrome-devtools__*
   - mcp__postgres__*
 memory: user
+slots:
+  runtime:
+    default: "node"
+    options: ["node", "bun", "deno"]
+    description: "JS runtime for build/test commands"
+  agent:
+    default: "claude-code"
+    options: ["claude-code", "codex", "aider"]
+    description: "Agent backend for task execution"
+  workspace:
+    default: "worktree"
+    options: ["worktree", "inline", "docker"]
+    description: "Isolation strategy for parallel task groups"
+  tracker:
+    default: "state-file"
+    options: ["state-file", "github-issues", "linear"]
+    description: "Task progress tracking backend"
+  notifier:
+    default: "console"
+    options: ["console", "slack", "discord"]
+    description: "Where completion/failure notifications go"
+  qa:
+    default: "auto-detect"
+    options: ["auto-detect", "chrome-devtools", "playwright", "none"]
+    description: "QA testing strategy"
+  learnings:
+    default: "local+mcp"
+    options: ["local+mcp", "local-only", "none"]
+    description: "Where learnings are stored"
+  vcs:
+    default: "git"
+    options: ["git", "gh-pr"]
+    description: "Version control workflow"
 tool-annotations:
   Bash: { destructiveHint: true, idempotentHint: false }
   Write: { destructiveHint: false, idempotentHint: true }
@@ -99,6 +132,40 @@ A disciplined 7-phase skill that takes a feature from idea to production. Each p
 │  └──────────┘   └──────────┘                                                        │
 └─────────────────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## Slot Configuration
+
+This skill uses a plugin-slot architecture. Each slot has a default but can be swapped without rewriting the skill. Override via `.claude/ship/config.json`.
+
+| Slot        | Default     | Alternatives                | Purpose                     |
+| ----------- | ----------- | --------------------------- | --------------------------- |
+| `runtime`   | node        | bun, deno                   | JS runtime for commands     |
+| `agent`     | claude-code | codex, aider                | Agent backend for execution |
+| `workspace` | worktree    | inline, docker              | Task group isolation        |
+| `tracker`   | state-file  | github-issues, linear       | Progress tracking           |
+| `notifier`  | console     | slack, discord              | Notification delivery       |
+| `qa`        | auto-detect | chrome-devtools, playwright | QA testing strategy         |
+| `learnings` | local+mcp   | local-only, none            | Learning storage            |
+| `vcs`       | git         | gh-pr                       | Version control workflow    |
+
+### Slot Resolution
+
+Slots resolve in order: defaults → `.claude/ship/config.json` → Phase 0 auto-detection.
+
+```json
+// .claude/ship/config.json (optional)
+{
+  "slots": {
+    "notifier": "slack",
+    "qa": "playwright",
+    "workspace": "docker"
+  }
+}
+```
+
+Skills that consume slots read `state.slots` during execution. Migrating from e.g. tmux to Docker isolation requires changing one slot value — zero rewriting of Phase 4 logic.
 
 ---
 
@@ -913,6 +980,7 @@ After writing ship-log.md, automatically run a retrospective:
 
 ## Version
 
+**v4.0.0** — Added eight-slot plugin architecture for swappable Runtime, Agent, Workspace, Tracker, Notifier, QA, Learnings, and VCS backends. Zero skill rewrites needed when migrating tools.
 **v3.0.0** — Added Phase -1: Project Init. When no existing project is detected, asks for directory, initializes git, and scaffolds the project before proceeding.
 **v2.1.0** — Added two-layer learnings system: project-local learnings.json + cross-project MCP Memory. Each run gets smarter from past runs via model routing corrections, QA failure patterns, fix solutions, and dependency gotchas.
 **v2.0.0** — Project-agnostic: auto-detects project type, package manager, commands, and QA skill via Phase 0

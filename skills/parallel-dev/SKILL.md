@@ -1,6 +1,6 @@
 ---
 name: parallel-dev
-description: "Parallel feature development using git worktrees and specialized agents. Orchestrates multiple features in isolation with progress monitoring and progressive merge."
+description: "Parallel feature development using git worktrees and specialized agents. Orchestrates multiple features in isolation with CI reaction loops, progress monitoring, and progressive merge. Delegates to `ao` CLI when available."
 user-invocable: true
 context: fork
 model: opus
@@ -26,6 +26,39 @@ allowed-tools:
   - SendMessage
   - AskUserQuestion
 disable-model-invocation: true
+slots:
+  runtime:
+    default: "node"
+    options: ["node", "bun", "deno"]
+    description: "JS runtime for orchestration scripts"
+  agent:
+    default: "claude-code"
+    options: ["claude-code", "codex", "aider", "ao"]
+    description: "Agent backend for worktree execution"
+  workspace:
+    default: "git-worktree"
+    options: ["git-worktree", "docker", "devcontainer"]
+    description: "Isolation strategy for parallel features"
+  tracker:
+    default: "state-file"
+    options: ["state-file", "github-issues", "linear"]
+    description: "Progress tracking backend"
+  notifier:
+    default: "console"
+    options: ["console", "slack", "discord", "telegram"]
+    description: "Where completion/failure notifications go"
+  terminal:
+    default: "inline"
+    options: ["inline", "tmux", "ao-dashboard"]
+    description: "How agent sessions are managed"
+  ci:
+    default: "github-actions"
+    options: ["github-actions", "none"]
+    description: "CI system to poll for reaction loops"
+  merger:
+    default: "git-merge"
+    options: ["git-merge", "gh-pr"]
+    description: "How completed features are integrated"
 tool-annotations:
   Bash: { destructiveHint: true, idempotentHint: false }
   Write: { destructiveHint: false, idempotentHint: true }
@@ -101,6 +134,159 @@ Reads `master-project.json` and parallelizes stages based on their `dependsOn` a
 ```bash
 /parallel-dev --config parallel-features.json
 ```
+
+## Slot Configuration
+
+This skill uses a plugin-slot architecture. Each slot has a default implementation but can be swapped without rewriting the skill. Override slots via `--slot.<name>=<value>` or in `.parallel-dev-config.json`.
+
+| Slot        | Default        | Alternatives             | Purpose                      |
+| ----------- | -------------- | ------------------------ | ---------------------------- |
+| `runtime`   | node           | bun, deno                | JS runtime for orchestration |
+| `agent`     | claude-code    | codex, aider, ao         | Agent backend per worktree   |
+| `workspace` | git-worktree   | docker, devcontainer     | Feature isolation strategy   |
+| `tracker`   | state-file     | github-issues, linear    | Progress tracking backend    |
+| `notifier`  | console        | slack, discord, telegram | Notification delivery        |
+| `terminal`  | inline         | tmux, ao-dashboard       | Agent session management     |
+| `ci`        | github-actions | none                     | CI system for reaction loops |
+| `merger`    | git-merge      | gh-pr                    | Feature integration method   |
+
+### Slot Resolution
+
+```javascript
+function resolveSlots(cliArgs, configFile) {
+  const defaults = {
+    runtime: "node",
+    agent: "claude-code",
+    workspace: "git-worktree",
+    tracker: "state-file",
+    notifier: "console",
+    terminal: "inline",
+    ci: "github-actions",
+    merger: "git-merge",
+  };
+
+  // 1. Start with defaults
+  const slots = { ...defaults };
+
+  // 2. Override from config file
+  if (configFile?.slots) Object.assign(slots, configFile.slots);
+
+  // 3. Override from CLI args (highest priority)
+  for (const [key, value] of Object.entries(cliArgs)) {
+    if (key.startsWith("slot.")) {
+      const slotName = key.replace("slot.", "");
+      if (slotName in defaults) slots[slotName] = value;
+    }
+  }
+
+  // 4. Auto-detect ao CLI
+  if (slots.agent === "claude-code") {
+    const aoAvailable = execSync("which ao 2>/dev/null").toString().trim();
+    if (aoAvailable) {
+      slots.agent = "ao";
+      slots.terminal = "ao-dashboard";
+      console.log(
+        "Detected `ao` CLI — delegating session management to agent-orchestrator",
+      );
+    }
+  }
+
+  return slots;
+}
+```
+
+### Example Override
+
+```bash
+# Use Docker isolation + Linear tracking + Slack notifications
+/parallel-dev --slot.workspace=docker --slot.tracker=linear --slot.notifier=slack
+
+# Or via config file
+echo '{ "slots": { "workspace": "docker", "tracker": "linear" } }' > .parallel-dev-config.json
+/parallel-dev
+```
+
+---
+
+## `ao` CLI Delegation
+
+When `ao` (agent-orchestrator) is detected on PATH, the skill delegates session management to it instead of managing tmux/worktrees manually.
+
+### Detection
+
+```bash
+# Run at skill startup, before Phase 0
+if command -v ao &>/dev/null; then
+  AO_AVAILABLE=true
+  AO_VERSION=$(ao --version 2>/dev/null || echo "unknown")
+  echo "agent-orchestrator detected (${AO_VERSION}) — delegating to ao"
+fi
+```
+
+### Delegation Flow
+
+When `ao` is available and `slots.agent === 'ao'`:
+
+```javascript
+async function delegateToAO(features, projectRoot) {
+  // 1. Generate ao-compatible manifest from parsed features
+  const manifest = {
+    project: projectRoot,
+    agents: features.map((f) => ({
+      name: f.id,
+      branch: `feature/${f.id}`,
+      agent: selectAOAgent(f.type), // claude|codex|aider
+      prompt: buildAgentPrompt(f),
+      dependsOn: f.dependsOn.map((d) => `feature/${d}`),
+    })),
+  };
+
+  // 2. Write manifest
+  fs.writeFileSync(".ao-manifest.json", JSON.stringify(manifest, null, 2));
+
+  // 3. Spawn via ao CLI
+  await exec(`ao spawn --manifest .ao-manifest.json --ci-react`);
+
+  // 4. Monitor via ao dashboard (opens localhost:3000)
+  await exec(`ao dashboard &`);
+
+  // 5. Poll ao status instead of custom monitoring
+  return pollAOStatus(features);
+}
+
+async function pollAOStatus(features) {
+  while (true) {
+    const status = JSON.parse(await exec("ao status --json"));
+
+    for (const agent of status.agents) {
+      const feature = features.find((f) => f.id === agent.name);
+      if (!feature) continue;
+
+      feature.status = mapAOStatus(agent.status);
+      // ao handles CI reaction internally with --ci-react flag
+
+      if (agent.status === "merged") {
+        feature.mergedAt = agent.completedAt;
+      }
+    }
+
+    if (features.every((f) => ["merged", "failed"].includes(f.status))) break;
+    await sleep(15000);
+  }
+}
+
+function selectAOAgent(featureType) {
+  // ao supports claude, codex, aider as agent backends
+  // Default to claude for all types; user can override via slots
+  return "claude";
+}
+```
+
+### Fallback
+
+If `ao` is NOT available, the skill falls back to the native worktree + Task tool approach (Phase 2-5 below).
+
+---
 
 ## Execution Flow
 
@@ -351,6 +537,154 @@ while (hasActiveFeatures()) {
 }
 ```
 
+### Phase 4.5: CI Reaction Loop
+
+When `slots.ci !== 'none'`, the monitoring loop (Phase 4) also polls GitHub Actions for CI failures on feature branches and routes failure logs back to the responsible agent for autonomous remediation.
+
+**Key principle:** Human notifications are reserved only for decisions requiring genuine judgment. CI failures, lint errors, and test regressions are routed back to agents automatically.
+
+```javascript
+async function ciReactionLoop(features, state) {
+  const CI_POLL_INTERVAL = 45000; // 45 seconds (avoid rate limits)
+  const MAX_CI_RETRIES = 2; // Max times to re-route a failure to agent
+
+  for (const feature of getActiveFeatures(state)) {
+    if (!feature.branch) continue;
+
+    // 1. Check latest CI run for this branch
+    const runs = await exec(
+      `gh run list --branch ${feature.branch} --limit 1 --json status,conclusion,databaseId,name`,
+    );
+    const latestRun = JSON.parse(runs)[0];
+    if (!latestRun) continue;
+
+    // 2. Skip if still running or already succeeded
+    if (
+      latestRun.status === "in_progress" ||
+      latestRun.conclusion === "success"
+    )
+      continue;
+
+    // 3. CI failed — extract failure logs
+    if (latestRun.conclusion === "failure") {
+      const failedJobs = await exec(
+        `gh run view ${latestRun.databaseId} --json jobs --jq '.jobs[] | select(.conclusion=="failure") | .name'`,
+      );
+      const failureLog = await exec(
+        `gh run view ${latestRun.databaseId} --log-failed 2>/dev/null | tail -100`,
+      );
+
+      // 4. Track CI failure count per feature
+      feature.ciFailures = (feature.ciFailures || 0) + 1;
+
+      if (feature.ciFailures <= MAX_CI_RETRIES) {
+        // 5. Route failure back to the responsible agent
+        console.log(
+          `CI failed for ${feature.name} (attempt ${feature.ciFailures}) — routing to agent`,
+        );
+
+        await respawnAgentWithCIFix(feature, {
+          failedJobs: failedJobs.trim().split("\n"),
+          log: failureLog.trim(),
+          runId: latestRun.databaseId,
+          runName: latestRun.name,
+        });
+      } else {
+        // 6. Max retries exceeded — escalate to human
+        feature.status = "ci-failed";
+        notify(
+          `CI for ${feature.name} failed ${MAX_CI_RETRIES} times. ` +
+            `Failed jobs: ${failedJobs.trim()}. Manual intervention needed.`,
+        );
+      }
+    }
+  }
+}
+
+async function respawnAgentWithCIFix(feature, ciContext) {
+  const agentType = selectAgentType(feature.type);
+
+  // Spawn a fix agent with CI context
+  const fixPrompt = `
+## CI Failure Fix: ${feature.name}
+
+The CI pipeline failed for branch \`${feature.branch}\`.
+
+### Failed Jobs
+${ciContext.failedJobs.map((j) => `- ${j}`).join("\n")}
+
+### Failure Log (last 100 lines)
+\`\`\`
+${ciContext.log}
+\`\`\`
+
+### Instructions
+1. Read the failure log carefully
+2. Identify the root cause (test failure, lint error, type error, build error)
+3. Fix the issue in the relevant files
+4. Run the failing command locally to verify
+5. Commit the fix: \`fix(${feature.id}): resolve CI failure - ${ciContext.failedJobs[0]}\`
+6. Push to trigger a new CI run
+
+### Constraints
+- Only fix what's broken — do not refactor unrelated code
+- If the failure is a flaky test, add a retry or skip with TODO comment
+- If the failure requires architectural changes, create .ci-escalate marker instead
+  `;
+
+  // Respawn agent in the same worktree
+  await spawnAgent(agentType, {
+    ...feature,
+    prompt: fixPrompt,
+    isFixAgent: true,
+  });
+}
+```
+
+**CI Reaction Dashboard Extension:**
+
+```
+╔══════════════════════════════════════════════════════════════╗
+║ Feature          │ Agent      │ Status      │ CI             ║
+╠──────────────────┼────────────┼─────────────┼────────────────╣
+║ auth             │ backend    │ ████████░░  │ ✓ passing      ║
+║ api-endpoints    │ api-agent  │ ██████████  │ ✓ merged       ║
+║ dashboard        │ frontend   │ ██████░░░░  │ ⟳ fixing (#2)  ║
+║ payment          │ backend    │ ░░░░░░░░░░  │ — blocked      ║
+╠══════════════════════════════════════════════════════════════╣
+║ CI Reactions: 3 total │ 2 auto-fixed │ 1 in-progress        ║
+╚══════════════════════════════════════════════════════════════╝
+```
+
+**State Persistence for CI:**
+
+```json
+{
+  "features": [
+    {
+      "id": "dashboard",
+      "ciFailures": 2,
+      "ciHistory": [
+        {
+          "runId": 12345,
+          "conclusion": "failure",
+          "autoFixed": true,
+          "fixCommit": "abc1234"
+        },
+        {
+          "runId": 12350,
+          "conclusion": "failure",
+          "autoFixed": false,
+          "escalated": true
+        }
+      ]
+    }
+  ]
+}
+```
+
+---
+
 ### Phase 5: Progressive Merge
 
 ```bash
@@ -565,6 +899,11 @@ if (hasCycle(graph)) {
   throw new Error(`Dependency cycle detected: ${cycle.join(" -> ")}`);
 }
 ```
+
+## Version History
+
+**v2.0.0** — Added CI reaction loops (Phase 4.5), eight-slot plugin architecture, and `ao` CLI delegation. Inspired by [ComposioHQ/agent-orchestrator](https://github.com/ComposioHQ/agent-orchestrator).
+**v1.0.0** — Initial release with worktree-based parallel development, dependency graphs, and progressive merge.
 
 ## Model Configuration
 

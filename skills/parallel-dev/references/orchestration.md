@@ -16,15 +16,15 @@ async function runPreflightVerification(features, projectRoot) {
     const verification = {
       featureId: feature.id,
       featureName: feature.name,
-      status: 'clear',
+      status: "clear",
       warnings: [],
-      blockers: []
+      blockers: [],
     };
 
     // 1. Check master-project.json status
     const stageStatus = getStageStatus(feature.id);
-    if (stageStatus === 'completed' || stageStatus === 'tested') {
-      verification.status = 'skip';
+    if (stageStatus === "completed" || stageStatus === "tested") {
+      verification.status = "skip";
       verification.blockers.push(`Stage already marked as ${stageStatus}`);
       results.push(verification);
       continue;
@@ -34,9 +34,9 @@ async function runPreflightVerification(features, projectRoot) {
     const keyFiles = await findImplementationFiles(feature, projectRoot);
     if (keyFiles.length > 0) {
       verification.warnings.push({
-        type: 'existing_files',
+        type: "existing_files",
         message: `Found ${keyFiles.length} potentially related files`,
-        files: keyFiles.slice(0, 5)
+        files: keyFiles.slice(0, 5),
       });
     }
 
@@ -44,9 +44,9 @@ async function runPreflightVerification(features, projectRoot) {
     const relatedCommits = await findRelatedCommits(feature, projectRoot);
     if (relatedCommits.length > 0) {
       verification.warnings.push({
-        type: 'git_history',
+        type: "git_history",
         message: `Found ${relatedCommits.length} related commits`,
-        commits: relatedCommits
+        commits: relatedCommits,
       });
     }
 
@@ -54,9 +54,9 @@ async function runPreflightVerification(features, projectRoot) {
     const progressMentions = await checkProgressFiles(feature, projectRoot);
     if (progressMentions.length > 0) {
       verification.warnings.push({
-        type: 'progress_tracking',
-        message: 'Feature mentioned in progress tracking',
-        mentions: progressMentions
+        type: "progress_tracking",
+        message: "Feature mentioned in progress tracking",
+        mentions: progressMentions,
       });
     }
 
@@ -64,15 +64,15 @@ async function runPreflightVerification(features, projectRoot) {
     const criteriaStatus = await checkAcceptanceCriteria(feature, projectRoot);
     if (criteriaStatus.metCount > 0) {
       verification.warnings.push({
-        type: 'criteria_met',
+        type: "criteria_met",
         message: `${criteriaStatus.metCount}/${criteriaStatus.totalCount} acceptance criteria may be satisfied`,
-        details: criteriaStatus.met
+        details: criteriaStatus.met,
       });
     }
 
     // Set status based on findings
     if (verification.warnings.length > 0) {
-      verification.status = 'review';
+      verification.status = "review";
     }
 
     results.push(verification);
@@ -93,21 +93,21 @@ async function findImplementationFiles(feature, projectRoot) {
     const globPattern = `**/*${keyword}*`;
     const files = await glob(globPattern, {
       cwd: projectRoot,
-      ignore: ['node_modules/**', '.git/**', 'dist/**']
+      ignore: ["node_modules/**", ".git/**", "dist/**"],
     });
     patterns.push(...files);
   }
 
   // Also grep for specific identifiers
   for (const story of feature.tasks) {
-    const storyId = story.id || '';
+    const storyId = story.id || "";
     if (storyId) {
       const grepResult = await exec(
         `grep -rl "${storyId}" --include="*.ts" --include="*.tsx" . 2>/dev/null || true`,
-        { cwd: projectRoot }
+        { cwd: projectRoot },
       );
       if (grepResult.stdout.trim()) {
-        patterns.push(...grepResult.stdout.trim().split('\n'));
+        patterns.push(...grepResult.stdout.trim().split("\n"));
       }
     }
   }
@@ -120,17 +120,17 @@ async function findRelatedCommits(feature, projectRoot) {
   const searchTerms = [
     feature.id,
     feature.name,
-    ...feature.tasks.map(t => t.id).filter(Boolean)
+    ...feature.tasks.map((t) => t.id).filter(Boolean),
   ];
 
   const commits = [];
   for (const term of searchTerms) {
     const result = await exec(
       `git log --oneline --all --grep="${term}" -n 3 2>/dev/null || true`,
-      { cwd: projectRoot }
+      { cwd: projectRoot },
     );
     if (result.stdout.trim()) {
-      commits.push(...result.stdout.trim().split('\n'));
+      commits.push(...result.stdout.trim().split("\n"));
     }
   }
 
@@ -142,16 +142,28 @@ function extractKeywords(feature) {
   const keywords = new Set();
 
   // From feature name (convert to likely filenames)
-  const nameWords = feature.name.toLowerCase()
-    .replace(/[^a-z0-9\s]/g, '')
+  const nameWords = feature.name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")
     .split(/\s+/)
-    .filter(w => w.length > 3);
-  nameWords.forEach(w => keywords.add(w));
+    .filter((w) => w.length > 3);
+  nameWords.forEach((w) => keywords.add(w));
 
   // Technical terms from tasks
   const techTerms = [
-    'stripe', 'sentry', 'posthog', 'oauth', 'jwt', 'csp', 'cors',
-    'prisma', 'redis', 'webhook', 'billing', 'subscription', 'payment'
+    "stripe",
+    "sentry",
+    "posthog",
+    "oauth",
+    "jwt",
+    "csp",
+    "cors",
+    "prisma",
+    "redis",
+    "webhook",
+    "billing",
+    "subscription",
+    "payment",
   ];
 
   for (const task of feature.tasks) {
@@ -171,53 +183,62 @@ function extractKeywords(feature) {
 
 ```javascript
 async function handleVerificationWarnings(results) {
-  const needsReview = results.filter(r => r.status === 'review');
-  const blocked = results.filter(r => r.status === 'skip');
-  const clear = results.filter(r => r.status === 'clear');
+  const needsReview = results.filter((r) => r.status === "review");
+  const blocked = results.filter((r) => r.status === "skip");
+  const clear = results.filter((r) => r.status === "clear");
 
   // Display summary
-  console.log('\n╔══════════════════════════════════════════════════════════════╗');
-  console.log('║ PRE-FLIGHT VERIFICATION RESULTS                              ║');
-  console.log('╠══════════════════════════════════════════════════════════════╣');
+  console.log(
+    "\n╔══════════════════════════════════════════════════════════════╗",
+  );
+  console.log(
+    "║ PRE-FLIGHT VERIFICATION RESULTS                              ║",
+  );
+  console.log(
+    "╠══════════════════════════════════════════════════════════════╣",
+  );
 
   for (const r of results) {
-    const icon = r.status === 'clear' ? '✓' :
-                 r.status === 'skip' ? '✗' : '⚠';
+    const icon = r.status === "clear" ? "✓" : r.status === "skip" ? "✗" : "⚠";
     const statusText = r.status.toUpperCase().padEnd(8);
-    console.log(`║ ${icon} ${r.featureName.padEnd(25)} │ ${statusText} │ ${r.warnings.length} warnings`);
+    console.log(
+      `║ ${icon} ${r.featureName.padEnd(25)} │ ${statusText} │ ${r.warnings.length} warnings`,
+    );
   }
 
-  console.log('╚══════════════════════════════════════════════════════════════╝');
+  console.log(
+    "╚══════════════════════════════════════════════════════════════╝",
+  );
 
   // If any need review, ask user
   if (needsReview.length > 0) {
-    console.log('\n⚠ Some features have warnings that need review:\n');
+    console.log("\n⚠ Some features have warnings that need review:\n");
 
     for (const r of needsReview) {
       console.log(`\n### ${r.featureName}`);
       for (const w of r.warnings) {
         console.log(`  - ${w.type}: ${w.message}`);
-        if (w.files) console.log(`    Files: ${w.files.join(', ')}`);
-        if (w.commits) console.log(`    Commits: ${w.commits.join(', ')}`);
+        if (w.files) console.log(`    Files: ${w.files.join(", ")}`);
+        if (w.commits) console.log(`    Commits: ${w.commits.join(", ")}`);
       }
     }
 
     // Ask user what to do
     const response = await askUser({
-      question: 'How do you want to proceed with features that have warnings?',
+      question: "How do you want to proceed with features that have warnings?",
       options: [
-        { label: 'Review each', value: 'review' },
-        { label: 'Skip all with warnings', value: 'skip' },
-        { label: 'Proceed anyway', value: 'proceed' },
-        { label: 'Abort', value: 'abort' }
-      ]
+        { label: "Review each", value: "review" },
+        { label: "Skip all with warnings", value: "skip" },
+        { label: "Proceed anyway", value: "proceed" },
+        { label: "Abort", value: "abort" },
+      ],
     });
 
     return handleUserResponse(response, results);
   }
 
   // Auto-proceed if all clear
-  return results.filter(r => r.status === 'clear');
+  return results.filter((r) => r.status === "clear");
 }
 ```
 
@@ -228,8 +249,8 @@ async function handleVerificationWarnings(results) {
 ```javascript
 class DependencyGraph {
   constructor(features) {
-    this.features = new Map();  // id -> Feature
-    this.edges = new Map();     // id -> Set<dependentIds>
+    this.features = new Map(); // id -> Feature
+    this.edges = new Map(); // id -> Set<dependentIds>
     this.reverseEdges = new Map(); // id -> Set<dependencyIds>
 
     for (const feature of features) {
@@ -250,12 +271,12 @@ class DependencyGraph {
   getReadyFeatures() {
     const ready = [];
     for (const [id, feature] of this.features) {
-      if (feature.status !== 'pending') continue;
+      if (feature.status !== "pending") continue;
 
       const deps = this.reverseEdges.get(id);
-      const allDepsMet = [...deps].every(depId => {
+      const allDepsMet = [...deps].every((depId) => {
         const dep = this.features.get(depId);
-        return dep && (dep.status === 'merged' || dep.status === 'completed');
+        return dep && (dep.status === "merged" || dep.status === "completed");
       });
 
       if (allDepsMet) {
@@ -297,16 +318,16 @@ class DependencyGraph {
   // Mark feature as complete and check what's unblocked
   markComplete(id) {
     const feature = this.features.get(id);
-    feature.status = 'completed';
+    feature.status = "completed";
 
     const unblocked = [];
     for (const dependentId of this.edges.get(id) || []) {
       const dependent = this.features.get(dependentId);
-      if (dependent.status === 'pending') {
+      if (dependent.status === "pending") {
         const deps = this.reverseEdges.get(dependentId);
-        const allMet = [...deps].every(d => {
+        const allMet = [...deps].every((d) => {
           const dep = this.features.get(d);
-          return dep.status === 'merged' || dep.status === 'completed';
+          return dep.status === "merged" || dep.status === "completed";
         });
         if (allMet) {
           unblocked.push(dependent);
@@ -327,7 +348,7 @@ function topologicalSort(graph) {
   const temp = new Set();
 
   function visit(id) {
-    if (temp.has(id)) throw new Error('Cycle detected');
+    if (temp.has(id)) throw new Error("Cycle detected");
     if (visited.has(id)) return;
 
     temp.add(id);
@@ -410,7 +431,7 @@ function topologicalSort(graph) {
 ```javascript
 // State structure for tracking agents
 const agentTracker = {
-  agents: new Map(),  // featureId -> { agentId, outputFile, startedAt }
+  agents: new Map(), // featureId -> { agentId, outputFile, startedAt }
 
   spawn(feature, agentType) {
     // Task tool returns agentId
@@ -419,7 +440,7 @@ const agentTracker = {
       agentId: result.agentId,
       outputFile: result.outputFile,
       startedAt: new Date(),
-      feature: feature
+      feature: feature,
     });
   },
 
@@ -437,9 +458,9 @@ const agentTracker = {
     return {
       output,
       isComplete,
-      elapsed: Date.now() - agent.startedAt.getTime()
+      elapsed: Date.now() - agent.startedAt.getTime(),
     };
-  }
+  },
 };
 ```
 
@@ -447,8 +468,8 @@ const agentTracker = {
 
 ```javascript
 async function monitorProgress(state) {
-  const POLL_INTERVAL = 30000;  // 30 seconds
-  const MAX_RUNTIME = 3600000;  // 1 hour per feature
+  const POLL_INTERVAL = 30000; // 30 seconds
+  const MAX_RUNTIME = 3600000; // 1 hour per feature
 
   while (hasActiveFeatures(state)) {
     // Check each active feature
@@ -460,8 +481,8 @@ async function monitorProgress(state) {
         await handleFeatureComplete(feature, state);
       } else if (progress.elapsed > MAX_RUNTIME) {
         // Timeout - mark as failed
-        feature.status = 'failed';
-        feature.failureReason = 'Timeout';
+        feature.status = "failed";
+        feature.failureReason = "Timeout";
         notify(`Feature ${feature.name} timed out after 1 hour`);
       }
     }
@@ -469,7 +490,7 @@ async function monitorProgress(state) {
     // Check for newly unblocked features
     const ready = state.graph.getReadyFeatures();
     for (const feature of ready) {
-      if (feature.status === 'pending') {
+      if (feature.status === "pending") {
         await spawnFeatureAgent(feature, state);
       }
     }
@@ -492,14 +513,14 @@ async function handleFeatureComplete(feature, state) {
   const testResult = await runTests(feature.worktree);
 
   if (testResult.passed) {
-    feature.status = 'completed';
+    feature.status = "completed";
     feature.completedAt = new Date();
 
     // 3. Attempt merge to integration
     await attemptMerge(feature, state);
   } else {
     // Tests failed - agent needs to fix
-    feature.status = 'testing-failed';
+    feature.status = "testing-failed";
     feature.testFailures = testResult.failures;
 
     // Optionally: respawn agent to fix
@@ -507,6 +528,81 @@ async function handleFeatureComplete(feature, state) {
   }
 }
 ```
+
+## CI Reaction Loop
+
+Integrated into the monitoring loop (Phase 4). Polls GitHub Actions for CI failures and routes them back to responsible agents.
+
+```javascript
+// Called every CI_POLL_INTERVAL within monitorProgress()
+async function runCIReactionLoop(state) {
+  if (state.slots?.ci === "none") return;
+
+  for (const feature of getActiveFeatures(state)) {
+    if (!feature.branch) continue;
+
+    // Poll latest CI run
+    const result = await exec(
+      `gh run list --branch ${feature.branch} --limit 1 --json status,conclusion,databaseId`,
+    );
+    const run = JSON.parse(result)[0];
+    if (!run || run.status === "in_progress" || run.conclusion === "success")
+      continue;
+
+    if (run.conclusion === "failure") {
+      feature.ciFailures = (feature.ciFailures || 0) + 1;
+
+      // Extract failure context
+      const log = await exec(
+        `gh run view ${run.databaseId} --log-failed 2>/dev/null | tail -100`,
+      );
+
+      if (feature.ciFailures <= 2) {
+        // Route back to agent
+        await respawnForCIFix(feature, log.trim());
+      } else {
+        // Escalate to human
+        feature.status = "ci-failed";
+        notify(
+          `CI for ${feature.name} failed ${feature.ciFailures} times. Manual intervention needed.`,
+        );
+      }
+    }
+  }
+}
+
+async function respawnForCIFix(feature, failureLog) {
+  const agentType = selectAgentType(feature.type);
+  await spawnAgent(agentType, {
+    ...feature,
+    prompt: `Fix CI failure for ${feature.name}.\n\nFailure log:\n${failureLog}\n\nFix the issue, commit, and push.`,
+    isFixAgent: true,
+  });
+}
+```
+
+### CI Reaction State Tracking
+
+```json
+{
+  "id": "dashboard",
+  "ciFailures": 1,
+  "ciHistory": [
+    {
+      "runId": 12345,
+      "conclusion": "failure",
+      "autoFixed": true,
+      "fixCommit": "abc1234"
+    }
+  ]
+}
+```
+
+### When `ao` is Available
+
+If `slots.agent === 'ao'`, skip the custom CI reaction loop entirely — `ao spawn --ci-react` handles this natively. The `ao` CLI monitors GitHub Actions and re-routes failures to the responsible agent session automatically.
+
+---
 
 ## Merge Coordination
 
@@ -516,33 +612,35 @@ async function attemptMerge(feature, state) {
 
   try {
     // 1. Ensure integration branch exists
-    await ensureBranch(integrationBranch, 'main');
+    await ensureBranch(integrationBranch, "main");
 
     // 2. Attempt merge
     await exec(`git checkout ${integrationBranch}`, { cwd: state.mainRepo });
-    await exec(`git merge feature/${feature.id} --no-ff -m "Merge ${feature.name}"`, {
-      cwd: state.mainRepo
-    });
+    await exec(
+      `git merge feature/${feature.id} --no-ff -m "Merge ${feature.name}"`,
+      {
+        cwd: state.mainRepo,
+      },
+    );
 
     // 3. Run integration tests
     const integrationTests = await runIntegrationTests(state.mainRepo);
 
     if (integrationTests.passed) {
-      feature.status = 'merged';
+      feature.status = "merged";
       feature.mergedAt = new Date();
       state.graph.markComplete(feature.id);
     } else {
       // Integration tests failed after merge
       await exec(`git reset --hard HEAD~1`, { cwd: state.mainRepo });
-      feature.status = 'integration-failed';
+      feature.status = "integration-failed";
       feature.integrationFailures = integrationTests.failures;
     }
-
   } catch (error) {
-    if (error.message.includes('CONFLICT')) {
+    if (error.message.includes("CONFLICT")) {
       // Merge conflict
       await exec(`git merge --abort`, { cwd: state.mainRepo });
-      feature.status = 'conflict';
+      feature.status = "conflict";
       feature.conflictDetails = await getConflictDetails();
 
       // Pause all merging
@@ -565,7 +663,7 @@ function saveState(state) {
     startedAt: state.startedAt,
     integrationBranch: state.integrationBranch,
     mainRepo: state.mainRepo,
-    features: Array.from(state.features.values()).map(f => ({
+    features: Array.from(state.features.values()).map((f) => ({
       id: f.id,
       name: f.name,
       type: f.type,
@@ -577,22 +675,25 @@ function saveState(state) {
       agentId: f.agentId,
       completedAt: f.completedAt,
       mergedAt: f.mergedAt,
-      failureReason: f.failureReason
+      failureReason: f.failureReason,
     })),
     mergingPaused: state.mergingPaused,
-    conflicts: state.conflicts
+    conflicts: state.conflicts,
   };
 
-  fs.writeFileSync('.parallel-dev-state.json', JSON.stringify(serializable, null, 2));
+  fs.writeFileSync(
+    ".parallel-dev-state.json",
+    JSON.stringify(serializable, null, 2),
+  );
 }
 
 // Load state for resume
 function loadState() {
-  if (!fs.existsSync('.parallel-dev-state.json')) {
+  if (!fs.existsSync(".parallel-dev-state.json")) {
     return null;
   }
 
-  const data = JSON.parse(fs.readFileSync('.parallel-dev-state.json', 'utf-8'));
+  const data = JSON.parse(fs.readFileSync(".parallel-dev-state.json", "utf-8"));
 
   // Reconstruct graph
   data.graph = new DependencyGraph(data.features);
@@ -601,7 +702,7 @@ function loadState() {
   for (const feature of data.features) {
     if (feature.worktree && !fs.existsSync(feature.worktree)) {
       feature.worktree = null;
-      feature.status = 'pending';  // Reset if worktree gone
+      feature.status = "pending"; // Reset if worktree gone
     }
   }
 
@@ -625,14 +726,16 @@ async function handleAgentFailure(feature, error, state) {
     await spawnFeatureAgent(feature, state);
   } else {
     // Max retries exceeded
-    feature.status = 'failed';
+    feature.status = "failed";
     feature.failureReason = error.message;
 
     // Check if this blocks other features
     const blocked = getBlockedFeatures(feature, state);
     if (blocked.length > 0) {
-      notify(`${feature.name} failed after ${MAX_RETRIES} retries. ` +
-             `Blocked features: ${blocked.map(f => f.name).join(', ')}`);
+      notify(
+        `${feature.name} failed after ${MAX_RETRIES} retries. ` +
+          `Blocked features: ${blocked.map((f) => f.name).join(", ")}`,
+      );
     }
   }
 }
@@ -644,25 +747,28 @@ async function handleAgentFailure(feature, error, state) {
 async function handleConflictResolution(state) {
   // User has manually resolved conflicts
   // Verify resolution
-  const hasConflicts = await exec('git diff --check', { cwd: state.mainRepo })
-    .catch(() => true);
+  const hasConflicts = await exec("git diff --check", {
+    cwd: state.mainRepo,
+  }).catch(() => true);
 
   if (hasConflicts) {
-    notify('Conflicts still present. Please resolve all conflicts.');
+    notify("Conflicts still present. Please resolve all conflicts.");
     return false;
   }
 
   // Complete the merge
-  await exec('git add .', { cwd: state.mainRepo });
-  await exec('git commit --no-edit', { cwd: state.mainRepo });
+  await exec("git add .", { cwd: state.mainRepo });
+  await exec("git commit --no-edit", { cwd: state.mainRepo });
 
   // Run integration tests
   const tests = await runIntegrationTests(state.mainRepo);
 
   if (tests.passed) {
     // Find the feature that was conflicted
-    const conflictedFeature = state.features.find(f => f.status === 'conflict');
-    conflictedFeature.status = 'merged';
+    const conflictedFeature = state.features.find(
+      (f) => f.status === "conflict",
+    );
+    conflictedFeature.status = "merged";
     conflictedFeature.mergedAt = new Date();
 
     state.mergingPaused = false;
@@ -672,7 +778,7 @@ async function handleConflictResolution(state) {
     await resumeMerging(state);
     return true;
   } else {
-    notify('Integration tests failed after conflict resolution.');
+    notify("Integration tests failed after conflict resolution.");
     return false;
   }
 }
