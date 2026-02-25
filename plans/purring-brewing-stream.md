@@ -10,7 +10,7 @@ Based on Boris Cherny's (Claude Code creator) workflow patterns vs our current s
 
 The `format-file.sh` hook exists but isn't wired into settings.json.
 
-**File**: `~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/settings.json`
+**File**: `~/.claude-setup/settings.json`
 
 Add to `hooks` section:
 ```json
@@ -20,7 +20,7 @@ Add to `hooks` section:
     "hooks": [
       {
         "type": "command",
-        "command": "\"$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/hooks/format-file.sh\""
+        "command": "\"$HOME/.claude-setup/hooks/format-file.sh\""
       }
     ]
   }
@@ -33,7 +33,7 @@ Add to `hooks` section:
 
 ### 2a. `/verify` — Verify project health after changes
 
-**File**: `~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/skills/verify/SKILL.md`
+**File**: `~/.claude-setup/skills/verify/SKILL.md`
 
 - Detect project type from package.json/go.mod/etc.
 - Run type-check (`tsc --noEmit`)
@@ -44,7 +44,7 @@ Add to `hooks` section:
 
 ### 2b. `/test-and-fix` — Run tests, auto-fix failures in loop
 
-**File**: `~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/skills/test-and-fix/SKILL.md`
+**File**: `~/.claude-setup/skills/test-and-fix/SKILL.md`
 
 - Run test suite
 - If failures: analyze errors, read failing test + source, fix
@@ -53,7 +53,7 @@ Add to `hooks` section:
 
 ### 2c. `/review-changes` — Pre-commit quality review
 
-**File**: `~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/skills/review-changes/SKILL.md`
+**File**: `~/.claude-setup/skills/review-changes/SKILL.md`
 
 - Run `git diff --cached` or `git diff`
 - Review for bugs, security issues, accidental secrets, debug code
@@ -62,7 +62,7 @@ Add to `hooks` section:
 
 ### 2d. `/cpr` — Commit, push, and create PR
 
-**File**: `~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/skills/cpr/SKILL.md`
+**File**: `~/.claude-setup/skills/cpr/SKILL.md`
 
 - Precompute `git diff --stat` via inline bash (Boris's key optimization)
 - Generate commit message from diff
@@ -71,7 +71,7 @@ Add to `hooks` section:
 
 ### 2e. `/first-principles` — Structured problem decomposition
 
-**File**: `~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/skills/first-principles/SKILL.md`
+**File**: `~/.claude-setup/skills/first-principles/SKILL.md`
 
 - Walk through: What problem? What constraints? What approaches? Trade-offs?
 - Select approach, create implementation plan
@@ -83,7 +83,7 @@ Add to `hooks` section:
 
 ### 3a. `oncall-guide` — Production incident diagnosis
 
-**File**: `~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/agents/oncall-guide.md`
+**File**: `~/.claude-setup/agents/oncall-guide.md`
 
 - Accept error description/stack trace/alert
 - Check recent deploys (`git log`)

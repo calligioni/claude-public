@@ -42,7 +42,7 @@ All personal skills, agents, and commands are stored in a single iCloud location
 **Source of Truth (iCloud):**
 
 ```
-/Users/ps/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/
+/Users/ps/.claude-setup/
 ├── skills/       ← All skills
 ├── agents/       ← All agents
 ├── commands/     ← All commands
@@ -137,7 +137,7 @@ ls ~/.claude/commands/*.md 2>/dev/null
 
 ```bash
 # Settings in iCloud
-cat "/Users/ps/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/settings.json"
+cat "/Users/ps/.claude-setup/settings.json"
 
 # Global Claude config
 cat ~/.claude.json
@@ -241,7 +241,7 @@ Would you like me to:
 **IMPORTANT: iCloud is the source of truth.** All changes MUST be made directly in the iCloud path to ensure they sync across devices:
 
 ```
-/Users/ps/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/
+/Users/ps/.claude-setup/
 ```
 
 For approved changes:
@@ -249,13 +249,13 @@ For approved changes:
 1. **Back up affected files first (in iCloud):**
 
 ```bash
-ICLOUD_PATH="/Users/ps/Library/Mobile Documents/com~apple~CloudDocs/claude-setup"
+ICLOUD_PATH="/Users/ps/.claude-setup"
 mkdir -p "$ICLOUD_PATH/backups/$(date +%Y%m%d-%H%M%S)"
 cp <file> "$ICLOUD_PATH/backups/$(date +%Y%m%d-%H%M%S)/"
 ```
 
 2. **Apply changes using Edit or Write tools to the iCloud path directly**
-   - Always use the full iCloud path: `/Users/ps/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/...`
+   - Always use the full iCloud path: `/Users/ps/.claude-setup/...`
    - Do NOT edit via symlinks (`~/.claude/` or `/Users/ps/code/claude/`) to ensure changes are persisted to iCloud
 
 3. **Validate changes:**
@@ -266,7 +266,7 @@ cp <file> "$ICLOUD_PATH/backups/$(date +%Y%m%d-%H%M%S)/"
 4. **Verify files exist in iCloud:**
 
 ```bash
-ls -la "/Users/ps/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/skills/<skill-name>/"
+ls -la "/Users/ps/.claude-setup/skills/<skill-name>/"
 ```
 
 5. **Sync to GitHub skills repo (Contably/skills):**
@@ -279,7 +279,7 @@ SKILLS_REPO="/tmp/skills-repo"
 git clone https://github.com/Contably/skills.git "$SKILLS_REPO" 2>/dev/null || (cd "$SKILLS_REPO" && git pull)
 
 # Copy the updated skill/agent
-cp -r "/Users/ps/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/skills/<skill-name>" "$SKILLS_REPO/skills/"
+cp -r "/Users/ps/.claude-setup/skills/<skill-name>" "$SKILLS_REPO/skills/"
 
 # Commit and push
 cd "$SKILLS_REPO"

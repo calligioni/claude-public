@@ -1,11 +1,11 @@
 {
   "paths": {
-    "root": "~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup",
-    "skills": "~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/skills",
-    "agents": "~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/agents",
-    "memory": "~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory",
-    "hooks": "~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/hooks",
-    "rules": "~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/rules"
+    "root": "~/.claude-setup",
+    "skills": "~/.claude-setup/skills",
+    "agents": "~/.claude-setup/agents",
+    "memory": "~/.claude-setup/memory",
+    "hooks": "~/.claude-setup/hooks",
+    "rules": "~/.claude-setup/rules"
   },
   "userProfile": {
     "name": "Pierre Schurmann",

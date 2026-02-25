@@ -58,7 +58,7 @@ const memoryObservations = [
 async function trackMemoryApplication(memoryName, storyId, context) {
   // Log in session context
   const sessionContext = JSON.parse(
-    await readFile('~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/session-context.json')
+    await readFile('~/.claude-setup/memory/session-context.json')
   );
 
   sessionContext.memoryApplicationLog.applications.push({
@@ -69,7 +69,7 @@ async function trackMemoryApplication(memoryName, storyId, context) {
     helpful: null  // Filled in after story completion
   });
 
-  await writeFile('~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/session-context.json',
+  await writeFile('~/.claude-setup/memory/session-context.json',
     JSON.stringify(sessionContext, null, 2));
 }
 ```
@@ -82,7 +82,7 @@ async function trackMemoryApplication(memoryName, storyId, context) {
  */
 async function evaluateMemoryHelpfulness(storyId, storyOutcome) {
   const sessionContext = JSON.parse(
-    await readFile('~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/session-context.json')
+    await readFile('~/.claude-setup/memory/session-context.json')
   );
 
   // Find all memories applied to this story
@@ -111,7 +111,7 @@ async function evaluateMemoryHelpfulness(storyId, storyOutcome) {
     console.log(`Memory ${application.memoryName}: ${wasHelpful ? '✓' : '✗'} helpful`);
   }
 
-  await writeFile('~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/session-context.json',
+  await writeFile('~/.claude-setup/memory/session-context.json',
     JSON.stringify(sessionContext, null, 2));
 }
 
@@ -164,7 +164,7 @@ async function postStoryReflection(story, outcome) {
 
   // 1. What memories were applied?
   const sessionContext = JSON.parse(
-    await readFile('~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/session-context.json')
+    await readFile('~/.claude-setup/memory/session-context.json')
   );
   const applied = sessionContext.memoryApplicationLog.applications
     .filter(a => a.storyId === story.id);
@@ -198,10 +198,10 @@ async function deepReflectionCycle() {
   console.log('\n========== METACOGNITION: Deep Reflection ==========\n');
 
   const sessionContext = JSON.parse(
-    await readFile('~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/session-context.json')
+    await readFile('~/.claude-setup/memory/session-context.json')
   );
   const coreMemory = JSON.parse(
-    await readFile('~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/core-memory.json')
+    await readFile('~/.claude-setup/memory/core-memory.json')
   );
 
   // 1. WHAT WORKED? (High-value memories)

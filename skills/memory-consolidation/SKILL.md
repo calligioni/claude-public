@@ -47,7 +47,7 @@ Based on: [Towards Human-like Memory for AI Agents](https://manthanguptaa.in/pos
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                     CORE MEMORY                              │
-│  ~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/core-memory.json │
+│  ~/.claude-setup/memory/core-memory.json │
 │  - Stable preferences, beliefs, patterns                     │
 │  - Rarely changes, high confidence                           │
 │  - Loaded at session start                                   │
@@ -305,7 +305,7 @@ Other skills should call this before saving:
 async function saveToMemoryWithFilter(learning) {
   const coreMemory = JSON.parse(
     await readFile(
-      "~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/core-memory.json",
+      "~/.claude-setup/memory/core-memory.json",
     ),
   );
   const existingMemories = await mcp__memory__search_nodes({ query: "" });
@@ -455,7 +455,7 @@ async function promoteToCore(memory, coreMemory) {
   // Update core memory file
   coreMemory.lastUpdated = new Date().toISOString().split("T")[0];
   await writeFile(
-    "~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/core-memory.json",
+    "~/.claude-setup/memory/core-memory.json",
     JSON.stringify(coreMemory, null, 2),
   );
 
@@ -505,7 +505,7 @@ function identifyStaleMemories(memories, coreMemory) {
 ```javascript
 async function archiveMemories(memories) {
   const archiveDir =
-    "~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/archive";
+    "~/.claude-setup/memory/archive";
   const archiveFile = `${archiveDir}/${new Date().toISOString().split("T")[0]}-forgotten.json`;
 
   // Read existing archive or create new
@@ -668,7 +668,7 @@ async function findOrphanedMemories(memories) {
 | --------------- | ---------- | ------------ | --------- | --------------- |
 | mistake:old-api | 180        | 150 days ago | 1         | Decay threshold |
 
-**Archive location:** ~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/archive/2026-01-27-forgotten.json
+**Archive location:** ~/.claude-setup/memory/archive/2026-01-27-forgotten.json
 
 ---
 

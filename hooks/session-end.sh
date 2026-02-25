@@ -1,10 +1,10 @@
 #!/bin/bash
 # Session End Hook - Capture learnings for memory system
-# Location: ~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/hooks/session-end.sh
+# Location: ~/.claude-setup/hooks/session-end.sh
 
 set -euo pipefail
 
-MEMORY_DIR="$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory"
+MEMORY_DIR="$HOME/.claude-setup/memory"
 SESSIONS_DIR="$MEMORY_DIR/sessions"
 DATE=$(date +%Y-%m-%d)
 TIME=$(date +%H%M%S)

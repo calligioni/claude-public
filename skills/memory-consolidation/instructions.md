@@ -67,8 +67,8 @@ Memory archived when:
 
 | File | Purpose |
 |------|---------|
-| `~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/core-memory.json` | Stable preferences and beliefs |
-| `~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/archive/*.json` | Archived forgotten memories |
+| `~/.claude-setup/memory/core-memory.json` | Stable preferences and beliefs |
+| `~/.claude-setup/memory/archive/*.json` | Archived forgotten memories |
 | Memory MCP | Long-term cross-project learnings |
 
 ## Attention Weights

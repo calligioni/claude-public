@@ -23,7 +23,7 @@ hooks:
   Stop:
     - hooks:
         - type: command
-          command: 'cd "$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup" && { git diff --quiet && git diff --cached --quiet && [ -z "$(git ls-files --others --exclude-standard)" ] && echo ''No changes to commit''; } || { git add -A && git commit -m ''feat: apply claude-setup-optimizer recommendations'' && git push origin master && echo ''Committed and pushed to GitHub''; }'
+          command: 'cd "$HOME/.claude-setup" && { git diff --quiet && git diff --cached --quiet && [ -z "$(git ls-files --others --exclude-standard)" ] && echo ''No changes to commit''; } || { git add -A && git commit -m ''feat: apply claude-setup-optimizer recommendations'' && git push origin master && echo ''Committed and pushed to GitHub''; }'
 tool-annotations:
   Bash: { destructiveHint: true, idempotentHint: false }
   Write: { destructiveHint: false, idempotentHint: true }
@@ -51,13 +51,13 @@ Automatically analyzes the Claude Code changelog and recommends improvements to 
 **Define this variable at the start of any bash operations:**
 
 ```bash
-ICLOUD_SETUP="$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup"
+ICLOUD_SETUP="$HOME/.claude-setup"
 ```
 
 **Source of Truth Structure:**
 
 ```
-~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/
+~/.claude-setup/
 ├── skills/       ← All skills
 ├── agents/       ← All agents
 ├── commands/     ← All commands
@@ -129,7 +129,7 @@ Extract key information:
 ### Step 2: Analyze Current Setup (Parallel)
 
 **IMPORTANT:** Always use the iCloud path as the source of truth:
-`~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup`
+`~/.claude-setup`
 
 **Use parallel Task agents to inventory everything concurrently.** Launch these in a single message:
 
@@ -245,7 +245,7 @@ Would you like me to:
 #### 6a. Back up affected files first
 
 ```bash
-ICLOUD_SETUP="$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup"
+ICLOUD_SETUP="$HOME/.claude-setup"
 mkdir -p "$ICLOUD_SETUP/backups/$(date +%Y%m%d-%H%M%S)"
 cp <file> "$ICLOUD_SETUP/backups/$(date +%Y%m%d-%H%M%S)/"
 ```

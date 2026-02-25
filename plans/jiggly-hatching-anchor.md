@@ -270,7 +270,7 @@ Steps 1-4 are sequential (dependencies). Steps 5-7 can be parallelized. Step 8 d
 
 - `escotilha/nuvini-os-master-plan` — update status to reflect separation
 - `escotilha/nuvini-os-dashboard` — cloned to Contabo, live data wiring
-- Skills remain in `~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/skills/` (shared via iCloud, copied to VPS)
+- Skills remain in `~/.claude-setup/skills/` (shared via iCloud, copied to VPS)
 
 ## DNS Records Needed (nuvini.ai)
 

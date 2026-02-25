@@ -34,7 +34,7 @@ fi
 
 # Define paths
 CLAUDE_DIR="$HOME/.claude"
-ICLOUD_DIR="$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup"
+ICLOUD_DIR="$HOME/.claude-setup"
 
 # Check if iCloud directory exists
 if [[ ! -d "$ICLOUD_DIR" ]]; then

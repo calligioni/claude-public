@@ -12,7 +12,7 @@ Reusable functions for memory operations across all skills.
  */
 async function loadCoreMemory() {
   try {
-    const content = await readFile('~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/core-memory.json');
+    const content = await readFile('~/.claude-setup/memory/core-memory.json');
     return JSON.parse(content);
   } catch {
     // Return sensible defaults if not found
@@ -423,7 +423,7 @@ function identifyStaleMemories(memories, coreMemory) {
 async function archiveAndForget(memories) {
   if (memories.length === 0) return { forgotten: 0 };
 
-  const archiveDir = '~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/archive';
+  const archiveDir = '~/.claude-setup/memory/archive';
   const archiveFile = `${archiveDir}/${new Date().toISOString().split('T')[0]}-forgotten.json`;
 
   // Create archive directory if needed

@@ -11,7 +11,7 @@ Research caching follows the three-tier memory system:
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                     CORE MEMORY                              │
-│  ~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/core-memory.json                          │
+│  ~/.claude-setup/memory/core-memory.json                          │
 │  - User preferences (deployment targets, tech stack)         │
 │  - Stable beliefs about product development                  │
 └─────────────────────────────────────────────────────────────┘
@@ -66,7 +66,7 @@ Before saving research to Memory MCP, apply relevance scoring:
 async function saveResearchWithFilter(research) {
   // Load core memory for threshold
   const coreMemory = JSON.parse(
-    await readFile('~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/core-memory.json')
+    await readFile('~/.claude-setup/memory/core-memory.json')
   );
   const existingMemories = await mcp__memory__search_nodes({ query: "" });
 

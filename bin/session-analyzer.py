@@ -24,7 +24,7 @@ from collections import defaultdict
 from typing import Optional
 
 # Paths
-MEMORY_DIR = Path.home() / "Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory"
+MEMORY_DIR = Path.home() / ".claude-setup/memory"
 LEARNING_LOG = MEMORY_DIR / "learning-log.jsonl"
 SESSIONS_DIR = MEMORY_DIR / "sessions"
 EXTRACTED_DIR = MEMORY_DIR / "extracted"

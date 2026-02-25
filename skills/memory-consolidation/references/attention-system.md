@@ -33,7 +33,7 @@ Human working memory maintains **focus** and **relevance** - not everything is e
 
 ## Session Context File
 
-**Location:** `~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/session-context.json`
+**Location:** `~/.claude-setup/memory/session-context.json`
 
 ```json
 {
@@ -292,7 +292,7 @@ function extractTopicsFromMemory(memory) {
  */
 async function startSession(project, workingDirectory) {
   const sessionContext = JSON.parse(
-    await readFile('~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/session-context.json')
+    await readFile('~/.claude-setup/memory/session-context.json')
   );
 
   sessionContext.currentSession = {
@@ -322,7 +322,7 @@ async function startSession(project, workingDirectory) {
   sessionContext.recentContext.entries =
     sessionContext.recentContext.entries.slice(-sessionContext.recentContext.maxEntries);
 
-  await writeFile('~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/session-context.json',
+  await writeFile('~/.claude-setup/memory/session-context.json',
     JSON.stringify(sessionContext, null, 2));
 
   return sessionContext;
@@ -337,7 +337,7 @@ async function startSession(project, workingDirectory) {
  */
 async function updateFocus(topic, relatedFiles = []) {
   const sessionContext = JSON.parse(
-    await readFile('~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/session-context.json')
+    await readFile('~/.claude-setup/memory/session-context.json')
   );
 
   // Archive previous focus to recent context
@@ -376,7 +376,7 @@ async function updateFocus(topic, relatedFiles = []) {
     sessionContext
   );
 
-  await writeFile('~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/session-context.json',
+  await writeFile('~/.claude-setup/memory/session-context.json',
     JSON.stringify(sessionContext, null, 2));
 
   return sessionContext;
@@ -391,7 +391,7 @@ async function updateFocus(topic, relatedFiles = []) {
  */
 async function logMemoryApplication(memoryName, context) {
   const sessionContext = JSON.parse(
-    await readFile('~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/session-context.json')
+    await readFile('~/.claude-setup/memory/session-context.json')
   );
 
   // Add to current focus
@@ -407,7 +407,7 @@ async function logMemoryApplication(memoryName, context) {
     helpful: null  // To be filled in by metacognition
   });
 
-  await writeFile('~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/session-context.json',
+  await writeFile('~/.claude-setup/memory/session-context.json',
     JSON.stringify(sessionContext, null, 2));
 }
 ```
@@ -429,7 +429,7 @@ async function loadContextWithAttention(story, prd) {
 
   // Load session context
   const sessionContext = JSON.parse(
-    await readFile('~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/session-context.json')
+    await readFile('~/.claude-setup/memory/session-context.json')
   );
 
   // Query memories with attention weighting
@@ -458,12 +458,12 @@ async function loadContextWithAttention(story, prd) {
 // When making an important decision during implementation
 async function recordKeyDecision(decision) {
   const sessionContext = JSON.parse(
-    await readFile('~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/session-context.json')
+    await readFile('~/.claude-setup/memory/session-context.json')
   );
 
   sessionContext.currentFocus.keyDecisions.push(decision);
 
-  await writeFile('~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/session-context.json',
+  await writeFile('~/.claude-setup/memory/session-context.json',
     JSON.stringify(sessionContext, null, 2));
 }
 ```

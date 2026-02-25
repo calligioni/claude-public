@@ -1,13 +1,13 @@
 #!/bin/bash
 # Learning Capture Hook - Track code changes for pattern extraction
-# Location: ~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/hooks/learning-capture.sh
+# Location: ~/.claude-setup/hooks/learning-capture.sh
 #
 # This hook captures file changes and test outcomes to build a learning log
 # that the session analyzer can process for pattern extraction.
 
 set -euo pipefail
 
-MEMORY_DIR="$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory"
+MEMORY_DIR="$HOME/.claude-setup/memory"
 LEARNING_LOG="$MEMORY_DIR/learning-log.jsonl"
 DATE=$(date +%Y-%m-%d)
 TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)

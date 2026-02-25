@@ -27,7 +27,7 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 # Paths
-ICLOUD_CLAUDE="$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup"
+ICLOUD_CLAUDE="$HOME/.claude-setup"
 CLAUDE_DIR="$HOME/.claude"
 
 echo -e "${BLUE}"

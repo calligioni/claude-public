@@ -147,7 +147,7 @@ The orchestrator maintains a live progress view:
 ## File Structure
 
 ```
-~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/
+~/.claude-setup/
 └── skills/
     └── parallel-dev/
         ├── SKILL.md              # Main skill definition

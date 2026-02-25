@@ -30,7 +30,7 @@ hooks:
   Stop:
     - hooks:
         - type: command
-          command: 'cd "$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup" && { git diff --quiet && git diff --cached --quiet && [ -z "$(git ls-files --others --exclude-standard)" ] && echo "No changes to commit"; } || { git add -A && git commit -m "feat: apply research skill recommendations" && git push origin master && echo "Committed and pushed"; }'
+          command: 'cd "$HOME/.claude-setup" && { git diff --quiet && git diff --cached --quiet && [ -z "$(git ls-files --others --exclude-standard)" ] && echo "No changes to commit"; } || { git add -A && git commit -m "feat: apply research skill recommendations" && git push origin master && echo "Committed and pushed"; }'
 invocation-contexts:
   user-direct:
     verbosity: high
@@ -49,7 +49,7 @@ Analyze any URL or image and turn it into actionable improvements for your Claud
 ## Paths
 
 ```bash
-ICLOUD_SETUP="$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup"
+ICLOUD_SETUP="$HOME/.claude-setup"
 ```
 
 All reads and writes go to the iCloud path directly. Never use symlink paths.

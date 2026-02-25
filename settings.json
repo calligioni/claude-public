@@ -12,7 +12,7 @@
           },
           {
             "type": "command",
-            "command": "echo '=== CORE MEMORY ===' && cat \"$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/core-memory.json\" 2>/dev/null || echo 'No core memory found'"
+            "command": "echo '=== CORE MEMORY ===' && cat \"$HOME/.claude-setup/memory/core-memory.json\" 2>/dev/null || echo 'No core memory found'"
           }
         ]
       }
@@ -33,7 +33,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/hooks/format-file.sh\""
+            "command": "\"$HOME/.claude-setup/hooks/format-file.sh\""
           }
         ]
       },
@@ -42,7 +42,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/hooks/format-file.sh\""
+            "command": "\"$HOME/.claude-setup/hooks/format-file.sh\""
           }
         ]
       },
@@ -51,7 +51,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/hooks/format-file.sh\""
+            "command": "\"$HOME/.claude-setup/hooks/format-file.sh\""
           }
         ]
       }
@@ -72,7 +72,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/hooks/session-end.sh\""
+            "command": "\"$HOME/.claude-setup/hooks/session-end.sh\""
           }
         ]
       }
@@ -142,7 +142,7 @@
     ]
   },
   "alwaysThinkingEnabled": false,
-  "plansDirectory": "~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/plans",
+  "plansDirectory": "~/.claude-setup/plans",
   "skipDangerousModePermissionPrompt": true,
   "mcpSearchAutoThreshold": 15,
   "default_arguments": [
@@ -161,12 +161,12 @@
       "memory": {
         "command": "node",
         "args": [
-          "$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/mcp-servers/memory-turso/dist/index.js"
+          "$HOME/.claude-setup/mcp-servers/memory-turso/dist/index.js"
         ],
         "env": {
           "TURSO_DATABASE_URL": "libsql://claude-memory-escotilha.aws-us-east-1.turso.io",
           "TURSO_AUTH_TOKEN": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3Njk2MDg3ODIsImlkIjoiZDUyM2I3OWEtZjA1My00M2U4LThhOGQtNjYwZTc1MmE0ZTY5IiwicmlkIjoiYTI3NDM2NWEtOWY3ZS00MTVlLTgxNTYtYzQxYzk2MWY4YTM0In0._TaT30NMCijZJhWyPmx_EGSzntWpyawyLoGh_JgASaHbrPkPNabsLsCfrArwLCCK1VBK9jE3NhSr9WLe_38gDg",
-          "TURSO_LOCAL_REPLICA_PATH": "$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/turso-replica.db"
+          "TURSO_LOCAL_REPLICA_PATH": "$HOME/.claude-setup/memory/turso-replica.db"
         },
         "description": "Knowledge graph for persistent memory (Turso-backed)"
       },

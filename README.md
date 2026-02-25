@@ -182,10 +182,10 @@ git commit -m "Update Claude configuration"
 
 The `~/.claude/` directory uses symlinks:
 
-- `settings.json` → `~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/settings.json`
+- `settings.json` → `~/.claude-setup/settings.json`
 - `agents/` → iCloud synced location
-- `skills/` → `~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/skills/`
-- `commands/` → `~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/commands/`
+- `skills/` → `~/.claude-setup/skills/`
+- `commands/` → `~/.claude-setup/commands/`
 
 ## Adding Custom Components
 

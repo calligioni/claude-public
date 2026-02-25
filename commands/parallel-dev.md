@@ -70,4 +70,4 @@ dependsOn: []
 ## Reference
 
 See full skill documentation at:
-`~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/skills/parallel-dev/SKILL.md`
+`~/.claude-setup/skills/parallel-dev/SKILL.md`

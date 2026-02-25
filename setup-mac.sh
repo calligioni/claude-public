@@ -4,14 +4,14 @@
 # Run this on any Mac to set up Claude Code with iCloud-synced skills, agents, and commands.
 #
 # Usage:
-#   curl -sL "file://$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/setup-mac.sh" | bash
+#   curl -sL "file://$HOME/.claude-setup/setup-mac.sh" | bash
 #   OR
-#   bash "/Users/$(whoami)/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/setup-mac.sh"
+#   bash "/Users/$(whoami)/.claude-setup/setup-mac.sh"
 #
 
 set -e
 
-ICLOUD_BASE="$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup"
+ICLOUD_BASE="$HOME/.claude-setup"
 CLAUDE_DIR="$HOME/.claude"
 
 echo "=== Claude Code iCloud Setup ==="

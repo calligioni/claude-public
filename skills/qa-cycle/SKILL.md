@@ -183,7 +183,7 @@ PROJECT_NAME=$(echo "$PROJECT_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0
 ### 0b. Check for Existing Skill
 
 ```bash
-SKILLS_DIR="$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/skills"
+SKILLS_DIR="$HOME/.claude-setup/skills"
 ```
 
 Check in order:

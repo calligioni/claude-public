@@ -1,6 +1,6 @@
 #!/bin/bash
 # Memory Auto-Consolidation - Automated triggers for memory maintenance
-# Location: ~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/bin/memory-auto-consolidate.sh
+# Location: ~/.claude-setup/bin/memory-auto-consolidate.sh
 #
 # This script checks if consolidation is needed and triggers it.
 # Run via cron or launchd for automated maintenance.
@@ -13,7 +13,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MEMORY_DIR="$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory"
+MEMORY_DIR="$HOME/.claude-setup/memory"
 CORE_MEMORY="$MEMORY_DIR/core-memory.json"
 LOG_FILE="$MEMORY_DIR/consolidation.log"
 

@@ -25,7 +25,7 @@ from pathlib import Path
 from typing import List, Optional
 
 # Paths
-MEMORY_DIR = Path.home() / "Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory"
+MEMORY_DIR = Path.home() / ".claude-setup/memory"
 EXTRACTED_DIR = MEMORY_DIR / "extracted"
 IMPORTED_DIR = MEMORY_DIR / "imported"
 CORE_MEMORY = MEMORY_DIR / "core-memory.json"

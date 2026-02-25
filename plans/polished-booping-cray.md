@@ -14,7 +14,7 @@ User shares a link → skill extracts content → analyzes it → recommends one
 
 ## Skill: `/research`
 
-**File:** `~/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/skills/research/SKILL.md`
+**File:** `~/.claude-setup/skills/research/SKILL.md`
 
 ### Frontmatter
 
@@ -44,7 +44,7 @@ hooks:
   Stop:
     - hooks:
         - type: command
-          command: 'cd "$HOME/Library/Mobile Documents/com~apple~CloudDocs/claude-setup" && { git diff --quiet && git diff --cached --quiet && [ -z "$(git ls-files --others --exclude-standard)" ] && echo "No changes to commit"; } || { git add -A && git commit -m "feat: apply research skill recommendations" && git push origin master && echo "Committed and pushed"; }'
+          command: 'cd "$HOME/.claude-setup" && { git diff --quiet && git diff --cached --quiet && [ -z "$(git ls-files --others --exclude-standard)" ] && echo "No changes to commit"; } || { git add -A && git commit -m "feat: apply research skill recommendations" && git push origin master && echo "Committed and pushed"; }'
 ```
 
 ### Workflow (3 phases)

@@ -1,5 +1,5 @@
 {
-  "plansDirectory": "/Users/ps/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/plans",
+  "plansDirectory": "/Users/ps/.claude-setup/plans",
   "mcpSearchAutoThreshold": 15,
   "hooks": {
     "SessionStart": [

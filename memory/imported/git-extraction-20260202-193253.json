@@ -365,7 +365,7 @@
   "status": "imported",
   "imported_at": "2026-02-02T19:33:08.220174",
   "import_result": {
-    "file": "/Users/psm2/Library/Mobile Documents/com~apple~CloudDocs/claude-setup/memory/extracted/git-extraction-20260202-193253.json",
+    "file": "/Users/psm2/.claude-setup/memory/extracted/git-extraction-20260202-193253.json",
     "total_candidates": 9,
     "qualified": 7,
     "skipped_low_relevance": 2,
