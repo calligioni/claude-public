@@ -130,7 +130,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "~/.claude/statusline-command.sh"
+    "command": "~/.claude-setup/hooks/statusline-command.sh"
   },
   "enabledPlugins": {
     "swift-lsp@claude-plugins-official": true
