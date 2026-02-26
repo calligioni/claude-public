@@ -75,6 +75,21 @@ Based on: [Towards Human-like Memory for AI Agents](https://manthanguptaa.in/pos
 
 ---
 
+## Auto-Memory Awareness
+
+Since Claude Code v2.1.59, auto-memory captures context automatically during sessions. This skill should focus on **consolidation, pruning, and promotion** rather than raw capture:
+
+- **Do NOT** duplicate what auto-memory already captures (session context, file paths, tool usage)
+- **DO** consolidate auto-memory entries into structured patterns/insights
+- **DO** prune redundant auto-memory entries that overlap with existing Memory MCP entities
+- **DO** promote high-value auto-memory observations to the Memory MCP graph
+
+When running consolidation, also scan `~/.claude/memory/` (auto-memory directory) for entries that should be:
+
+1. **Promoted** to Memory MCP as structured entities (if relevance score >= 5)
+2. **Pruned** if they duplicate existing Memory MCP content
+3. **Left alone** if they're session-specific context that auto-memory handles well
+
 ## Entry Point Detection
 
 When this skill activates:
@@ -113,6 +128,11 @@ const research = await mcp__memory__search_nodes({ query: "research:" });
 const competitors = await mcp__memory__search_nodes({ query: "competitor:" });
 const designs = await mcp__memory__search_nodes({ query: "design:" });
 const stacks = await mcp__memory__search_nodes({ query: "stack:" });
+
+// Also scan auto-memory for consolidation candidates
+const autoMemoryDir = `${HOME}/.claude/memory`;
+const autoMemoryFiles = await glob(`${autoMemoryDir}/*.md`);
+// Auto-memory entries are evaluated in Step 1.3 for promotion/pruning
 ```
 
 ### Step 1.2: Calculate Memory Statistics
@@ -304,9 +324,7 @@ Other skills should call this before saving:
 // In autonomous-dev, cto, cpo-ai-skill, etc.
 async function saveToMemoryWithFilter(learning) {
   const coreMemory = JSON.parse(
-    await readFile(
-      "~/.claude-setup/memory/core-memory.json",
-    ),
+    await readFile("~/.claude-setup/memory/core-memory.json"),
   );
   const existingMemories = await mcp__memory__search_nodes({ query: "" });
 
@@ -504,8 +522,7 @@ function identifyStaleMemories(memories, coreMemory) {
 
 ```javascript
 async function archiveMemories(memories) {
-  const archiveDir =
-    "~/.claude-setup/memory/archive";
+  const archiveDir = "~/.claude-setup/memory/archive";
   const archiveFile = `${archiveDir}/${new Date().toISOString().split("T")[0]}-forgotten.json`;
 
   // Read existing archive or create new

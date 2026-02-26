@@ -137,6 +137,16 @@ cd /path/to/projects/payment-flow
 cd /path/to/projects/dark-mode
 ```
 
+## Worktree Lifecycle Hooks
+
+When worktrees are created or removed, Claude Code automatically runs lifecycle hooks configured in `settings.json`:
+
+- **WorktreeCreate** (`~/.claude-setup/hooks/worktree-create.sh`): Copies `.env*` files from the main repo, installs dependencies (detects pnpm/bun/yarn/npm/bundler/pip), and copies local config files. Dependencies install in the background so the agent can start working immediately.
+
+- **WorktreeRemove** (`~/.claude-setup/hooks/worktree-remove.sh`): Cleans up `node_modules`, `.next`, `dist`, and `.turbo` directories before removal to speed up the `git worktree remove` operation.
+
+These hooks run automatically for both `/maketree` and `/parallel-dev` worktree operations. No manual setup needed.
+
 ## Notes
 
 - Each worktree is a full working directory with its own checkout

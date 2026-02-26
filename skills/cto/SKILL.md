@@ -55,6 +55,10 @@ invocation-contexts:
 
 A comprehensive CTO advisor skill that provides strategic technical leadership for any project. Analyzes codebases, evaluates architecture, recommends improvements, and guides technical decisions.
 
+## Auto-Memory Note
+
+Auto-memory (v2.1.59) captures session context automatically. When saving findings to Memory MCP, focus on **structured architectural decisions and cross-concern insights** — not raw session data that auto-memory already handles. Only create Memory MCP entities for insights with relevance score >= 5 (per memory-consolidation skill).
+
 ## Core Responsibilities
 
 ### 1. Architecture Review

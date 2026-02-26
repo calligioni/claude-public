@@ -561,7 +561,58 @@ The `claude --worktree` flag is the native CLI mechanism for launching isolated 
 
 ### Phase 3: Agent Dispatch
 
-Spawn specialized agents per worktree using `run_in_background: true` with `isolation: "worktree"`:
+#### Execution Mode Selection
+
+```
+IF TeamCreate is available AND ready features >= 2:
+  → Agent Teams mode (preferred — real-time coordination)
+ELSE:
+  → Task mode (fallback — fully supported)
+```
+
+Both modes produce identical outputs. Agent Teams mode adds real-time cross-feature coordination, immediate blocker detection, and no polling overhead.
+
+#### Agent Teams Mode (Preferred)
+
+For each ready feature (no unmet dependencies), spawn a teammate:
+
+```
+Create a team for parallel feature development.
+
+For each feature, spawn a teammate:
+
+Teammate "{feature-id}":
+  Working directory: {worktree-path}
+  Task: Implement {feature-name} in this git worktree.
+
+  Requirements:
+  {task-list}
+
+  Instructions:
+  1. Read the codebase in this worktree for context
+  2. Implement all requirements
+  3. Write tests for each component
+  4. Run tests and fix any failures
+  5. Commit with message: feat({feature-id}): {description}
+  6. Message the lead: "Complete. {summary of what was built}"
+  7. If you need an API/interface from another feature,
+     message that teammate directly to coordinate.
+
+  Do NOT modify files outside {worktree-path}.
+```
+
+**Lead orchestrator instructions:**
+
+- When a teammate messages completion, update feature status and shut them down immediately
+- Check if newly-unblocked features can be spawned
+- When a teammate reports a blocker, try to resolve or notify user
+- When all features complete, begin Phase 5 (merge)
+
+**Messaging discipline:** Teammates should use direct messages only. Never broadcast for progress updates or individual findings. Only broadcast for blocking discoveries that change everyone's approach.
+
+#### Task Mode (Fallback)
+
+When Agent Teams is unavailable, use the Task tool with `run_in_background: true` and `isolation: "worktree"`:
 
 ```xml
 <Task
@@ -610,6 +661,18 @@ The `isolation: "worktree"` parameter is the officially supported pattern for ag
 > **Tip:** Agents are now running in parallel in isolated worktrees. This session will be active for a while. Run `/remote-control` (or `/rc`) to connect from your phone or another browser — your local filesystem, MCP servers, and project config all stay available. Requires Pro/Max plan.
 
 ### Phase 4: Progress Monitoring
+
+#### Agent Teams Mode
+
+The polling loop is unnecessary — the lead receives idle notifications and direct messages from teammates automatically:
+
+- **Teammate completes** → receives completion message → updates status → shuts down teammate → checks for unblocked features
+- **Teammate hits blocker** → receives blocker message → resolves or escalates to user
+- **All teammates done** → proceeds to Phase 5
+
+No sleep loops, no marker files. The Agent Teams messaging infrastructure handles coordination.
+
+#### Task Mode (Fallback)
 
 Poll background agents and update dashboard:
 
