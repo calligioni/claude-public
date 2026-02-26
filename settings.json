@@ -8,7 +8,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "git -C \"$HOME/.claude-setup\" pull --ff-only --quiet 2>/dev/null || true; echo '=== CORE MEMORY ===' && cat \"$HOME/.claude-setup/memory/core-memory.json\" 2>/dev/null || echo 'No core memory found'"
+            "command": "GIT_TERMINAL_PROMPT=0 git -C \"$HOME/.claude-setup\" pull --ff-only --quiet 2>/dev/null || true; echo '=== CORE MEMORY ===' && cat \"$HOME/.claude-setup/memory/core-memory.json\" 2>/dev/null || echo 'No core memory found'"
           }
         ]
       }
