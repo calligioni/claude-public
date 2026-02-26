@@ -8,7 +8,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '=== CORE MEMORY ===' && cat \"$HOME/.claude-setup/memory/core-memory.json\" 2>/dev/null || echo 'No core memory found'"
+            "command": "git -C \"$HOME/.claude-setup\" pull --ff-only --quiet 2>/dev/null || true; echo '=== CORE MEMORY ===' && cat \"$HOME/.claude-setup/memory/core-memory.json\" 2>/dev/null || echo 'No core memory found'"
           }
         ]
       }
