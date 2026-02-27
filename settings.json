@@ -157,6 +157,7 @@
       "Use /qa-cycle for full QA pass with Playwright"
     ]
   },
+  "autoUpdaterStatus": "enabled",
   "alwaysThinkingEnabled": false,
   "plansDirectory": "~/.claude/plans",
   "skipDangerousModePermissionPrompt": true,
