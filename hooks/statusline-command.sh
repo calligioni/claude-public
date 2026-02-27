@@ -1,11 +1,8 @@
 #!/bin/bash
 input=$(cat)
 
-# Account (logged-in Claude Code user)
-ACCOUNT=$(claude config get account 2>/dev/null | tr -d '[:space:]')
-if [ -z "$ACCOUNT" ]; then
-  ACCOUNT=$(whoami)
-fi
+# Account
+ACCOUNT=$(whoami)
 
 # Model
 MODEL=$(echo "$input" | jq -r '.model.display_name // "?"')
