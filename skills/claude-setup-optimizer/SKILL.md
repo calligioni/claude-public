@@ -81,69 +81,64 @@ Claude Code searches for skills/agents in multiple locations, but symlinks point
 
 ## Workflow
 
-### Step 1: Fetch Claude Code Changelog
+### Step 1: Fetch Changelog + Inventory Setup (ALL IN PARALLEL)
 
-Fetch the latest Claude Code changelog using strategies that handle large files:
+**Run changelog fetch AND setup inventory simultaneously** — they are independent. Use a single message with parallel tool calls.
 
-**Primary Source - GitHub CLI (Recommended):**
-
-Use the `gh` CLI to fetch recent releases which avoids large file issues:
+#### 1a. Changelog (Bash — fast)
 
 ```bash
-# Get the 5 most recent releases with full details
-gh release list --repo anthropics/claude-code --limit 5
+# Get 5 most recent releases in one shot
+gh release list --repo anthropics/claude-code --limit 5 --json tagName,publishedAt,name
+```
 
-# Get detailed notes for a specific release
+Then fetch details for the 2–3 most recent tags:
+
+```bash
 gh release view <tag> --repo anthropics/claude-code
 ```
 
-**Secondary Source - GitHub Releases Page:**
+If `gh` fails, fall back to WebSearch for "Claude Code changelog 2026".
 
-Use WebFetch on the releases page (summarized, not full changelog):
+**Never fetch the full CHANGELOG.md** — it exceeds token limits.
 
+Extract: new tools, skill/agent format changes, MCP updates, config options, breaking changes.
+
+#### 1b. Setup Inventory (Bash — single command, no subagents)
+
+**Do NOT spawn Explore/Task agents for inventory.** Use Bash to extract all frontmatter in one pass:
+
+```bash
+SETUP="$HOME/.claude-setup"
+
+echo "=== SKILLS FRONTMATTER ==="
+for f in "$SETUP"/skills/*/SKILL.md; do
+  echo "--- $(basename $(dirname "$f")) ---"
+  # Extract YAML frontmatter (between first --- and second ---)
+  sed -n '/^---$/,/^---$/p' "$f" 2>/dev/null
+  echo ""
+done
+
+echo "=== AGENTS FRONTMATTER ==="
+for f in "$SETUP"/agents/*.md "$SETUP"/agents/**/*.md; do
+  [ -f "$f" ] || continue
+  echo "--- $(basename "$f") ---"
+  sed -n '/^---$/,/^---$/p' "$f" 2>/dev/null
+  echo ""
+done
+
+echo "=== CONFIG ==="
+cat "$SETUP/settings.json" 2>/dev/null
+echo ""
+echo "=== COMMANDS ==="
+ls "$SETUP/commands/" 2>/dev/null
 ```
-https://github.com/anthropics/claude-code/releases
-```
 
-Prompt: "Extract the 3 most recent releases with their version numbers, dates, and key new features. Focus on: new tools, skill/agent updates, MCP changes, configuration options."
+This single Bash call replaces 3 Explore subagents and runs in seconds instead of minutes.
 
-**Tertiary Source - Web Search:**
+**Launch 1a and 1b in parallel** (two Bash calls in the same message), then proceed to Step 2 with combined results.
 
-Search for "Claude Code changelog 2026" or "Claude Code new features" for recent announcements.
-
-**IMPORTANT: Avoid fetching the full CHANGELOG.md file directly** - it exceeds token limits (~32K tokens). If you must read it, use the Read tool with `limit` parameter to read only the first 500 lines:
-
-```
-Read file with limit=500 to get only recent entries
-```
-
-Extract key information:
-
-- New features and capabilities
-- New tools or MCP changes
-- Skill/agent system updates
-- Configuration options
-- Breaking changes
-- Best practice updates
-
-### Step 2: Analyze Current Setup (Parallel)
-
-**IMPORTANT:** Always use the iCloud path as the source of truth:
-`~/.claude-setup`
-
-**Use parallel Task agents to inventory everything concurrently.** Launch these in a single message:
-
-1. **Skills inventory agent** - Read all SKILL.md frontmatter from every skill directory under `skills/`. Extract name, description, allowed-tools, context, model, and any other frontmatter fields. Return the complete frontmatter for each skill.
-
-2. **Agents inventory agent** - Read all agent .md files from `agents/` (including subdirectories like `review/`). Extract name, description, allowed-tools, disallowedTools, model, color, skills, and any other frontmatter fields. Return the complete frontmatter for each agent.
-
-3. **Config inventory agent** - Read settings.json from the iCloud path and ~/.claude.json. Also list all commands in `commands/`. Return the full configuration content.
-
-All three agents should use `subagent_type="Explore"` and `run_in_background=true`.
-
-Wait for all agents to complete, then proceed to Step 3 with the combined inventory data.
-
-### Step 3: Compare and Identify Opportunities
+### Step 2: Compare and Identify Opportunities
 
 Cross-reference changelog features against your current setup:
 
@@ -168,7 +163,7 @@ For each skill/agent, check:
 - [ ] Follows current best practices for triggers/descriptions
 - [ ] Uses new tools/features that weren't available before
 
-### Step 4: Generate Recommendations
+### Step 3: Generate Recommendations
 
 Create a structured report with:
 
@@ -200,7 +195,7 @@ Specific steps or code changes needed
 **Effort:** Low/Medium/High
 ```
 
-### Step 5: Present and Confirm
+### Step 4: Present and Confirm
 
 Present findings to the user:
 
@@ -236,7 +231,7 @@ Would you like me to:
 5. Skip implementation (just review)
 ```
 
-### Step 6: Implement Improvements with Parallel Agents
+### Step 5: Implement Improvements with Parallel Agents
 
 **IMPORTANT: iCloud is the source of truth.** All changes MUST be made directly in the iCloud path to ensure they sync across devices.
 
