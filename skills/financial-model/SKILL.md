@@ -1,10 +1,28 @@
 ---
+name: financial-model
 description: Create M&A financial proposal with IRR/MOIC analysis
 argument-hint: [company-name]
-allowed-tools: Read, Write, Bash, TaskCreate, TaskUpdate, TaskList
+user-invocable: true
+context: fork
+model: opus
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - TaskCreate
+  - TaskUpdate
+  - TaskList
+tool-annotations:
+  Bash: { destructiveHint: false, idempotentHint: true }
+invocation-contexts:
+  user-direct:
+    verbosity: high
+  agent-spawned:
+    verbosity: minimal
 ---
 
 ## Argument Syntax
+
 - `$0` - First argument
 - `$1` - Second argument
 - `$ARGUMENTS` - Full argument string
@@ -15,6 +33,7 @@ allowed-tools: Read, Write, Bash, TaskCreate, TaskUpdate, TaskList
 Create comprehensive M&A financial proposal with IRR/MOIC analysis.
 
 ## Process
+
 1. Gather historical and projected financials
 2. Configure deal terms (or use defaults)
 3. Call generate_proposal MCP tool
@@ -22,15 +41,18 @@ Create comprehensive M&A financial proposal with IRR/MOIC analysis.
 5. Present key metrics and validation results
 
 ## Usage
+
 ```
 /financial-model
 ```
 
 ## Required Information
+
 - Company name
 - EBITDA by year (historical + projected)
 
 ## Optional Information
+
 - Revenue by year
 - Purchase multiple (default: 6.0x)
 - Cash at closing % (default: 60%)
@@ -38,6 +60,7 @@ Create comprehensive M&A financial proposal with IRR/MOIC analysis.
 - Custom output path
 
 ## Output
+
 - IRR and MOIC calculations
 - Payment schedule
 - Debt structure analysis
@@ -46,6 +69,7 @@ Create comprehensive M&A financial proposal with IRR/MOIC analysis.
 - Text report
 
 ## Deal Structure (Default)
+
 - 60% cash at closing
 - 40% deferred (Year 1)
 - 3.0x earnout on EBITDA growth

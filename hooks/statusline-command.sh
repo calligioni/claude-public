@@ -60,5 +60,12 @@ fi
 DIR=$(echo "$input" | jq -r '.workspace.current_dir // "?"')
 DIR=${DIR##*/}
 
+# Added dirs (from /add-dir command, available since v2.1.47)
+ADDED_DIRS=$(echo "$input" | jq -r '(.workspace.added_dirs // []) | map(. | split("/") | last) | join(",")' 2>/dev/null)
+ADDED_DIRS_FMT=""
+if [ -n "$ADDED_DIRS" ]; then
+  ADDED_DIRS_FMT=" ${DIM}+dirs:${RST}${DIM}${ADDED_DIRS}${RST}"
+fi
+
 # Build output
-echo -e "${BOLD}${CYAN}${MODEL}${RST} ${DIM}|${RST} ${CLR}${BAR}${RST} ${PCT}% ${DIM}|${RST} ${MAGENTA}${COST_FMT}${RST} ${DIM}|${RST} ${DUR_FMT} ${DIM}|${RST} ${BLUE}${BRANCH}${DIRTY}${RST} ${DIM}|${RST} ${DIR} ${DIM}|${RST} ${DIM}+${ADDED} -${REMOVED}${RST}"
+echo -e "${BOLD}${CYAN}${MODEL}${RST} ${DIM}|${RST} ${CLR}${BAR}${RST} ${PCT}% ${DIM}|${RST} ${MAGENTA}${COST_FMT}${RST} ${DIM}|${RST} ${DUR_FMT} ${DIM}|${RST} ${BLUE}${BRANCH}${DIRTY}${RST} ${DIM}|${RST} ${DIR}${ADDED_DIRS_FMT} ${DIM}|${RST} ${DIM}+${ADDED} -${REMOVED}${RST}"

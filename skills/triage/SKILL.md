@@ -1,10 +1,29 @@
 ---
+name: triage
 description: Run quick triage analysis on potential M&A target
 argument-hint: [company-name]
-allowed-tools: Read, Bash, WebFetch, TaskCreate, TaskUpdate, TaskList
+user-invocable: true
+context: fork
+model: sonnet
+allowed-tools:
+  - Read
+  - Bash
+  - WebFetch
+  - TaskCreate
+  - TaskUpdate
+  - TaskList
+tool-annotations:
+  Bash: { destructiveHint: false, idempotentHint: true }
+  WebFetch: { readOnlyHint: true, openWorldHint: true }
+invocation-contexts:
+  user-direct:
+    verbosity: high
+  agent-spawned:
+    verbosity: minimal
 ---
 
 ## Argument Syntax
+
 - `$0` - First argument
 - `$1` - Second argument
 - `$ARGUMENTS` - Full argument string
@@ -15,6 +34,7 @@ allowed-tools: Read, Bash, WebFetch, TaskCreate, TaskUpdate, TaskList
 Run quick triage analysis on a potential acquisition target.
 
 ## Process
+
 1. Ask user for company financial metrics
 2. Call triage_deal MCP tool
 3. Present score (0-10) and recommendation
@@ -22,16 +42,19 @@ Run quick triage analysis on a potential acquisition target.
 5. Recommend next steps
 
 ## Usage
+
 ```
 /triage
 ```
 
 ## Required Information
+
 - Company name
 - Revenue (millions)
 - EBITDA (millions)
 
 ## Optional Information
+
 - Growth rate (%)
 - EBITDA margin (%)
 - Churn rate
@@ -40,6 +63,7 @@ Run quick triage analysis on a potential acquisition target.
 - Market vertical
 
 ## Output
+
 - Overall score (0-10)
 - Recommendation (PROCEED/REVIEW/REJECT)
 - Scoring breakdown

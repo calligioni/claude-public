@@ -1,9 +1,22 @@
 ---
+name: cs
 description: Check and sync Claude setup with remote repository
-allowed-tools: Bash
+user-invocable: true
+context: fork
+model: haiku
+allowed-tools:
+  - Bash
+tool-annotations:
+  Bash: { destructiveHint: false, idempotentHint: false }
+invocation-contexts:
+  user-direct:
+    verbosity: high
+  agent-spawned:
+    verbosity: minimal
 ---
 
 ## Argument Syntax
+
 - `$0` - First argument
 - `$1` - Second argument
 - `$ARGUMENTS` - Full argument string

@@ -1,10 +1,28 @@
 ---
+name: manual
 description: Build project user manual (MkDocs) with optional Word export
 argument-hint: [format: html|word|screenshots [url]]
-allowed-tools: Bash, Read, Glob, Write, mcp__chrome-devtools__*
+user-invocable: true
+context: fork
+model: sonnet
+allowed-tools:
+  - Bash
+  - Read
+  - Glob
+  - Write
+  - mcp__chrome-devtools__*
+tool-annotations:
+  Bash: { destructiveHint: false, idempotentHint: false }
+  mcp__chrome-devtools__*: { openWorldHint: true }
+invocation-contexts:
+  user-direct:
+    verbosity: high
+  agent-spawned:
+    verbosity: minimal
 ---
 
 ## Argument Syntax
+
 - `$0` - First argument
 - `$1` - Second argument
 - `$ARGUMENTS` - Full argument string
@@ -138,11 +156,13 @@ For the fastest path to screenshots:
 1. **Start your app locally** (e.g., `npm run dev`)
 
 2. **Add directives to your docs** where you want screenshots:
+
    ```markdown
    <!-- screenshot: dashboard path=/dashboard -->
    ```
 
 3. **Run the capture**:
+
    ```
    /manual screenshots http://localhost:3000
    ```
@@ -177,7 +197,7 @@ mkdir -p "$DOCS_DIR/images/screenshots"
 # manual-screenshots.yml (example)
 base_url: http://localhost:3000
 auth:
-  type: cookie  # or 'none', 'basic', 'token'
+  type: cookie # or 'none', 'basic', 'token'
   login_url: /login
   credentials:
     email: test@example.com
@@ -189,7 +209,7 @@ screens:
     description: Main dashboard view
     doc_file: getting-started/dashboard.md
     actions:
-      - wait: 2000  # Wait for data to load
+      - wait: 2000 # Wait for data to load
 
   - id: agent-list
     path: /agents
@@ -216,7 +236,7 @@ screens:
     description: Mobile navigation
     doc_file: getting-started/dashboard.md
     section: mobile-navigation
-    viewport: { width: 375, height: 667 }  # iPhone SE
+    viewport: { width: 375, height: 667 } # iPhone SE
 ```
 
 If no config exists, scan the markdown files for `<!-- screenshot: ... -->` directives.
@@ -295,7 +315,7 @@ Replace with:
 
 ```markdown
 ![Dashboard](../images/screenshots/dashboard.png)
-*Figure: Main dashboard view*
+_Figure: Main dashboard view_
 ```
 
 **Option B: Append to specific sections**
@@ -308,7 +328,7 @@ If `section` is specified in config, find that section in the doc file and add t
 On mobile devices (screen width < 1024px)...
 
 ![Mobile Navigation](../images/screenshots/mobile-nav.png)
-*Figure: Mobile navigation on iPhone SE*
+_Figure: Mobile navigation on iPhone SE_
 ```
 
 **Option C: Create a screenshots index**
@@ -319,10 +339,12 @@ Generate a `screenshots.md` file listing all captured screenshots:
 # Screenshots Reference
 
 ## Dashboard
+
 ![Dashboard](./images/screenshots/dashboard.png)
 Path: `/dashboard`
 
 ## Agent List
+
 ![Agent List](./images/screenshots/agent-list.png)
 Path: `/agents`
 
@@ -417,13 +439,13 @@ Use descriptive, kebab-case IDs:
 
 Common sizes to use:
 
-| Name | Width | Height | Use Case |
-|------|-------|--------|----------|
-| Desktop | 1280 | 800 | Standard desktop |
-| Desktop Wide | 1920 | 1080 | Full HD |
-| Tablet | 768 | 1024 | iPad portrait |
-| Mobile | 375 | 667 | iPhone SE |
-| Mobile Large | 414 | 896 | iPhone 11 Pro Max |
+| Name         | Width | Height | Use Case          |
+| ------------ | ----- | ------ | ----------------- |
+| Desktop      | 1280  | 800    | Standard desktop  |
+| Desktop Wide | 1920  | 1080   | Full HD           |
+| Tablet       | 768   | 1024   | iPad portrait     |
+| Mobile       | 375   | 667    | iPhone SE         |
+| Mobile Large | 414   | 896    | iPhone 11 Pro Max |
 
 ### Actions Before Screenshot
 
@@ -490,7 +512,7 @@ base_url: http://localhost:3000
 
 # Authentication (optional)
 auth:
-  type: cookie  # none | cookie | basic | token
+  type: cookie # none | cookie | basic | token
   login_url: /login
   credentials:
     email: demo@example.com
@@ -505,7 +527,7 @@ defaults:
     width: 1280
     height: 800
   format: png
-  quality: 90  # for jpeg/webp
+  quality: 90 # for jpeg/webp
 
 # Screenshots to capture
 screens:
@@ -560,13 +582,13 @@ screens:
 
 ### Inline Directive Reference
 
-| Directive | Description | Example |
-|-----------|-------------|---------|
-| `screenshot: <id>` | Basic screenshot | `<!-- screenshot: dashboard -->` |
-| `path=<url>` | Custom URL path | `path=/settings/profile` |
-| `viewport=WxH` | Set viewport | `viewport=375x667` |
-| `fullpage` | Capture full page | `fullpage` |
-| `click=<sel>` | Click before capture | `click=#open-modal` |
-| `hover=<sel>` | Hover before capture | `hover=.tooltip-trigger` |
-| `wait=<ms>` | Wait before capture | `wait=1000` |
-| `element=<sel>` | Screenshot element only | `element=.card` |
+| Directive          | Description             | Example                          |
+| ------------------ | ----------------------- | -------------------------------- |
+| `screenshot: <id>` | Basic screenshot        | `<!-- screenshot: dashboard -->` |
+| `path=<url>`       | Custom URL path         | `path=/settings/profile`         |
+| `viewport=WxH`     | Set viewport            | `viewport=375x667`               |
+| `fullpage`         | Capture full page       | `fullpage`                       |
+| `click=<sel>`      | Click before capture    | `click=#open-modal`              |
+| `hover=<sel>`      | Hover before capture    | `hover=.tooltip-trigger`         |
+| `wait=<ms>`        | Wait before capture     | `wait=1000`                      |
+| `element=<sel>`    | Screenshot element only | `element=.card`                  |

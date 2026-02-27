@@ -1,10 +1,22 @@
 ---
+name: project-orchestrator
 description: Full project orchestrator - analyze, build, test, deploy
 argument-hint: [project-path]
+user-invocable: true
+context: fork
+model: opus
 allowed-tools: "*"
+tool-annotations:
+  Bash: { destructiveHint: true, idempotentHint: false }
+invocation-contexts:
+  user-direct:
+    verbosity: high
+  agent-spawned:
+    verbosity: minimal
 ---
 
 ## Argument Syntax
+
 - `$0` - First argument
 - `$1` - Second argument
 - `$ARGUMENTS` - Full argument string
