@@ -30,7 +30,7 @@
     "decayThresholdDays": 90,
     "minUsesToRetain": 3
   },
-  "activeProjects": ["Contably", "AgentCreator", "M&A Toolkit"],
+  "activeProjects": ["Contably", "AgentCreator", "M&A Toolkit", "NuvinOS"],
   "integrations": {
     "github": "escotilha",
     "resend": { "domains": ["nuvini.ai", "contably.ai"] },
