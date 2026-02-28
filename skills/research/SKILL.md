@@ -16,6 +16,7 @@ allowed-tools:
   - Bash
   - AskUserQuestion
   - mcp__firecrawl__*
+  - mcp__ScraplingServer__*
   - mcp__browserless__*
   - mcp__brave-search__*
   - mcp__memory__*
@@ -25,6 +26,7 @@ tool-annotations:
   Write: { destructiveHint: false, idempotentHint: true }
   Edit: { destructiveHint: false, idempotentHint: true }
   mcp__firecrawl__*: { readOnlyHint: true, openWorldHint: true }
+  mcp__ScraplingServer__*: { readOnlyHint: true, openWorldHint: true }
   mcp__memory__*: { readOnlyHint: false, idempotentHint: false }
 hooks:
   Stop:
@@ -63,7 +65,7 @@ All reads and writes go to the iCloud path directly. Never use symlink paths.
 
 ## Skill Map (for matching content to existing skills)
 
-- Web scraping/data → firecrawl, mna-toolkit
+- Web scraping/data → firecrawl, scrapling, mna-toolkit
 - Code quality/architecture → cto, code-review-agent
 - Testing/QA → fulltest-skill, test-and-fix, qa-cycle
 - Product/UX → cpo-ai-skill, website-design
@@ -72,7 +74,7 @@ All reads and writes go to the iCloud path directly. Never use symlink paths.
 - Financial/M&A → mna-toolkit, portfolio-reporter, finance-\*
 - GitHub/repos → cpr, review-changes
 - Email/comms → agentmail
-- Research → deep-research, firecrawl
+- Research → deep-research, firecrawl, scrapling
 - Legal/compliance → legal-_, compliance-_
 
 ## Workflow
@@ -91,7 +93,7 @@ If ambiguous, check if path exists on disk using Glob.
 
 #### 1b. Extract Content
 
-**URLs** — Try Firecrawl, fall back to WebFetch:
+**URLs** — Try Firecrawl first, escalate through fallbacks:
 
 ```
 mcp__firecrawl__firecrawl_scrape({
@@ -101,7 +103,21 @@ mcp__firecrawl__firecrawl_scrape({
 })
 ```
 
-If Firecrawl fails or URL is a tweet/social post, use WebFetch/WebSearch as fallback.
+Fallback chain if Firecrawl fails (403, empty, credits exhausted, bot-detected):
+
+```
+1. Firecrawl (cloud, fast, structured extraction)
+   ↓ if fails
+2. Scrapling Fetcher (local HTTP, TLS fingerprint impersonation, free)
+   mcp__ScraplingServer__fetch({ url: "<url>", headless: true })
+   ↓ if blocked (403, captcha, empty)
+3. Scrapling StealthyFetcher (Playwright stealth, Cloudflare bypass)
+   mcp__ScraplingServer__stealthy_fetch({ url: "<url>", headless: true, block_webrtc: true })
+   ↓ if still fails
+4. WebFetch (last resort)
+```
+
+If URL is a tweet/social post, replace domain with `api.fxtwitter.com` and use WebFetch. Fall back to WebSearch if that fails.
 
 **GitHub repos** — Scrape repo page (description, stars, tech stack from package.json). Only fetch README separately if the repo page lacks sufficient detail.
 

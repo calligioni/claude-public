@@ -47,12 +47,13 @@ When you identify a matching skill, tell the user which skill you're invoking an
 
 ### Research & Analysis
 
-| Task                        | Skill            | When                          |
-| --------------------------- | ---------------- | ----------------------------- |
-| Deep multi-track research   | `/deep-research` | Any research question         |
-| Analyze URL/image/tool      | `/research`      | Evaluate a specific resource  |
-| Web scraping                | `/firecrawl`     | Extract data from websites    |
-| Headless browser automation | `/browserless`   | PDFs, screenshots, Lighthouse |
+| Task                         | Skill            | When                                          |
+| ---------------------------- | ---------------- | --------------------------------------------- |
+| Deep multi-track research    | `/deep-research` | Any research question                         |
+| Analyze URL/image/tool       | `/research`      | Evaluate a specific resource                  |
+| Web scraping                 | `/firecrawl`     | Extract data from websites                    |
+| Anti-bot / Cloudflare scrape | `/scrapling`     | Stealth scraping, TLS impersonation, anti-bot |
+| Headless browser automation  | `/browserless`   | PDFs, screenshots, Lighthouse                 |
 
 ### Communication & Utilities
 
