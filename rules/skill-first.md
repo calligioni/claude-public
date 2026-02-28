@@ -28,8 +28,8 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Commit + push (no PR)         | `/cp`                   | Ready to push, no PR needed                 |
 | Full product from idea        | `/cpo`                  | Product lifecycle: discovery → spec → build |
 | Git worktree management       | `/maketree`             | Create/manage isolated worktrees            |
-| Refactor for clarity          | `/simplify`             | Clean up code after long session or PR      |
-| Parallel codebase migration   | `/batch`                | Repetitive changes across many files        |
+| Refactor for clarity          | `/simplify` (built-in)  | Clean up code after long session or PR      |
+| Parallel codebase migration   | `/batch` (built-in)     | Repetitive changes across many files        |
 | Revert a feature/track        | `/revert-track`         | Undo a feature, phase, or commit range      |
 
 ### QA & Testing
@@ -57,14 +57,15 @@ When you identify a matching skill, tell the user which skill you're invoking an
 
 ### Communication & Utilities
 
-| Task                  | Skill                     |
-| --------------------- | ------------------------- |
-| Send/manage email     | `/agentmail`              |
-| Fetch tweet           | `/tweet`                  |
-| Memory maintenance    | `/memory-consolidation`   |
-| Optimize claude setup | `/claude-setup-optimizer` |
-| Sync setup repo       | `/cs`                     |
-| Build user manual     | `/manual`                 |
+| Task                           | Skill                     |
+| ------------------------------ | ------------------------- |
+| Send/manage email              | `/agentmail`              |
+| Fetch tweet                    | `/tweet`                  |
+| Memory maintenance (Turso/MCP) | `/memory-consolidation`   |
+| Manage auto-memory (built-in)  | `/memory`                 |
+| Optimize claude setup          | `/claude-setup-optimizer` |
+| Sync setup repo                | `/cs`                     |
+| Build user manual              | `/manual`                 |
 
 ## When to Go Ad-Hoc
 
@@ -74,6 +75,8 @@ Only skip skills when:
 2. The user explicitly asks for a specific manual approach
 3. No skill covers the task at all
 4. The task is pure conversation/explanation (no implementation)
+
+> **Tip:** Run `claude agents` in the terminal to list all configured agents (specialist, project, and NuvinOS agents).
 
 ## Remote Monitoring (Remote Control)
 

@@ -12,6 +12,7 @@ allowed-tools:
 color: #FBBF24
 model: sonnet
 memory: project
+isolation: worktree
 ---
 
 # DevOps/Infrastructure Agent

@@ -12,6 +12,7 @@ allowed-tools:
 color: #F59E0B
 model: sonnet
 memory: project
+isolation: worktree
 ---
 
 # Performance Agent

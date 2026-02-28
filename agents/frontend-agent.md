@@ -12,6 +12,7 @@ allowed-tools:
 color: #34D399
 model: sonnet
 memory: project
+isolation: worktree
 skills: [verify, test-and-fix]
 ---
 

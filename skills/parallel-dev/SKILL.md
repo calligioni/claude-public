@@ -659,6 +659,8 @@ The `isolation: "worktree"` parameter is the officially supported pattern for ag
 
 > **Tip:** Agents are now running in parallel in isolated worktrees. This session will be active for a while. Run `/remote-control` (or `/rc`) to connect from your phone or another browser — your local filesystem, MCP servers, and project config all stay available. Requires Pro/Max plan.
 
+> **Note:** As of v2.1.63, project configs (`.claude/`) and auto-memory are automatically shared across all git worktrees of the same repository. Worktree agents inherit the same skill/agent definitions as the main session.
+
 ### Phase 4: Progress Monitoring
 
 #### Agent Teams Mode
