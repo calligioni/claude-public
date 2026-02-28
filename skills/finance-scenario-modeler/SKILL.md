@@ -55,6 +55,7 @@ invocation-contexts:
     verbosity: minimal
     confirmDestructive: false
     outputFormat: structured
+memory: user
 ---
 
 # finance-scenario-modeler — Scenario Planning & Monte Carlo Simulation Engine

@@ -12,6 +12,7 @@ allowed-tools:
   - Grep
 tool-annotations:
   Bash: { readOnlyHint: false, idempotentHint: false }
+memory: user
 ---
 
 # Portfolio Financial Reporter

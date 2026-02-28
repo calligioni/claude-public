@@ -38,6 +38,7 @@ invocation-contexts:
     verbosity: minimal
     confirmDestructive: false
     outputFormat: structured
+memory: user
 ---
 
 # ir-capital-register — Capital Instruments Live Register

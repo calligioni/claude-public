@@ -55,6 +55,7 @@ invocation-contexts:
     verbosity: minimal
     confirmDestructive: false
     outputFormat: structured
+memory: user
 ---
 
 # finance-variance-commentary — Automated Variance Explanation Generator

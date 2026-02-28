@@ -20,6 +20,7 @@ invocation-contexts:
     verbosity: high
   agent-spawned:
     verbosity: minimal
+memory: user
 ---
 
 ## Argument Syntax

@@ -40,6 +40,7 @@ invocation-contexts:
     verbosity: minimal
     confirmDestructive: false
     outputFormat: structured
+memory: user
 ---
 
 # finance-mutuo-calculator — Intercompany Loan Interest Calculator

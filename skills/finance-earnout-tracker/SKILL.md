@@ -57,6 +57,7 @@ invocation-contexts:
     verbosity: minimal
     confirmDestructive: false
     outputFormat: structured
+memory: user
 ---
 
 # finance-earnout-tracker — M&A Earn-out Obligation Calculator

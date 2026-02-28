@@ -55,6 +55,7 @@ invocation-contexts:
     verbosity: minimal
     confirmDestructive: false
     outputFormat: structured
+memory: user
 ---
 
 # finance-rolling-forecast — 12-Month Rolling Forecast

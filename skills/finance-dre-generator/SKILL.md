@@ -55,6 +55,7 @@ invocation-contexts:
     verbosity: minimal
     confirmDestructive: false
     outputFormat: structured
+memory: user
 ---
 
 # finance-dre-generator — Brazilian DRE (P&L) Generator per Subsidiary

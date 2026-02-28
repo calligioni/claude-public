@@ -17,6 +17,7 @@ tool-annotations:
 inject:
   - bash: ls "$HOME/code/nuvini-nda/references/" 2>/dev/null | head -20
   - bash: ls "$HOME/code/nuvini-nda/output/" 2>/dev/null | head -10
+memory: user
 ---
 
 # NDA Reviewer Skill

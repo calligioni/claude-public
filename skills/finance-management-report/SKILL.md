@@ -59,6 +59,7 @@ invocation-contexts:
     verbosity: minimal
     confirmDestructive: false
     outputFormat: structured
+memory: user
 ---
 
 # finance-management-report — Monthly Executive Summary Package

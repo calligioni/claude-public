@@ -48,6 +48,7 @@ invocation-contexts:
     verbosity: minimal
     confirmDestructive: false
     outputFormat: structured
+memory: user
 ---
 
 # ir-qna-draft — Investor Q&A Response Drafter

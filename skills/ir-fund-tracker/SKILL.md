@@ -56,6 +56,7 @@ invocation-contexts:
     verbosity: minimal
     confirmDestructive: false
     outputFormat: structured
+memory: user
 ---
 
 # ir-fund-tracker — Fund Lifecycle and LP Fundraising Tracker

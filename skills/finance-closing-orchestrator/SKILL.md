@@ -41,6 +41,7 @@ invocation-contexts:
     verbosity: minimal
     confirmDestructive: false
     outputFormat: structured
+memory: user
 ---
 
 # finance-closing-orchestrator — Monthly Closing Checklist Automation

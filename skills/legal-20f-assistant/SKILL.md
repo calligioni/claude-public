@@ -50,6 +50,7 @@ invocation-contexts:
     output: minimal
     confirm-destructive: false
     format: structured
+memory: user
 ---
 
 ## Overview

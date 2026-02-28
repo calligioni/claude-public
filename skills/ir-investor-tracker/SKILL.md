@@ -62,6 +62,7 @@ invocation-contexts:
     verbosity: minimal
     confirmDestructive: false
     outputFormat: structured
+memory: user
 ---
 
 # ir-investor-tracker — Investor Relationship CRM

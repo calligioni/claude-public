@@ -42,6 +42,7 @@ invocation-contexts:
     verbosity: minimal
     confirmDestructive: false
     outputFormat: structured
+memory: user
 ---
 
 # legal-compliance-calendar — Multi-Jurisdiction Regulatory Alert System
