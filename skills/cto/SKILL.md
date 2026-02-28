@@ -152,13 +152,14 @@ Auto-memory (v2.1.59) captures session context automatically. When saving findin
 
 ### Swarm Specialist Agents
 
-| Agent                    | Focus           | Checks For                                              | Priority |
-| ------------------------ | --------------- | ------------------------------------------------------- | -------- |
-| **architecture-analyst** | System design   | Patterns, coupling, scalability, separation of concerns | Medium   |
-| **security-analyst**     | Vulnerabilities | OWASP Top 10, secrets, auth/authz, injection            | High     |
-| **performance-analyst**  | Bottlenecks     | N+1 queries, caching, memory, complexity                | Medium   |
-| **quality-analyst**      | Code health     | Tech debt, testing, conventions, maintainability        | Low      |
-| **stack-analyst**        | Technology fit  | Dependencies, versions, alternatives, migrations        | Low      |
+| Agent                    | Focus                     | Checks For                                                              | Priority |
+| ------------------------ | ------------------------- | ----------------------------------------------------------------------- | -------- |
+| **architecture-analyst** | System design             | Patterns, coupling, scalability, separation of concerns                 | Medium   |
+| **security-analyst**     | Vulnerabilities + deps    | OWASP Top 10, secrets, auth/authz, injection, dependency CVEs, licenses | High     |
+| **performance-analyst**  | Bottlenecks               | N+1 queries, caching, memory, complexity, bundle size                   | Medium   |
+| **quality-analyst**      | Code health + conventions | Tech debt, testing, conventions, maintainability, framework currency    | Low      |
+
+> **Note:** Stack-analyst responsibilities are merged into security-analyst (dependency CVEs, security advisories) and quality-analyst (version currency, deprecated packages, migration paths). This keeps the swarm at 4 teammates — the cost-effective sweet spot per AGENT-TEAMS-STRATEGY.md.
 
 ---
 

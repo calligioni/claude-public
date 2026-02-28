@@ -41,6 +41,76 @@ invocation-contexts:
 
 A disciplined three-phase workflow that produces persistent markdown artifacts. Never write code until the user has reviewed and approved a written plan.
 
+## Session State & Resumability
+
+This skill persists session state to `.deep-plan-state.json` in the project root. On activation, **always check for an existing state file first**:
+
+```bash
+cat .deep-plan-state.json 2>/dev/null
+```
+
+### State File Format
+
+```json
+{
+  "feature": "Feature/task name",
+  "startedAt": "2026-02-28T10:00:00Z",
+  "currentPhase": "research|plan|implement",
+  "research": {
+    "status": "pending|in_progress|complete",
+    "scopeIdentified": true,
+    "filesRead": ["src/auth/login.ts", "src/api/routes.ts"],
+    "artifactWritten": false
+  },
+  "plan": {
+    "status": "pending|in_progress|approved",
+    "artifactWritten": false,
+    "annotationCycles": 0,
+    "approvedAt": null
+  },
+  "implement": {
+    "status": "pending|in_progress|complete",
+    "stepsTotal": 0,
+    "stepsCompleted": 0,
+    "lastCompletedStep": null
+  },
+  "commits": []
+}
+```
+
+### Resume Logic
+
+```
+IF .deep-plan-state.json exists:
+  Read state file
+  IF currentPhase == "research" AND research.status != "complete":
+    → Resume Phase 1 (skip already-read files from research.filesRead)
+  IF currentPhase == "plan" AND plan.status == "in_progress":
+    → Resume Phase 2 (re-read plan.md, continue annotation cycle)
+  IF currentPhase == "implement":
+    → Resume Phase 3 (skip completed steps, start from lastCompletedStep + 1)
+  Tell user: "Resuming from {currentPhase} phase. {context summary}"
+ELSE:
+  → Start fresh from Phase 1
+```
+
+### State Updates
+
+Update `.deep-plan-state.json` at each checkpoint:
+
+- After identifying scope (Phase 1.1)
+- After reading each batch of files (Phase 1.2)
+- After writing research.md (Phase 1.3)
+- After writing plan.md (Phase 2.1)
+- After each annotation cycle (Phase 2.2)
+- After plan approval
+- After completing each implementation step (Phase 3.2)
+- After all steps complete (Phase 3.3)
+
+Track commits made during implementation in the `commits` array for potential revert via `/revert-track`.
+
+---
+
 ## Phase 1: Deep Research
 
 Deeply read the relevant parts of the codebase. Understand all intricacies.
@@ -215,9 +285,11 @@ Before writing any code:
 For each step in the plan:
 
 1. Announce which step you're working on
-2. Implement the change
-3. Run `tsc --noEmit` (if TypeScript project) to verify types
-4. Update `plan.md` — mark the step as done:
+2. Update `.deep-plan-state.json`: set `implement.status = "in_progress"`, update `implement.lastCompletedStep`
+3. Implement the change
+4. Run `tsc --noEmit` (if TypeScript project) to verify types
+5. Update `.deep-plan-state.json`: increment `implement.stepsCompleted`, add commit SHA to `commits` array
+6. Update `plan.md` — mark the step as done:
 ```
 
 ### Step 1: [Description] ✅
@@ -231,7 +303,8 @@ After all steps are complete:
 
 1. Run tests if available (`npm test`, `vitest`, etc.)
 2. Run typecheck if TypeScript
-3. Update `plan.md` with final status:
+3. Update `.deep-plan-state.json`: set `implement.status = "complete"`, `currentPhase = "complete"`
+4. Update `plan.md` with final status:
 ```markdown
 ## Status: ✅ Complete
 
