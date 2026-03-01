@@ -6,6 +6,7 @@ Personal Claude Code configuration for ps. This directory contains agents, skill
 
 ```bash
 # First time setup - build local MCP servers
+sudo xcodebuild -license accept
 ./setup-mcp-servers.sh
 
 # Start Claude Code with all configurations loaded
