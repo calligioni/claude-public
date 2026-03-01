@@ -131,7 +131,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "/Users/psm2/.claude-setup/hooks/statusline-command.sh"
+    "command": "$HOME/.claude-setup/hooks/statusline-command.sh"
   },
   "enabledPlugins": {
     "swift-lsp@claude-plugins-official": true
