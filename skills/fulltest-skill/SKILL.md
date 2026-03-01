@@ -23,6 +23,7 @@ allowed-tools:
   - Grep
   - mcp__chrome-devtools__*
   - mcp__browserless__*
+  - mcp__context-mode__*
   - mcp__memory__*
 memory: user
 tool-annotations:
@@ -158,6 +159,8 @@ The fulltesting-agent should now follow this enhanced flow:
 - Build page map
 
 ### Phase 2: Parallel Testing (Per Page)
+
+> **Context Compression:** When `mcp__context-mode__batch_execute` is available, batch multiple navigation + console-check + network-check sequences per page into a single `batch_execute` call with intent filtering (e.g., "show only errors and 4xx/5xx responses"). This reduces Playwright snapshot bloat from ~56 KB per snapshot to ~300 bytes, preserving context window for more pages.
 
 For each page, run these checks:
 

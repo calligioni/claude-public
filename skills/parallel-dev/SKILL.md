@@ -17,6 +17,7 @@ allowed-tools:
   - Task(agent_type=devops-agent)
   - Task(agent_type=general-purpose)
   - Task(agent_type=Explore)
+  - mcp__context-mode__*
   - TaskCreate
   - TaskUpdate
   - TaskList
@@ -710,6 +711,8 @@ while (hasActiveFeatures()) {
 ```
 
 ### Phase 4.5: CI Reaction Loop
+
+> **Context Compression:** When `mcp__context-mode__batch_execute` is available, CI-fix agents should batch typecheck + lint + test into a single `batch_execute` call with intent filtering ("show only errors"). This trims per-agent context in long parallel-dev sessions without changing semantics.
 
 When `slots.ci !== 'none'`, the monitoring loop (Phase 4) also polls GitHub Actions for CI failures on feature branches and routes failure logs back to the responsible agent for autonomous remediation.
 

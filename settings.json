@@ -271,6 +271,11 @@
         "command": "$HOME/.local/bin/scrapling",
         "args": ["mcp"],
         "description": "Stealth web scraping with anti-bot bypass, TLS fingerprint impersonation, and adaptive element tracking"
+      },
+      "context-mode": {
+        "command": "npx",
+        "args": ["-y", "context-mode"],
+        "description": "Context window compression: batches tool calls, indexes large outputs for query-based retrieval"
       }
     }
   }

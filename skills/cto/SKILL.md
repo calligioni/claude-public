@@ -14,6 +14,7 @@ allowed-tools:
   - WebSearch
   - WebFetch
   - mcp__firecrawl__*
+  - mcp__context-mode__*
   - Task(agent_type=general-purpose)
   - Task(agent_type=Explore)
   - Task(agent_type=security-agent)
@@ -240,6 +241,8 @@ When prompting subagents or analyzing code, use thorough directive language:
 - Recommend running `tsc --noEmit` continuously during implementation
 
 ### Step 2: Codebase Discovery
+
+> **Context Compression:** When `mcp__context-mode__*` tools are available, use `fetch_and_index` for large files (package-lock.json, directory trees, config dumps) and `search` for targeted queries instead of reading full files into context. Use `batch_execute` to combine typecheck + lint + test runs into a single call with intent filtering ("show only errors").
 
 **Detect tech stack:**
 
