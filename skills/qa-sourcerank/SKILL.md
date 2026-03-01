@@ -337,10 +337,10 @@ CREATE INDEX IF NOT EXISTS idx_qa_feature_coverage_status ON qa_feature_coverage
 
 The QA skill tracks **feature coverage** to ensure every feature is tested and approved before the cycle ends. Features are seeded into `qa_feature_coverage` at session start.
 
-### Feature Matrix (50 coverage rows across 4 personas)
+### Feature Matrix (56 coverage rows across 4 personas)
 
 ```
-SARAH (CMO/Admin) — 16 features:
+SARAH (CMO/Admin) — 17 features:
   landing-page        | /                              | Landing page messaging, CTAs, pricing, demo sections
   sign-in             | /sign-in                       | Login flow
   dashboard-overview  | /dashboard                     | Dashboard KPIs and widgets
@@ -357,8 +357,9 @@ SARAH (CMO/Admin) — 16 features:
   stream              | /dashboard/stream              | Real-time event stream (mentions, alerts, metrics)
   ai-models           | /dashboard/settings/ai-models  | AI model provider configuration
   api-keys            | /dashboard/settings/api-keys   | API key creation and management
+  visibility          | /dashboard/visibility          | Brand visibility tracking across AI engines
 
-MARCUS (SEO/Member) — 13 features:
+MARCUS (SEO/Member) — 16 features:
   dashboard-overview  | /dashboard                     | Daily overview
   monitor             | /dashboard/monitor             | AI monitoring (mentions, hallucinations, prompt library, brand facts)
   content-analysis    | /dashboard/content             | Content analysis and optimization
@@ -368,10 +369,13 @@ MARCUS (SEO/Member) — 13 features:
   brand-facts         | /dashboard/brands/[id]/facts   | Brand facts management
   intelligence        | /dashboard/intelligence        | Intelligence hub
   integrations        | /dashboard/integrations        | CMS integrations
-  readiness           | /dashboard/readiness           | AI readiness scoring
+  readiness           | /dashboard/readiness           | AI readiness / GEO audit scoring
   integration-detail  | /dashboard/integrations/[id]   | Integration detail and config
   analytics           | /dashboard/analytics           | Analytics trends, attribution, predictions
   stream              | /dashboard/stream              | Real-time event stream monitoring
+  site-audit          | /dashboard/site-audit          | Site audit issues and crawl results
+  backlog             | /dashboard/backlog             | Content/issue backlog management
+  visibility          | /dashboard/visibility          | Visibility sprint results and engine breakdown
 
 DIANA (Agency) — 11 features:
   agency-dashboard    | /dashboard/agency              | Agency dashboard overview
@@ -386,7 +390,7 @@ DIANA (Agency) — 11 features:
   webhooks            | /dashboard/settings/webhooks   | Webhook endpoint configuration
   public-api          | /dashboard/settings/api        | Public API docs and key management
 
-ALEX (Brand Manager) — 10 features:
+ALEX (Brand Manager) — 12 features:
   dashboard-overview  | /dashboard                     | Dashboard overview
   brand-detail        | /dashboard/brands/[id]         | Brand deep dive
   alerts              | /dashboard/alerts              | Alert center
@@ -397,6 +401,8 @@ ALEX (Brand Manager) — 10 features:
   quality             | /dashboard/quality             | Content quality review
   analytics           | /dashboard/analytics           | Analytics overview and predictions
   billing             | /dashboard/settings/billing    | Billing plans and invoices
+  site-audit          | /dashboard/site-audit          | Site audit issues from brand perspective
+  backlog             | /dashboard/backlog             | Backlog items for brand
 ```
 
 ### Seeding Feature Coverage (Phase 0)
@@ -422,7 +428,8 @@ INSERT INTO qa_feature_coverage (session_id, feature_key, feature_name, persona,
   ('{sid}', 'analytics', 'Advanced analytics dashboard', 'sarah', '/dashboard/analytics', 2),
   ('{sid}', 'stream', 'Real-time event stream', 'sarah', '/dashboard/stream', 1),
   ('{sid}', 'ai-models', 'AI model configuration', 'sarah', '/dashboard/settings/ai-models', 2),
-  ('{sid}', 'api-keys', 'API key management', 'sarah', '/dashboard/settings/api-keys', 2)
+  ('{sid}', 'api-keys', 'API key management', 'sarah', '/dashboard/settings/api-keys', 2),
+  ('{sid}', 'visibility', 'Brand visibility tracking', 'sarah', '/dashboard/visibility', 2)
 ON CONFLICT (session_id, feature_key, persona) DO NOTHING;
 "
 
@@ -441,7 +448,10 @@ INSERT INTO qa_feature_coverage (session_id, feature_key, feature_name, persona,
   ('{sid}', 'readiness', 'AI readiness scoring', 'marcus', '/dashboard/readiness', 2),
   ('{sid}', 'integration-detail', 'Integration detail and config', 'marcus', '/dashboard/integrations/[id]', 2),
   ('{sid}', 'analytics', 'Analytics trends and attribution', 'marcus', '/dashboard/analytics', 2),
-  ('{sid}', 'stream', 'Real-time event stream', 'marcus', '/dashboard/stream', 1)
+  ('{sid}', 'stream', 'Real-time event stream', 'marcus', '/dashboard/stream', 1),
+  ('{sid}', 'site-audit', 'Site audit issues and crawl results', 'marcus', '/dashboard/site-audit', 2),
+  ('{sid}', 'backlog', 'Content/issue backlog management', 'marcus', '/dashboard/backlog', 2),
+  ('{sid}', 'visibility', 'Visibility sprint results and engine breakdown', 'marcus', '/dashboard/visibility', 2)
 ON CONFLICT (session_id, feature_key, persona) DO NOTHING;
 "
 
@@ -474,7 +484,9 @@ INSERT INTO qa_feature_coverage (session_id, feature_key, feature_name, persona,
   ('{sid}', 'recommendations', 'Brand recommendations', 'alex', '/dashboard/recommendations', 1),
   ('{sid}', 'quality', 'Content quality review', 'alex', '/dashboard/quality', 1),
   ('{sid}', 'analytics', 'Analytics overview and predictions', 'alex', '/dashboard/analytics', 1),
-  ('{sid}', 'billing', 'Billing plans and invoices', 'alex', '/dashboard/settings/billing', 1)
+  ('{sid}', 'billing', 'Billing plans and invoices', 'alex', '/dashboard/settings/billing', 1),
+  ('{sid}', 'site-audit', 'Site audit issues from brand perspective', 'alex', '/dashboard/site-audit', 1),
+  ('{sid}', 'backlog', 'Backlog items for brand', 'alex', '/dashboard/backlog', 1)
 ON CONFLICT (session_id, feature_key, persona) DO NOTHING;
 "
 ```
