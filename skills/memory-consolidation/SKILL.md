@@ -278,6 +278,31 @@ function calculateRelevance(learning, existingMemories, coreMemory) {
     reasons.push("Common scenario (+2)");
   }
 
+  // 7. HYBRID RECALL RANKING - Recency bonus + staleness penalty
+  // Inspired by cognitive science: recent memories get a retrieval boost,
+  // stale memories get penalized proportional to time since last use.
+  if (learning.lastUsedDaysAgo !== undefined) {
+    if (learning.lastUsedDaysAgo <= 7) {
+      score += 2;
+      reasons.push("Recently used within 7 days (+2)");
+    } else if (learning.lastUsedDaysAgo <= 30) {
+      score += 1;
+      reasons.push("Used within 30 days (+1)");
+    } else if (learning.lastUsedDaysAgo > 90) {
+      score -= 1;
+      reasons.push("Stale >90 days (-1)");
+    }
+  }
+
+  // 8. USE FREQUENCY BONUS - High-use memories are more valuable
+  if (learning.useCount >= 10) {
+    score += 2;
+    reasons.push("High use count >=10 (+2)");
+  } else if (learning.useCount >= 5) {
+    score += 1;
+    reasons.push("Moderate use count >=5 (+1)");
+  }
+
   const threshold = coreMemory.memoryConfig?.relevanceThreshold || 5;
 
   return {
@@ -286,6 +311,19 @@ function calculateRelevance(learning, existingMemories, coreMemory) {
     save: score >= threshold,
     threshold,
   };
+}
+
+/**
+ * Extract the source type from a memory's observations.
+ * Parses "Source: {type} — {detail}" format per memory-strategy.md
+ */
+function extractSourceType(memory) {
+  const sourceObs = (memory.observations || []).find((o) =>
+    o.startsWith("Source:"),
+  );
+  if (!sourceObs) return null;
+  const match = sourceObs.match(/^Source:\s*(\S+)/);
+  return match ? match[1] : null;
 }
 
 /**
@@ -507,8 +545,22 @@ function identifyStaleMemories(memories, coreMemory) {
       return false;
     }
 
-    // Forget if: old AND rarely used
-    const isOld = stats.daysSinceLastUse > config.decayThresholdDays;
+    // Source-type-based decay thresholds (per memory-strategy.md)
+    const sourceDecayOverrides = {
+      research: 60, // Market data goes stale fast
+      failure: 180, // Mistakes are expensive to relearn
+      "user-feedback": Infinity, // Never auto-decay user preferences
+    };
+    const sourceType = extractSourceType(memory); // parses "Source: {type} — ..."
+    const baseThreshold =
+      sourceDecayOverrides[sourceType] ?? config.decayThresholdDays;
+
+    // Weighted decay: high-use memories get a longer grace period
+    // A memory used 10+ times gets 2x the decay threshold before forgetting
+    const useMultiplier = Math.min(1 + stats.useCount / 10, 2.0);
+    const adjustedThreshold = baseThreshold * useMultiplier;
+
+    const isOld = stats.daysSinceLastUse > adjustedThreshold;
     const isRarelyUsed = stats.useCount < config.minUsesToRetain;
     const isIneffective =
       stats.effectiveness !== null && stats.effectiveness < 0.3;

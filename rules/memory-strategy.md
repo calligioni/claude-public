@@ -17,7 +17,33 @@ Use lowercase with hyphens. Include project name when project-specific.
 
 ## Required Observations
 
-Every entity: `"Discovered: {date}"`, `"Source: {how}"`, `"Applied in: {project} - {date} - {HELPFUL|NOT HELPFUL|MODIFIED}"`, `"Use count: {N}"`
+Every entity must include these observations:
+
+- `"Discovered: {date}"`
+- `"Source: {type} — {detail}"` (see Source Types below)
+- `"Applied in: {project} - {date} - {HELPFUL|NOT HELPFUL|MODIFIED}"`
+- `"Use count: {N}"`
+
+### Source Types
+
+Use a typed `Source:` format to enable source-based filtering and pruning during consolidation:
+
+| Type             | Format                                        | Example                                                    |
+| ---------------- | --------------------------------------------- | ---------------------------------------------------------- |
+| `implementation` | `Source: implementation — {file or feature}`  | `Source: implementation — src/auth/jwt.ts`                 |
+| `failure`        | `Source: failure — {what went wrong}`         | `Source: failure — forgot RLS on profiles table`           |
+| `user-feedback`  | `Source: user-feedback — {context}`           | `Source: user-feedback — always use pnpm`                  |
+| `research`       | `Source: research — {url or paper}`           | `Source: research — github.com/kbanc85/claudia`            |
+| `code-review`    | `Source: code-review — {PR or session}`       | `Source: code-review — PR #42 security findings`           |
+| `git-history`    | `Source: git-history — {repo}`                | `Source: git-history — contably commit patterns`           |
+| `session`        | `Source: session — {skill or context}`        | `Source: session — /ship feature auth`                     |
+| `consolidation`  | `Source: consolidation — merged from {names}` | `Source: consolidation — merged from pattern:a, pattern:b` |
+
+During consolidation, source types enable targeted pruning:
+
+- `research` sources decay faster (60 days) — market data goes stale
+- `failure` sources are retained longer (180 days) — mistakes are expensive to relearn
+- `user-feedback` sources never auto-decay — explicit user preferences are stable
 
 ## Save vs Skip
 
