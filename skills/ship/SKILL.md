@@ -92,12 +92,6 @@ invocation-contexts:
 
 # Ship — End-to-End Feature Shipping
 
-## Current Environment
-
-- Git branch: !`git branch --show-current 2>/dev/null`
-- Recent commits: !`git log --oneline -5 2>/dev/null`
-- Changed files: !`git diff --stat HEAD 2>/dev/null | tail -5`
-
 A disciplined 7-phase skill that takes a feature from idea to production. Each phase produces persistent artifacts. Resumable across context clears via state file.
 
 ---
