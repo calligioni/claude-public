@@ -160,12 +160,17 @@ Score relevance 0-10 against three targets:
 
 ### Recommendations
 
-#### 1. [Improve Existing / Create New / Benefit Project]
+#### 1. [Improve Existing / Create New / Benefit Project] — Score: X/10
 
 - **Target:** [skill name / "New skill: xyz" / project name]
 - **What:** [specific change]
 - **Why:** [concrete benefit]
 - **Effort:** Low / Medium / High
+- **Score:** X/10 — [one-line justification]
+
+> Score = (impact × 0.4) + (feasibility × 0.3) + (relevance × 0.3)
+> where each factor is 1-10. Impact: how much it improves the target.
+> Feasibility: how easy to implement. Relevance: how aligned with current priorities.
 
 ### Memory
 
@@ -174,7 +179,7 @@ Score relevance 0-10 against three targets:
 
 #### 2b. Ask User What to Apply
 
-Use `AskUserQuestion` with recommendations as options. Include "Just save to memory" and "Skip".
+Use `AskUserQuestion` with recommendations as options. Each option label MUST include the score (e.g., "8/10 — Update /cto with new pattern"). Sort options by score descending. Include "Just save to memory" and "Skip".
 
 #### 2c. Implement Approved Changes
 
