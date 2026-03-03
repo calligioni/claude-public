@@ -87,6 +87,7 @@ Auto-memory (v2.1.59) captures session context automatically. When saving findin
 - Check authentication and authorization patterns
 - Evaluate secrets management
 - Assess input validation and output encoding
+- **Agent Chassis Security** (for AI-integrated codebases): verify secrets are injected at the deterministic runtime layer, not passed through the AI context window; confirm a trust boundary exists around model calls; check that all outbound agent actions and secret accesses are audit-logged
 - For production-wide or open-source vulnerability scanning, consider routing to **Claude Code Security** (AI-assisted SAST that reasons about code context rather than pattern-matching). Available for Enterprise/Team customers — especially effective for auth flows, RLS policies, and subtle context-dependent vulns that semgrep/trivy miss.
 
 ### 4. Performance Analysis
@@ -322,7 +323,8 @@ Teammate "security-analyst":
   Review {auth_files} and {api_files} for vulnerabilities. Also run `npm audit` / `pip-audit`.
   FILE OWNERSHIP: You own {auth_dirs}, {api_dirs}, package.json/lock files.
   Checklist: OWASP Top 10, auth flow, RBAC/ABAC, input validation, injection,
-  XSS, CSRF, secrets management, dependency CVEs, security headers, license compliance.
+  XSS, CSRF, secrets management, dependency CVEs, security headers, license compliance,
+  agent chassis security (if AI-integrated: secrets outside model context, deterministic trust boundary, audit logging of agent actions).
   Report: severity | file:line | CWE | issue | recommendation
   Message the lead with CRITICAL findings immediately (don't wait for completion).
   Message quality-analyst if you find deprecated/vulnerable dependencies they should flag.
@@ -939,6 +941,13 @@ When evaluating technology choices:
 - [ ] Principle of least privilege (IAM)
 - [ ] Regular dependency updates
 - [ ] Security headers configured
+
+### Agent Chassis Security (AI-Integrated Apps)
+
+- [ ] AI model context treated as untrusted — no raw credentials in prompts
+- [ ] Secrets injected by deterministic runtime (chassis), not by or through the model
+- [ ] Trust boundary exists around model calls (sandbox, allow-list, guardrails)
+- [ ] All outbound agent actions and secret accesses audit-logged
 
 ### Data Security
 
