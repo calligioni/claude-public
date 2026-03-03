@@ -270,7 +270,7 @@ Categorize approved changes into groups that can run in parallel without conflic
 
 If a group touches too many files, split further (e.g., separate M&A skills from dev skills).
 
-#### 6c. Launch parallel agents
+#### 5c. Launch parallel agents
 
 Use the Agent tool to launch multiple agents in a **single message** with multiple tool calls. Each agent gets a detailed prompt listing exactly which files to change and what to do. Use `model: "haiku"` for mechanical edits, `model: "sonnet"` for edits requiring judgment.
 
@@ -294,11 +294,11 @@ Agent(subagent_type="general-purpose", model="sonnet", description="Update confi
 - Wait for all agents to complete, then verify results
 - If a change depends on another change, put them in the same agent or run sequentially
 
-#### 6d. Verify all changes
+#### 5d. Verify all changes
 
 After all agents complete, spot-check key files to confirm changes were applied correctly. Read the frontmatter of a few modified files to verify.
 
-#### 6e. Git commit and push (automatic)
+#### 5e. Git commit and push (automatic)
 
 A `Stop` hook in this skill's frontmatter automatically commits and pushes all changes to the GitHub backup repo (`github.com/escotilha/claude`) when the skill finishes. No manual git commands needed.
 
