@@ -950,6 +950,14 @@ When evaluating technology choices:
 - [ ] Trust boundary exists around model calls (sandbox, allow-list, guardrails)
 - [ ] All outbound agent actions and secret accesses audit-logged
 
+### Claude Code Tool Security (Dev Environment Supply Chain)
+
+- [ ] `.claude/settings.json` reviewed — no untrusted hooks (`hooks.*` can execute arbitrary shell commands = RCE)
+- [ ] `.mcp.json` reviewed — no rogue MCP server configs (malicious servers execute before trust dialogs)
+- [ ] `ANTHROPIC_BASE_URL` not overridden in project settings (enables API key exfiltration to attacker proxy)
+- [ ] `.claude/` and `.mcp.json` included in PR review checklists (attack vector via malicious PRs/dependencies)
+- [ ] Tool trust dialogs not bypassed with `--dangerouslySkipPermissions` in CI/CD
+
 ### Data Security
 
 - [ ] Encryption at rest
