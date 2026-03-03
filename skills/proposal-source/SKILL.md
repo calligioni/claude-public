@@ -1,6 +1,6 @@
 ---
-name: proposal
-description: "Generate diagnostic and research proposals for SourceRank AI clients. Takes client inputs (conversation transcripts, URLs, screenshots, files), researches the company/industry, and produces a formatted PDF proposal in Portuguese. Triggers on: proposal, proposta, gerar proposta, create proposal, client proposal, diagnostic proposal."
+name: proposal-source
+description: "Generate diagnostic and research proposals for SourceRank AI clients. Takes client inputs (conversation transcripts, URLs, screenshots, files), researches the company/industry, and produces a formatted PDF proposal in Portuguese. Triggers on: proposal source, proposta sourcerank, gerar proposta, create proposal, client proposal, diagnostic proposal."
 argument-hint: "<client name or context>"
 user-invocable: true
 context: fork

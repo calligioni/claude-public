@@ -58,9 +58,9 @@ When you identify a matching skill, tell the user which skill you're invoking an
 
 ### Client & Business
 
-| Task                                                 | Skill       | When                                                  |
-| ---------------------------------------------------- | ----------- | ----------------------------------------------------- |
-| SourceRank client proposal (GEO diagnostic/research) | `/proposal` | Client proposal from conversations, URLs, notes → PDF |
+| Task                                                 | Skill              | When                                                  |
+| ---------------------------------------------------- | ------------------ | ----------------------------------------------------- |
+| SourceRank client proposal (GEO diagnostic/research) | `/proposal-source` | Client proposal from conversations, URLs, notes → PDF |
 
 ### Communication & Utilities
 
