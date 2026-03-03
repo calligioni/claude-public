@@ -60,8 +60,54 @@ Agent(subagent_type="general-purpose", model="sonnet", prompt="...")
 When spawning teammates via Agent Teams, include model guidance in the spawn prompt:
 "Use model: sonnet for this teammate" (Agent Teams inherits from parent by default).
 
+## Model Delegation Pattern (OpenClaw-Inspired)
+
+Beyond routing subagents to cheaper Claude tiers, a more aggressive cost optimization is **model delegation**: use an expensive model (Opus) strictly for orchestration and reasoning, while delegating text generation to a cheap or free model.
+
+### How It Works
+
+```
+Orchestrator (Opus/Sonnet) → decides WHAT to do
+  ↓
+Generator (Haiku / local model) → does the mechanical work
+```
+
+The orchestrator handles planning, tool selection, and judgment calls. The generator handles scaffolding, formatting, template expansion, and deterministic output. This mirrors the OpenClaw pattern where Claude Opus orchestrates while a local model handles generation, cutting API costs ~10x.
+
+### Where This Applies Today
+
+Within the current Claude API ecosystem, this is already partially implemented via the tier strategy (Opus orchestrates, Haiku executes). The key insight is to be **more aggressive** about pushing work down:
+
+| Current Pattern                                   | Delegation Pattern                                           |
+| ------------------------------------------------- | ------------------------------------------------------------ |
+| Opus orchestrator reads files itself              | Opus delegates file reading to Haiku Explore agent           |
+| Sonnet subagent formats its own report            | Sonnet produces findings, Haiku formats the report           |
+| Each subagent explores the codebase independently | Orchestrator pre-computes context, passes it in spawn prompt |
+
+### Future: Local Model Tier (Tier 0)
+
+When local model infrastructure matures (Ollama, LM Studio MLX), a **Tier 0** becomes viable:
+
+| Tier       | Model                       | Cost   | Use For                                              |
+| ---------- | --------------------------- | ------ | ---------------------------------------------------- |
+| **Tier 0** | Local (Qwen 3.5-9B, Ollama) | Free   | Pure text generation, template expansion, formatting |
+| **Tier 1** | Haiku                       | Low    | Deterministic execution with tool use                |
+| **Tier 2** | Sonnet                      | Medium | Nuanced judgment, code review, implementation        |
+| **Tier 3** | Opus                        | High   | Architecture, security, complex reasoning            |
+
+**Not actionable yet** — requires Ollama integration in Claude Code subagent spawning. Documented here for when the infrastructure supports it. Candidate models: Qwen 3.5-4B (edge), Qwen 3.5-9B (quality), both multimodal and MLX-optimized for Apple Silicon.
+
+### Practical Takeaway
+
+Even without local models, apply the delegation mindset now:
+
+1. **Pre-compute context** in the orchestrator instead of letting each subagent rediscover it
+2. **Split reasoning from generation** — if a subagent needs to analyze AND format, consider two passes
+3. **Push formatting to Haiku** — any subagent whose final step is "format findings as markdown table" could delegate that step
+
 ## Rule of Thumb
 
 **If the subagent only reads files and reports results → haiku.**
 **If the subagent writes code or makes judgment calls → sonnet.**
 **If the subagent makes architectural or security decisions → opus.**
+**If the task is pure text generation with no tool use → candidate for Tier 0 (future).**
