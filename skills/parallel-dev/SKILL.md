@@ -802,6 +802,123 @@ while (hasActiveFeatures()) {
 }
 ```
 
+### Phase 4.1: Task Registry (External Monitoring)
+
+The orchestrator maintains a machine-readable task registry at `.parallel-dev/active-tasks.json` in the project root. This file enables external monitoring (cron jobs, Telegram bots, dashboards, CI integrations) without consuming tokens or querying the running session.
+
+**Schema:**
+
+```json
+{
+  "startedAt": "2026-01-29T10:00:00Z",
+  "features": [
+    {
+      "id": "auth",
+      "branch": "feature/auth",
+      "worktree": "/Users/dev/project/.claude/worktrees/auth",
+      "agent": "backend-agent",
+      "status": "in_progress",
+      "startedAt": "2026-01-29T10:01:00Z",
+      "completedAt": null,
+      "ci": { "status": "pending", "lastRun": null },
+      "tasks": [
+        "OAuth2 login with Google/GitHub",
+        "Session management with Redis",
+        "JWT token refresh"
+      ],
+      "currentTask": "Implementing OAuth2 login flow"
+    },
+    {
+      "id": "api-endpoints",
+      "branch": "feature/api-endpoints",
+      "worktree": "/Users/dev/project/.claude/worktrees/api-endpoints",
+      "agent": "api-agent",
+      "status": "testing",
+      "startedAt": "2026-01-29T10:01:00Z",
+      "completedAt": null,
+      "ci": { "status": "pass", "lastRun": "2026-01-29T10:12:00Z" },
+      "tasks": [
+        "User CRUD endpoints",
+        "Rate limiting middleware",
+        "OpenAPI documentation"
+      ],
+      "currentTask": "Running test suite"
+    }
+  ],
+  "summary": {
+    "total": 4,
+    "complete": 0,
+    "in_progress": 2,
+    "pending": 1,
+    "failed": 0,
+    "testing": 1
+  }
+}
+```
+
+**When to write/update:**
+
+| Event                                | Action                                                       |
+| ------------------------------------ | ------------------------------------------------------------ |
+| Phase 2 complete (worktrees created) | Create file with all features in `pending` status            |
+| Phase 3 agent spawned                | Update feature to `in_progress`, set `agent` and `startedAt` |
+| Agent reports progress               | Update `currentTask`                                         |
+| Agent completes                      | Update to `complete`, set `completedAt`                      |
+| CI run finishes                      | Update `ci.status` and `ci.lastRun`                          |
+| Agent fails                          | Update to `failed`                                           |
+| Phase 5 merge                        | Update to `merged`                                           |
+
+**Implementation:**
+
+```javascript
+const REGISTRY_DIR = path.join(projectRoot, ".parallel-dev");
+const REGISTRY_PATH = path.join(REGISTRY_DIR, "active-tasks.json");
+
+function updateTaskRegistry(features) {
+  if (!fs.existsSync(REGISTRY_DIR)) {
+    fs.mkdirSync(REGISTRY_DIR, { recursive: true });
+  }
+
+  const registry = {
+    startedAt: state.startedAt,
+    features: features.map((f) => ({
+      id: f.id,
+      branch: f.branch || `feature/${f.id}`,
+      worktree: f.worktree || null,
+      agent: f.agentType || null,
+      status: f.status,
+      startedAt: f.startedAt || null,
+      completedAt: f.completedAt || null,
+      ci: f.ci || { status: "pending", lastRun: null },
+      tasks: f.tasks,
+      currentTask: f.currentTask || null,
+    })),
+    summary: {
+      total: features.length,
+      complete: features.filter((f) => f.status === "complete").length,
+      in_progress: features.filter((f) => f.status === "in_progress").length,
+      pending: features.filter((f) => f.status === "pending").length,
+      failed: features.filter((f) => f.status === "failed").length,
+      testing: features.filter((f) => f.status === "testing").length,
+    },
+  };
+
+  fs.writeFileSync(REGISTRY_PATH, JSON.stringify(registry, null, 2));
+}
+```
+
+The orchestrator calls `updateTaskRegistry(features)` at every phase transition and status change. The file is gitignored (add `.parallel-dev/` to `.gitignore` during Phase 2).
+
+**External consumers** can poll this file with `cat`, `jq`, or a simple watcher:
+
+```bash
+# Quick status check from another terminal
+cat .parallel-dev/active-tasks.json | jq '.summary'
+
+# Watch for changes
+watch -n 5 'cat .parallel-dev/active-tasks.json | jq ".features[] | {id, status, currentTask}"'
+```
+
 ### Phase 4.5: CI Reaction Loop
 
 > **Context Compression:** When `mcp__context-mode__batch_execute` is available, CI-fix agents should batch typecheck + lint + test into a single `batch_execute` call with intent filtering ("show only errors"). This trims per-agent context in long parallel-dev sessions without changing semantics.
@@ -974,6 +1091,83 @@ npm run test:integration
 
 # If all features merged and tests pass:
 #   - Prompt user for final merge to main
+```
+
+### Phase 5.1: Completion Notification
+
+When `slots.notifier === 'telegram'`, the orchestrator sends a single notification after ALL features have completed, passed CI, and been merged. This follows the "zero noise" principle -- no per-feature pings, no progress updates, only the final result.
+
+**Trigger condition:** All features `status === "merged"` AND integration tests pass AND merge to main succeeds (or all PRs merged if `merger === "gh-pr"`).
+
+**Environment variables required:**
+
+- `TELEGRAM_BOT_TOKEN` — Bot API token from [@BotFather](https://t.me/botfather)
+- `TELEGRAM_CHAT_ID` — Target chat/group ID (use `getUpdates` to find it)
+
+**Implementation:**
+
+```javascript
+async function sendTelegramNotification(features, projectName) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+
+  if (!token || !chatId) {
+    console.log(
+      "Telegram notification skipped: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not set",
+    );
+    return;
+  }
+
+  const succeeded = features.filter((f) => f.status === "merged");
+  const failed = features.filter((f) => f.status === "failed");
+  const elapsed = calculateElapsed(features);
+
+  let message = `*parallel-dev complete*: ${projectName}\n\n`;
+  message += `${succeeded.length}/${features.length} features merged\n`;
+  message += `Duration: ${elapsed}\n\n`;
+
+  // Feature summary
+  for (const f of features) {
+    const icon = f.status === "merged" ? "+" : "x";
+    message += `[${icon}] \`${f.id}\` → \`${f.branch}\`\n`;
+  }
+
+  // Warnings
+  if (failed.length > 0) {
+    message += `\nFailed: ${failed.map((f) => f.id).join(", ")}`;
+  }
+
+  const ciFixCount = features.reduce((n, f) => n + (f.ciFailures || 0), 0);
+  if (ciFixCount > 0) {
+    message += `\nCI auto-fixes applied: ${ciFixCount}`;
+  }
+
+  // Send via Telegram Bot API
+  await exec(`curl -s -X POST "https://api.telegram.org/bot${token}/sendMessage" \
+    -d chat_id="${chatId}" \
+    -d parse_mode="Markdown" \
+    -d text="${escapeMarkdown(message)}"`);
+}
+```
+
+**Notification only fires once** -- at the very end of Phase 5, after the final merge. If any features failed and were skipped, the notification includes them as warnings but still fires (so the user knows the run finished).
+
+**Other notifier slots** (`slack`, `discord`) follow the same zero-noise pattern. Only `console` prints per-feature updates during execution.
+
+**Configuration example:**
+
+```bash
+# Via CLI
+/parallel-dev --slot.notifier=telegram
+
+# Via config file
+{
+  "slots": { "notifier": "telegram" }
+}
+
+# Required environment (add to .env or shell profile)
+export TELEGRAM_BOT_TOKEN="123456:ABC-DEF..."
+export TELEGRAM_CHAT_ID="-1001234567890"
 ```
 
 ## Progress Dashboard
