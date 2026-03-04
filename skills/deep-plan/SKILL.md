@@ -15,8 +15,6 @@ allowed-tools:
   - WebSearch
   - WebFetch
   - Agent
-  - Task(agent_type=Explore)
-  - Task(agent_type=general-purpose)
   - AskUserQuestion
   - mcp__firecrawl__*
   - mcp__memory__*

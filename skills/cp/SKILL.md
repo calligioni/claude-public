@@ -10,6 +10,11 @@ allowed-tools:
 disable-model-invocation: true
 tool-annotations:
   Bash: { readOnlyHint: false, idempotentHint: false }
+invocation-contexts:
+  user-direct:
+    verbosity: high
+  agent-spawned:
+    verbosity: minimal
 inject:
   - bash: git diff --stat
   - bash: git status --short

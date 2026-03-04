@@ -15,8 +15,6 @@ allowed-tools:
   - Grep
   - Bash
   - Agent
-  - Task(agent_type=general-purpose)
-  - Task(agent_type=Explore)
   - AskUserQuestion
   - mcp__firecrawl__*
   - mcp__browserless__*

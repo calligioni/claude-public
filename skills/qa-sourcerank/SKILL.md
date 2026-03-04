@@ -6,8 +6,6 @@ context: fork
 model: opus
 allowed-tools:
   - Agent
-  - Task(agent_type=general-purpose)
-  - Task(agent_type=Explore)
   - TaskCreate
   - TaskUpdate
   - TaskList

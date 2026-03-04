@@ -5,12 +5,6 @@ user-invocable: true
 context: fork
 allowed-tools:
   - Agent
-  - Task(agent_type=frontend-agent)
-  - Task(agent_type=backend-agent)
-  - Task(agent_type=database-agent)
-  - Task(agent_type=devops-agent)
-  - Task(agent_type=general-purpose)
-  - Task(agent_type=Explore)
   - mcp__firecrawl__*
   - TeamCreate
   - TeamDelete

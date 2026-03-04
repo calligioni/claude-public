@@ -6,8 +6,6 @@ context: fork
 model: sonnet # Orchestration-focused; spawns haiku agents for parallel page testing
 allowed-tools:
   - Agent
-  - Task(agent_type=general-purpose)
-  - Task(agent_type=Explore)
   - TeamCreate
   - TeamDelete
   - SendMessage

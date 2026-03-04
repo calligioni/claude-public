@@ -103,8 +103,8 @@ When this skill activates:
 **First Action:** Load current state:
 
 ```bash
-cat ~/Library/Mobile\ Documents/com~apple~CloudDocs/claude-setup/memory/core-memory.json
-ls ~/Library/Mobile\ Documents/com~apple~CloudDocs/claude-setup/memory/archive/ 2>/dev/null | wc -l
+cat $HOME/.claude-setup/memory/core-memory.json
+ls $HOME/.claude-setup/memory/archive/ 2>/dev/null | wc -l
 ```
 
 ---
@@ -819,7 +819,7 @@ Add to `~/.claude/hooks/post-project.sh`:
 
 # Check if consolidation needed
 MEMORY_COUNT=$(claude --print "How many memories in Memory MCP?" 2>/dev/null | grep -o '[0-9]*')
-LAST_CONSOLIDATION=$(jq -r '.lastConsolidation' ~/Library/Mobile\ Documents/com~apple~CloudDocs/claude-setup/memory/core-memory.json)
+LAST_CONSOLIDATION=$(jq -r '.lastConsolidation' $HOME/.claude-setup/memory/core-memory.json)
 
 if [ "$MEMORY_COUNT" -gt 200 ] || [ "$LAST_CONSOLIDATION" = "null" ]; then
   echo "Running memory consolidation..."
@@ -941,7 +941,7 @@ Processes the learning log:
 
 ```bash
 # Analyze all unprocessed entries
-python3 ~/Library/Mobile\ Documents/com~apple~CloudDocs/claude-setup/bin/session-analyzer.py
+python3 $HOME/.claude-setup/bin/session-analyzer.py
 
 # Preview without saving
 python3 session-analyzer.py --dry-run
@@ -1005,7 +1005,7 @@ Orchestrates the full pipeline:
 Install the launchd agent:
 
 ```bash
-cp ~/Library/Mobile\ Documents/com~apple~CloudDocs/claude-setup/launchd/com.claude.memory-consolidation.plist \
+cp $HOME/.claude-setup/launchd/com.claude.memory-consolidation.plist \
    ~/Library/LaunchAgents/
 
 launchctl load ~/Library/LaunchAgents/com.claude.memory-consolidation.plist
