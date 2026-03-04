@@ -560,6 +560,97 @@ The `claude --worktree` flag is the native CLI mechanism for launching isolated 
 - Use `.worktree-scaffold.json` format for compatibility
 - Leverage existing branch detection and cleanup
 
+### Phase 2.5: Context Enrichment
+
+Before dispatching agents, the orchestrator pre-loads key project context and embeds it in every agent's spawn prompt. This eliminates N redundant Explore passes where each agent independently reads the same files (e.g., `package.json`, route structure, schema).
+
+**What to pre-load:**
+
+```javascript
+async function buildProjectContext(projectRoot) {
+  const context = {};
+
+  // 1. Package info (name, deps, scripts)
+  const pkgPath = path.join(projectRoot, "package.json");
+  if (fs.existsSync(pkgPath)) {
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+    context.package = {
+      name: pkg.name,
+      scripts: Object.keys(pkg.scripts || {}),
+      dependencies: Object.keys(pkg.dependencies || {}),
+      devDependencies: Object.keys(pkg.devDependencies || {}),
+    };
+  }
+
+  // 2. API route list (Next.js, Remix, or Express patterns)
+  const routeFiles = await glob("src/app/api/**/route.{ts,js}", {
+    cwd: projectRoot,
+  });
+  if (routeFiles.length === 0) {
+    // Fallback: Express/Fastify style
+    routeFiles.push(
+      ...(await glob("src/routes/**/*.{ts,js}", { cwd: projectRoot })),
+    );
+  }
+  context.apiRoutes = routeFiles;
+
+  // 3. Key type definitions
+  const typeFiles = await glob("{types,src/types,src/@types}/**/*.{ts,d.ts}", {
+    cwd: projectRoot,
+  });
+  context.typeFiles = typeFiles.slice(0, 20); // Cap to avoid bloat
+
+  // 4. Recent git log
+  const gitLog = await exec("git log --oneline -10", { cwd: projectRoot });
+  context.recentCommits = gitLog.stdout.trim();
+
+  // 5. Database schema (Prisma or Drizzle)
+  const prismaSchema = path.join(projectRoot, "prisma/schema.prisma");
+  const drizzleSchema = path.join(projectRoot, "drizzle/schema.ts");
+  if (fs.existsSync(prismaSchema)) {
+    context.dbSchema = {
+      type: "prisma",
+      summary: extractPrismaModels(fs.readFileSync(prismaSchema, "utf-8")),
+    };
+  } else if (fs.existsSync(drizzleSchema)) {
+    context.dbSchema = {
+      type: "drizzle",
+      summary: fs.readFileSync(drizzleSchema, "utf-8").slice(0, 2000),
+    };
+  }
+
+  return context;
+}
+```
+
+**Embedding in spawn prompts:**
+
+The orchestrator formats the context as a `## Project Context` block and prepends it to every agent's prompt (both Agent Teams and Task mode):
+
+```markdown
+## Project Context
+
+**Project:** {package.name}
+**Scripts:** {package.scripts.join(", ")}
+**Dependencies:** {package.dependencies.join(", ")}
+
+**API Routes:**
+{apiRoutes.map(r => "- " + r).join("\n")}
+
+**Type Definitions:**
+{typeFiles.map(t => "- " + t).join("\n")}
+
+**Database Schema ({dbSchema.type}):**
+{dbSchema.summary}
+
+**Recent Commits:**
+{recentCommits}
+```
+
+This block is generated once and reused for all agents. It costs ~200-500 tokens per agent prompt but saves 3-10 tool calls per agent that would otherwise be spent on `Glob`, `Read(package.json)`, `Bash(git log)`, etc.
+
+**When to skip:** If the project has no `package.json` (non-JS project), the orchestrator should adapt the pre-load list to the detected stack (e.g., `Cargo.toml` for Rust, `pyproject.toml` for Python, `go.mod` for Go).
+
 ### Phase 3: Agent Dispatch
 
 #### Execution Mode Selection
