@@ -3,7 +3,7 @@ name: first-principles
 description: "Break down a problem to its fundamentals before implementing. Use for complex or ambiguous problems."
 argument-hint: "<problem description>"
 user-invocable: true
-context: normal
+context: fork
 model: opus
 permissionMode: plan
 allowed-tools:

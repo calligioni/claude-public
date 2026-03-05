@@ -625,9 +625,9 @@ For each execution group:
 
 a. **Spawn agents** based on task complexity:
 
-- Simple tasks → `Task(model=haiku, subagent_type=general-purpose, isolation=worktree)`
-- Moderate tasks → `Task(model=sonnet, subagent_type=general-purpose, isolation=worktree)` or `Task(model=sonnet, subagent_type=frontend-agent, isolation=worktree)` / `backend-agent` based on type
-- Complex tasks → Keep in main context (opus) or `Task(model=sonnet, subagent_type=general-purpose, isolation=worktree)` with detailed prompt
+- Simple tasks → `Agent(model="haiku", subagent_type="general-purpose", isolation="worktree")`
+- Moderate tasks → `Agent(model="sonnet", subagent_type="general-purpose", isolation="worktree")` or `Agent(model="sonnet", subagent_type="frontend-agent", isolation="worktree")` / `backend-agent` based on type
+- Complex tasks → Keep in main context (opus) or `Agent(model="sonnet", subagent_type="general-purpose", isolation="worktree")` with detailed prompt
 
 > **Isolation Note:** The `isolation=worktree` parameter prevents parallel agents from clobbering each other's file edits. Each agent works in its own worktree, eliminating conflicts when multiple agents run concurrently.
 
@@ -836,7 +836,7 @@ Is this task...
 ├── Novel architecture, complex state, debugging tricky issues?
 │   └── opus (or keep in main context)
 └── Research, codebase exploration, pattern discovery?
-    └── Task(agent_type=Explore) with sonnet
+    └── Agent(subagent_type="Explore", model="haiku")
 ```
 
 ---

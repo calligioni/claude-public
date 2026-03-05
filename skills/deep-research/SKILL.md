@@ -107,14 +107,14 @@ For each sub-question, launch parallel investigation tracks using Task agents:
 - What are the failure cases?
 - What assumptions could be wrong?
 
-**Implementation:** Spawn parallel Task agents for independent sub-questions:
+**Implementation:** Spawn parallel research agents for independent sub-questions:
 
 ```
 // Launch 3-4 parallel research agents
-Task(agent_type=general-purpose) → Sub-question 1 + 2 (related topics)
-Task(agent_type=general-purpose) → Sub-question 3 + 4 (related topics)
-Task(agent_type=general-purpose) → Sub-question 5 + 6 (related topics)
-Task(agent_type=general-purpose) → Contrarian analysis across all sub-questions
+Agent(subagent_type="general-purpose", model="sonnet") → Sub-question 1 + 2 (related topics)
+Agent(subagent_type="general-purpose", model="sonnet") → Sub-question 3 + 4 (related topics)
+Agent(subagent_type="general-purpose", model="sonnet") → Sub-question 5 + 6 (related topics)
+Agent(subagent_type="general-purpose", model="sonnet") → Contrarian analysis across all sub-questions
 ```
 
 Each agent should use WebSearch and WebFetch/Firecrawl extensively. Instruct them to return:
@@ -236,7 +236,7 @@ Present the final report in this structure:
 - Use web search aggressively for current data — don't rely on training knowledge for facts
 - If you need to make assumptions, state them explicitly and mark with ⚠️
 - If sources conflict, present both sides and adjudicate (explain why you weight one over the other)
-- Think in trees, not lines — explore parallel paths simultaneously via Task agents
+- Think in trees, not lines — explore parallel paths simultaneously via Agent tool
 - Show your reasoning process for key decisions
 - Don't stop at the first answer — dig deeper, find the nuance
 

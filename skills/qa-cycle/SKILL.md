@@ -232,9 +232,9 @@ TaskCreate({ subject: "Generate /qa-{project} skill", ... })
 Spawn two explore agents simultaneously:
 
 ```
-Task({
+Agent({
   subagent_type: "Explore",
-  model: "sonnet",
+  model: "haiku",
   prompt: "Analyze {cwd}. Return JSON:
     tech_stack: { language, framework, package_manager, monorepo, db, orm, auth, css }
     structure: { key_dirs, routes_dir, api_dir, tests_dir }
@@ -243,9 +243,9 @@ Task({
     database: { type, connection_pattern, migrations, existing_qa_tables }"
 })
 
-Task({
+Agent({
   subagent_type: "Explore",
-  model: "sonnet",
+  model: "haiku",
   prompt: "Analyze {cwd}. Extract ALL user-facing features. Return JSON:
     routes: [{ path, purpose, auth_required, role_required }]
     api_endpoints: [{ method, path, resource }]
