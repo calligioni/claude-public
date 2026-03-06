@@ -322,7 +322,8 @@ Teammate "security-analyst":
   Checklist: OWASP Top 10, auth flow, RBAC/ABAC, input validation, injection,
   XSS, CSRF, secrets management, dependency CVEs, security headers, license compliance,
   agent chassis security (if AI-integrated: secrets outside model context, deterministic trust boundary, audit logging of agent actions),
-  prompt injection defense (if consuming external data from Google Workspace: verify `--sanitize` flag is used on Gmail/Drive/Sheets reads to block Model Armor injection from untrusted content).
+  prompt injection defense (if consuming external data from Google Workspace: verify `--sanitize` flag is used on Gmail/Drive/Sheets reads to block Model Armor injection from untrusted content),
+  insecure defaults / fail-open (grep for: catch blocks that continue past auth checks; env vars that enable features when missing; default roles of admin/superuser; `.catch(() => true)` on permission checks; boolean flags defaulting to true for allow/skip/bypass/public — for each hit, trace the code path to determine if the failure mode is permissive; flag CRITICAL if an auth guard silently no-ops on exception).
   Routing hint: For auth flows, Supabase RLS policies, and multi-hop data flow issues,
   note in your findings that these are strong candidates for Claude Code Security
   (AI-assisted SAST that traces data flows and catches business logic flaws that
@@ -481,6 +482,35 @@ grep -rn "query.*\$\|execute.*\$\|raw.*\$" --include="*.ts" --include="*.js" --i
 # eval usage
 grep -rn "\beval\b\|exec\b" --include="*.ts" --include="*.js" --include="*.py" | head -10
 ```
+
+**Check for insecure defaults / fail-open patterns:**
+
+Secure code fails **closed** (denies access on error). Insecure code fails **open** (grants access, skips the check, or defaults to a permissive state when config is missing).
+
+```bash
+# Exception handlers that continue past auth/permission checks
+# (catch blocks followed by no re-throw and no explicit denial)
+grep -rn -A 5 "catch\s*(" --include="*.ts" --include="*.js" | grep -A 5 "auth\|permission\|role\|token\|session" | head -40
+
+# Null/undefined user or role treated as valid (fail-open on missing identity)
+grep -rn "if.*user\b\|if.*role\b\|if.*session\b" --include="*.ts" --include="*.js" | grep -v "!" | head -20
+
+# Config flags that enable features when env var is missing (should default to disabled)
+grep -rn "process\.env\." --include="*.ts" --include="*.js" | grep -v "??\||| " | grep -i "enable\|allow\|skip\|bypass\|disable" | head -20
+
+# Boolean flags with insecure defaults
+grep -rn "=\s*true\b" --include="*.ts" --include="*.js" | grep -i "allow\|skip\|bypass\|open\|public\|insecure\|disable" | head -20
+```
+
+For each hit, trace the code path: determine whether the condition evaluates to a permissive outcome when the guard variable is falsy, null, undefined, or an exception is thrown. Flag the following patterns explicitly:
+
+| Fail-open pattern                            | Example                                                     | Verdict      |
+| -------------------------------------------- | ----------------------------------------------------------- | ------------ |
+| Auth check in try/catch with silent catch    | `try { verifyToken(t) } catch { }` then continues           | **CRITICAL** |
+| Missing env var enables feature              | `const debug = process.env.DEBUG_MODE` used as `if (debug)` | **HIGH**     |
+| Default role is admin/superuser              | `const role = user?.role ?? 'admin'`                        | **CRITICAL** |
+| Permission check returns true on error       | `canAccess().catch(() => true)`                             | **CRITICAL** |
+| Guard only checks truthy, not explicit value | `if (isAdmin)` where isAdmin could be any truthy string     | **HIGH**     |
 
 **Check dependencies:**
 
