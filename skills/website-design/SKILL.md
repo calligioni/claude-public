@@ -757,6 +757,100 @@ xl:  1280px  /* Desktops */
 
 ---
 
+## SEO / AEO Checklist
+
+Apply when building or reviewing any public-facing page. AEO (Answer Engine Optimization) ensures pages are selected as authoritative answers by AI-powered search (Google AI Overviews, Perplexity, ChatGPT Browse).
+
+### Metadata
+
+- [ ] `<title>` tag: descriptive, ≤60 chars, includes primary keyword and reflects user intent
+- [ ] `<meta name="description">`: 120–160 chars, answers the page's core question
+- [ ] Canonical tag: `<link rel="canonical">` on every page to prevent duplicate content
+- [ ] Open Graph tags: `og:title`, `og:description`, `og:image`, `og:url` for social sharing
+- [ ] `hreflang` tags if multi-language content is present
+
+### Structured Data (JSON-LD)
+
+Add structured data in `<script type="application/ld+json">`. Priority types for AEO:
+
+```html
+<!-- Organization — establishes entity credibility -->
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Acme Corp",
+    "url": "https://acme.com",
+    "logo": "https://acme.com/logo.png",
+    "sameAs": ["https://linkedin.com/company/acme"]
+  }
+</script>
+
+<!-- FAQPage — targets voice/assistant Q&A, featured snippets -->
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does Acme do?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Acme automates..."
+        }
+      }
+    ]
+  }
+</script>
+
+<!-- HowTo — step-by-step instructional content -->
+<!-- Article — long-form content with author/date -->
+<!-- Product — with pricing, availability, ratings -->
+<!-- BreadcrumbList — navigation path for rich results -->
+```
+
+Validate all structured data at: https://search.google.com/test/rich-results
+
+### EEAT Signals (Experience, Expertise, Authoritativeness, Trustworthiness)
+
+- [ ] Author bylines with professional credentials on blog/editorial content
+- [ ] Publication and last-updated dates visible on articles
+- [ ] Cite verifiable external sources for factual claims
+- [ ] Trust signals: security badges (SOC2, GDPR), certifications, awards
+- [ ] About page with team/company credibility
+
+### Semantic HTML for AI Comprehension
+
+AI answer engines parse semantic structure to understand content hierarchy and extract answers:
+
+- [ ] `<header>`, `<main>`, `<article>`, `<section>`, `<aside>`, `<footer>` used correctly
+- [ ] Single `<h1>` per page (the page's primary topic)
+- [ ] Logical heading hierarchy: `h1 → h2 → h3` (no skipping levels)
+- [ ] Questions as headings (`<h2>What is X?`) + direct answer in the first paragraph below
+- [ ] Lists (`<ul>`, `<ol>`) for enumerable content — AI extractors prefer lists over prose for factual content
+- [ ] `<time datetime="2026-01-15">` for dates
+- [ ] `aria-label` on icon-only buttons, `alt` on all meaningful images
+
+### Content Structure for AEO
+
+- [ ] Lead with the direct answer in the first 2 sentences (featured snippet pattern)
+- [ ] Use explicit question/answer patterns: "What is X? X is..."
+- [ ] Short paragraphs (3–4 lines max) and scannable formatting
+- [ ] FAQ section on landing pages and product pages — answers common search queries directly
+- [ ] Avoid burying answers in long preambles — AI extractors prefer front-loaded facts
+
+### Technical SEO
+
+- [ ] Sitemap (`/sitemap.xml`) generated and submitted to Search Console
+- [ ] `robots.txt` configured to allow crawling of public pages
+- [ ] All important pages return HTTP 200 (check for redirect chains)
+- [ ] Core Web Vitals: LCP < 2.5s, INP < 200ms, CLS < 0.1
+- [ ] Images: WebP format, `loading="lazy"`, explicit `width`/`height` to prevent CLS
+- [ ] No duplicate content without canonical tags
+
+---
+
 ## Quick Reference Templates
 
 See `templates/` folder for ready-to-use components:
@@ -974,5 +1068,8 @@ Before delivering website designs:
 - [ ] Error states for forms/failures
 - [ ] Consistent spacing (8px grid)
 - [ ] Production-ready code (no TODOs)
-- [ ] Images optimized (WebP, lazy loading)
-- [ ] SEO meta tags included
+- [ ] Images optimized (WebP, lazy loading, explicit width/height for CLS)
+- [ ] SEO meta tags included (title, description, canonical, OG tags)
+- [ ] Structured data (JSON-LD) added: at minimum Organization; FAQPage if FAQ section present
+- [ ] Semantic HTML structure: single h1, logical heading hierarchy, landmark elements
+- [ ] AEO content patterns: direct answers lead paragraphs, question headings, FAQ section

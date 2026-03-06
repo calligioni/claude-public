@@ -634,6 +634,31 @@ grep -rn "ORDER BY\|GROUP BY\|WHERE" --include="*.sql" | head -20
 cat package.json 2>/dev/null | jq '.dependencies' 2>/dev/null | head -30
 ```
 
+**Next.js App Router caching checks (if applicable):**
+
+```bash
+# Find uncached Server Components that fetch data (missed "use cache" opportunities)
+grep -rn "async function\|export async" --include="*.tsx" --include="*.ts" | grep -v "use cache" | head -20
+
+# Check for connection() overuse (makes entire route dynamic)
+grep -rn "await connection()" --include="*.tsx" --include="*.ts" | head -10
+
+# Find Server Actions that mutate without revalidation
+grep -rn "revalidateTag\|revalidatePath" --include="*.ts" --include="*.tsx" | head -20
+
+# Detect dynamic API leakage into cached scope
+grep -rn "cookies()\|headers()\|searchParams" --include="*.ts" --include="*.tsx" | head -20
+```
+
+When reviewing Next.js App Router code, check:
+
+- Server Components fetching non-user data without `"use cache"` + `cacheLife()` — HIGH opportunity
+- `connection()` at page level instead of Suspense boundary isolation — escalates full route to dynamic
+- Server Actions mutating DB without `revalidateTag()` on affected cache tags — causes stale reads
+- `fetch()` calls without explicit `cache` / `next.revalidate` — Next.js 15 defaults to no-store
+- `"use cache: private"` + client navigation issues (known bug in 16.1.x — prefer user-scoped tags)
+- Partial Prerendering: if `experimental.ppr` enabled, verify Suspense boundaries maximize static shell
+
 ### Step 4: Generate Report
 
 **Create comprehensive CTO report:**

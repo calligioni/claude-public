@@ -464,7 +464,9 @@ If user provides a detailed sprint plan (like the Sprint 1 example), treat it as
    - Service layer architecture
    - Dependencies to add/update
    - Migration strategy
-   - Performance considerations
+   - Performance considerations: for Next.js App Router — identify which new Server Components
+     can use `"use cache"` + `cacheLife()`, which Server Actions need `revalidateTag()` after
+     mutations, and where Suspense boundaries should isolate dynamic content vs cached content
    - Security implications
 
 3. **Write tech-spec.md:**
