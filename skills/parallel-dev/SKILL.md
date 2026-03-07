@@ -699,9 +699,13 @@ Teammate "{feature-id}":
   1. Read the codebase in this worktree for context
   2. Implement all requirements
   3. Write tests for each component
-  4. Run tests and fix any failures
+  4. **Verify triple (run all, fix failures before proceeding):**
+     a. Typecheck: `{project.commands.typecheck}` (skip if unavailable)
+     b. Tests: `{project.commands.test}` (skip if unavailable)
+     c. Build: `{project.commands.build}` (skip if unavailable)
+     Do NOT mark complete until all three pass.
   5. Commit with message: feat({feature-id}): {description}
-  6. Message the lead: "Complete. {summary of what was built}"
+  6. Message the lead: "Complete. Verify: types OK, tests OK, build OK. {summary}"
   7. If you need an API/interface from another feature,
      message that teammate directly to coordinate.
 
@@ -737,7 +741,10 @@ When Agent Teams is unavailable, use the Task tool with `run_in_background: true
     ### Instructions:
     1. Implement all tasks
     2. Write tests for each component
-    3. Run tests and fix any failures
+    3. Run the verify triple (fix all failures before proceeding):
+       a. Typecheck (skip if unavailable)
+       b. Tests (skip if unavailable)
+       c. Build (skip if unavailable)
     4. Commit your changes with descriptive messages
     5. Signal completion by creating .feature-complete marker file
 
@@ -1073,8 +1080,12 @@ ${ciContext.log}
 ### Phase 5: Progressive Merge
 
 ```bash
-# When feature tests pass in worktree:
+# When feature verify triple passes in worktree:
 cd {worktree-path}
+# Run verify triple before allowing merge
+{project.commands.typecheck}   # must pass
+{project.commands.test}         # must pass
+{project.commands.build}        # must pass
 git add .
 git commit -m "feat({feature-id}): {description}"
 

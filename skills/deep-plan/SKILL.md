@@ -250,7 +250,7 @@ Write the plan to `plan.md` in the project root:
 - No unnecessary comments or jsdocs
 - No `any` or `unknown` types
 - No disabled linter rules without justification
-- Run `tsc --noEmit` after each step
+- Run verify triple (typecheck + tests + build) after each step
 
 ```
 
@@ -286,7 +286,10 @@ For each step in the plan:
 1. Announce which step you're working on
 2. Update `.deep-plan-state.json`: set `implement.status = "in_progress"`, update `implement.lastCompletedStep`
 3. Implement the change
-4. Run `tsc --noEmit` (if TypeScript project) to verify types
+4. Run verify triple (skip any that aren't available, fix failures before proceeding):
+   - Typecheck: `tsc --noEmit` (TypeScript), `mypy .` (Python), `go build ./...` (Go)
+   - Tests: `pnpm test` / `pytest` / `go test ./...` / `cargo test`
+   - Build: `pnpm build` / `cargo build` / `go build ./...`
 5. Update `.deep-plan-state.json`: increment `implement.stepsCompleted`, add commit SHA to `commits` array
 6. Update `plan.md` — mark the step as done:
 ```
@@ -298,11 +301,13 @@ For each step in the plan:
 
 ### 3.3 Post-Implementation
 
-After all steps are complete:
+After all steps are complete, run the final verify triple:
 
-1. Run tests if available (`npm test`, `vitest`, etc.)
-2. Run typecheck if TypeScript
-3. Update `.deep-plan-state.json`: set `implement.status = "complete"`, `currentPhase = "complete"`
+1. Run typecheck (skip if unavailable) — must pass
+2. Run tests (skip if unavailable) — must pass
+3. Run build (skip if unavailable) — must pass
+4. Fix any failures before marking complete
+5. Update `.deep-plan-state.json`: set `implement.status = "complete"`, `currentPhase = "complete"`
 4. Update `plan.md` with final status:
 ```markdown
 ## Status: ✅ Complete

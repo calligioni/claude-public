@@ -640,10 +640,12 @@ b. **Each agent gets:**
 - Coding conventions from the codebase
 - Clear acceptance criteria
 
-c. **After each group completes:**
+c. **After each group completes — verify triple:**
 
-- Run `{project.commands.typecheck}` (skip if not available)
-- If typecheck fails, fix inline before proceeding
+- Run `{project.commands.typecheck}` (skip if not available) — fix inline before proceeding
+- Run `{project.commands.test}` (skip if not available) — fix any regressions
+- Run `{project.commands.build}` (skip if not available) — catch SSR/import/bundler issues
+- All three must pass before committing the group
 - Commit the group: `git add <specific files> && git commit -m "feat(feature): implement group X"`
 - Update state.json with completed tasks
 
@@ -697,9 +699,14 @@ You are implementing a specific task for the {feature} feature in the {project.n
 {extracted patterns from existing code}
 
 **Acceptance criteria:**
-- Code compiles/passes checks with no errors ({project.commands.typecheck} if available)
 - Follows existing patterns in the codebase
 - {specific criteria from task}
+
+**Before committing, YOU MUST run these checks (skip any that aren't available):**
+1. `{project.commands.typecheck}` — fix all type errors before proceeding
+2. `{project.commands.test}` — fix any test failures you caused
+3. `{project.commands.build}` — verify the build succeeds
+Do NOT mark your task as complete until all three pass.
 
 **Learnings from past runs:**
 {relevant entries from learnings.json for this task type, e.g.:}
@@ -728,13 +735,14 @@ You are implementing a specific task for the {feature} feature in the {project.n
 
 1. **Run typecheck:** `{project.commands.typecheck}` (skip if not available)
 2. **Run tests:** `{project.commands.test}` (skip if not available)
-3. **Run lint:** `{project.commands.lint}` (skip if not available)
-4. **Project-specific QA:** Based on detected `project.qaSkill`:
+3. **Run build:** `{project.commands.build}` (skip if not available) — catches SSR, import, and bundler issues that typecheck misses
+4. **Run lint:** `{project.commands.lint}` (skip if not available)
+5. **Project-specific QA:** Based on detected `project.qaSkill`:
    - If `/qa-sourcerank` available AND project is SourceRank → invoke it
    - If `/qa-cycle` available → invoke it
    - If `/fulltest-skill` available → invoke it
    - Otherwise → use Chrome DevTools MCP to test key flows manually
-5. **Collect results** into `qa-report.md`:
+6. **Collect results** into `qa-report.md`:
 
 ```markdown
 # QA Report: {Feature Name}
@@ -742,6 +750,8 @@ You are implementing a specific task for the {feature} feature in the {project.n
 ## Typecheck: PASS/FAIL
 
 ## Unit Tests: PASS/FAIL/SKIPPED
+
+## Build: PASS/FAIL/SKIPPED
 
 ## E2E Testing:
 
@@ -825,6 +835,8 @@ You are implementing a specific task for the {feature} feature in the {project.n
 ## QA Summary
 
 - Typecheck: PASS
+- Tests: PASS
+- Build: PASS
 - QA iterations: 1
 - Issues found: 2, all fixed
 
