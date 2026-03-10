@@ -519,6 +519,128 @@ async function promoteToCore(memory, coreMemory) {
 }
 ```
 
+### Step 3.4: Cross-Memory Insight Generation
+
+After merging similar memories, actively discover **connections between dissimilar memories** and generate cross-cutting insights. This step retrofits relations onto existing memories that were saved without them, inspired by the "sleep-cycle replay" pattern from Google's Always-On Memory Agent.
+
+**Process:**
+
+1. Select 5–10 recent unconsolidated memories (created since last consolidation)
+2. For each batch, prompt the LLM to find non-obvious connections
+3. Output: (a) relation triples to create in the MCP graph, (b) one cross-cutting insight entity
+
+```javascript
+async function generateCrossMemoryInsights(memories, lastConsolidationDate) {
+  // 1. Select recent memories that haven't been through insight generation
+  const recentMemories = memories.filter((m) => {
+    const discovered = extractDiscoveredDate(m);
+    const alreadyProcessed = m.observations?.some((o) =>
+      o.startsWith("Insight-processed:"),
+    );
+    return discovered > lastConsolidationDate && !alreadyProcessed;
+  });
+
+  if (recentMemories.length < 3) {
+    return { insights: [], relations: [], reason: "Too few recent memories" };
+  }
+
+  // 2. Process in batches of 5-10
+  const batches = chunk(recentMemories, 8);
+  const allInsights = [];
+  const allRelations = [];
+
+  for (const batch of batches) {
+    // Present memories to LLM and ask for connections
+    // Prompt pattern (execute via natural language reasoning):
+    //
+    // "Given these memories:
+    //  1. {memory1.name}: {memory1.observations summary}
+    //  2. {memory2.name}: {memory2.observations summary}
+    //  ...
+    //
+    //  Find connections between ANY pairs that share:
+    //  - Common root causes (e.g., two bugs from the same architectural gap)
+    //  - Complementary solutions (e.g., a pattern that prevents a known mistake)
+    //  - Cross-domain applicability (e.g., a frontend pattern useful in backend)
+    //  - Contradictions worth resolving (e.g., two patterns that conflict)
+    //
+    //  Output:
+    //  RELATIONS:
+    //  - {from_name} → {relation_type} → {to_name}: {why}
+    //
+    //  INSIGHT (if any cross-cutting pattern emerges):
+    //  - Name: tech-insight:{descriptive-name}
+    //  - Summary: {one sentence}
+    //  - Derived from: {memory names}"
+
+    const connections = analyzeConnections(batch);
+
+    // 3. Create relation triples
+    for (const conn of connections.relations) {
+      allRelations.push({
+        from: conn.from,
+        relationType: conn.type, // 'related_to', 'prevents', 'contradicts', 'generalizes'
+        to: conn.to,
+      });
+    }
+
+    // 4. Create insight entity if a cross-cutting pattern emerged
+    if (connections.insight) {
+      const insightEntity = {
+        name: connections.insight.name,
+        entityType: "tech-insight",
+        observations: [
+          connections.insight.summary,
+          `Discovered: ${new Date().toISOString().split("T")[0]}`,
+          `Source: consolidation — merged from ${connections.insight.derivedFrom.join(", ")}`,
+          "Use count: 0",
+        ],
+      };
+      allInsights.push(insightEntity);
+    }
+
+    // 5. Mark processed memories so they aren't re-analyzed
+    for (const mem of batch) {
+      await mcp__memory__add_observations({
+        observations: [
+          {
+            entityName: mem.name,
+            contents: [
+              `Insight-processed: ${new Date().toISOString().split("T")[0]}`,
+            ],
+          },
+        ],
+      });
+    }
+  }
+
+  // 6. Persist to MCP
+  if (allRelations.length > 0) {
+    await mcp__memory__create_relations({ relations: allRelations });
+  }
+  if (allInsights.length > 0) {
+    await mcp__memory__create_entities({ entities: allInsights });
+  }
+
+  return {
+    insights: allInsights,
+    relations: allRelations,
+    memoriesProcessed: recentMemories.length,
+  };
+}
+```
+
+**Additional relation types for cross-memory connections:**
+
+| Relation      | Meaning                    | Example                                             |
+| ------------- | -------------------------- | --------------------------------------------------- |
+| `prevents`    | Pattern avoids a mistake   | pattern:input-validation → mistake:sql-injection    |
+| `contradicts` | Conflicts with another     | pattern:eager-loading → pattern:lazy-loading        |
+| `generalizes` | Broader version of         | pattern:retry-with-backoff → pattern:supabase-retry |
+| `co_occurs`   | Frequently appear together | tech-insight:prisma-n+1 → tech-insight:supabase-rls |
+
+**When to run:** This step executes during every consolidation pass (both full `/consolidate` and `/consolidate --merge-only`). It is lightweight — the LLM reads memory text only, no codebase access needed.
+
 ---
 
 ## Phase 4: Selective Forgetting
@@ -708,6 +830,8 @@ async function findOrphanedMemories(memories) {
 | --------------------- | ----- |
 | Memories analyzed     | X     |
 | Merged                | Y     |
+| Cross-memory insights | I     |
+| Relations retrofitted | R     |
 | Promoted to core      | Z     |
 | Forgotten (archived)  | A     |
 | Relationships created | B     |
@@ -720,6 +844,21 @@ async function findOrphanedMemories(memories) {
 | Original Memories    | Merged Into      | Similarity |
 | -------------------- | ---------------- | ---------- |
 | pattern:a, pattern:b | pattern:combined | 87%        |
+
+---
+
+## Cross-Memory Insights Generated
+
+| Insight Entity                   | Derived From                               | Summary                               |
+| -------------------------------- | ------------------------------------------ | ------------------------------------- |
+| tech-insight:auth-validation-gap | mistake:auth-bug, pattern:input-validation | Input validation prevents auth bypass |
+
+### Relations Retrofitted
+
+| From                     | Relation  | To                        | Reason                          |
+| ------------------------ | --------- | ------------------------- | ------------------------------- |
+| pattern:input-validation | prevents  | mistake:sql-injection     | Validation directly mitigates   |
+| tech-insight:prisma-n+1  | co_occurs | tech-insight:supabase-rls | Often found together in reviews |
 
 ---
 
@@ -788,7 +927,7 @@ Consider adding relationships or reviewing:
 | `/consolidate --dry-run`     | Preview changes without applying |
 | `/consolidate --health`      | Health report only               |
 | `/consolidate --forget-only` | Only run forgetting phase        |
-| `/consolidate --merge-only`  | Only run merge phase             |
+| `/consolidate --merge-only`  | Merge + cross-memory insights    |
 
 ### Reflection (Metacognition)
 
