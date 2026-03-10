@@ -32,13 +32,18 @@ fi
 # shellcheck source=/dev/null
 source "$ENV_FILE"
 
-# Validate required vars
-for var in CONTABO_CLIENT_ID CONTABO_CLIENT_SECRET CONTABO_API_USER CONTABO_API_PASSWORD CONTABO_INSTANCE_ID TAILSCALE_API_KEY TAILSCALE_DEVICE_ID; do
+# Validate required Contabo vars
+for var in CONTABO_CLIENT_ID CONTABO_CLIENT_SECRET CONTABO_API_USER CONTABO_API_PASSWORD CONTABO_INSTANCE_ID; do
   if [[ -z "${!var:-}" ]]; then
     echo "ERROR: $var is not set in $ENV_FILE"
     exit 1
   fi
 done
+
+# Tailscale is optional — uses CLI if available, API key if configured
+TAILSCALE_VPS_IP="${TAILSCALE_VPS_IP:-100.77.51.51}"
+HAS_TAILSCALE_CLI=$(command -v tailscale >/dev/null 2>&1 && echo "yes" || echo "no")
+HAS_TAILSCALE_API=$([[ -n "${TAILSCALE_API_KEY:-}" && -n "${TAILSCALE_DEVICE_ID:-}" ]] && echo "yes" || echo "no")
 
 # --- Functions ---
 
@@ -136,19 +141,54 @@ contabo_status() {
 
 tailscale_remove() {
   echo ">> Removing VPS from Tailscale network..."
-  local response
-  response=$(curl -s -w "\n%{http_code}" -X DELETE \
-    "https://api.tailscale.com/api/v2/device/${TAILSCALE_DEVICE_ID}" \
-    -u "${TAILSCALE_API_KEY}:")
 
-  local http_code
-  http_code=$(echo "$response" | tail -1)
+  if [[ "$HAS_TAILSCALE_CLI" == "yes" ]]; then
+    # Use local tailscale CLI — no API key needed
+    # Find the node ID by IP
+    local node_id
+    node_id=$(tailscale status --json 2>/dev/null \
+      | python3 -c "
+import sys,json
+data=json.load(sys.stdin)
+for nid,peer in data.get('Peer',{}).items():
+  for addr in peer.get('TailscaleIPs',[]):
+    if addr == '${TAILSCALE_VPS_IP}':
+      print(nid)
+      sys.exit(0)
+print('')
+" 2>/dev/null)
 
-  if [[ "$http_code" =~ ^2 ]]; then
-    echo "   VPS removed from Tailscale (HTTP ${http_code})"
+    if [[ -n "$node_id" ]]; then
+      if tailscale lock remove "$node_id" 2>/dev/null; then
+        echo "   VPS removed from Tailscale via CLI (node: ${node_id})"
+      else
+        # lock remove may not be available, try admin API via CLI
+        echo "   Note: tailscale lock not enabled. VPS will lose Tailscale when powered off."
+        echo "   To fully remove, visit: https://login.tailscale.com/admin/machines"
+      fi
+    else
+      echo "   WARNING: Could not find VPS node (IP: ${TAILSCALE_VPS_IP}) in Tailscale"
+    fi
+
+  elif [[ "$HAS_TAILSCALE_API" == "yes" ]]; then
+    # Fallback to API
+    local response
+    response=$(curl -s -w "\n%{http_code}" -X DELETE \
+      "https://api.tailscale.com/api/v2/device/${TAILSCALE_DEVICE_ID}" \
+      -u "${TAILSCALE_API_KEY}:")
+
+    local http_code
+    http_code=$(echo "$response" | tail -1)
+
+    if [[ "$http_code" =~ ^2 ]]; then
+      echo "   VPS removed from Tailscale (HTTP ${http_code})"
+    else
+      echo "   WARNING: Tailscale removal returned HTTP ${http_code}"
+    fi
+
   else
-    echo "   WARNING: Tailscale removal returned HTTP ${http_code}"
-    echo "   (Device may already be removed, or key may need refresh)"
+    echo "   SKIP: No Tailscale CLI or API key configured."
+    echo "   VPS will lose Tailscale connectivity when powered off anyway."
   fi
 }
 
@@ -162,7 +202,13 @@ case "$ACTION" in
     token=$(get_contabo_token)
     contabo_status "$token"
     echo ""
-    echo "Tailscale device ID: ${TAILSCALE_DEVICE_ID}"
+    if [[ "$HAS_TAILSCALE_CLI" == "yes" ]]; then
+      echo "Tailscale: CLI available (VPS IP: ${TAILSCALE_VPS_IP})"
+    elif [[ "$HAS_TAILSCALE_API" == "yes" ]]; then
+      echo "Tailscale: API configured (device: ${TAILSCALE_DEVICE_ID})"
+    else
+      echo "Tailscale: Not configured (VPS loses connectivity on power off anyway)"
+    fi
     echo "Kill switch: READY"
     ;;
 
@@ -171,9 +217,9 @@ case "$ACTION" in
     token=$(get_contabo_token)
     contabo_start "$token"
     echo ""
-    echo "Note: VPS was removed from Tailscale during kill."
-    echo "You'll need to re-authorize it in the Tailscale admin console"
-    echo "after it boots, or SSH in via public IP to run 'tailscale up'."
+    echo "Note: If Tailscale was removed during kill, you'll need to"
+    echo "re-authorize at https://login.tailscale.com/admin/machines"
+    echo "or SSH in via public IP (167.86.119.7:2222) to run 'tailscale up'."
     ;;
 
   --force|-f)
