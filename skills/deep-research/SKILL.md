@@ -29,6 +29,7 @@ tool-annotations:
   mcp__memory__delete_entities: { destructiveHint: true, idempotentHint: true }
   mcp__firecrawl__*: { readOnlyHint: true, openWorldHint: true }
   mcp__brave-search__*: { readOnlyHint: true, openWorldHint: true }
+  mcp__qmd__*: { readOnlyHint: true, idempotentHint: true }
 invocation-contexts:
   user-direct:
     verbosity: high

@@ -15,6 +15,7 @@ allowed-tools:
   - WebFetch
   - mcp__firecrawl__*
   - mcp__context-mode__*
+  - mcp__qmd__*
   - Agent
   - TaskCreate
   - TaskUpdate
@@ -36,6 +37,7 @@ tool-annotations:
   mcp__memory__delete_relations: { destructiveHint: true, idempotentHint: true }
   mcp__memory__create_entities: { readOnlyHint: false, idempotentHint: false }
   mcp__firecrawl__*: { readOnlyHint: true, openWorldHint: true }
+  mcp__qmd__*: { readOnlyHint: true, idempotentHint: true }
 invocation-contexts:
   user-direct:
     verbosity: high
