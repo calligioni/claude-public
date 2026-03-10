@@ -340,6 +340,13 @@
           "context-mode"
         ],
         "description": "Context window compression: batches tool calls, indexes large outputs for query-based retrieval"
+      },
+      "qmd": {
+        "command": "qmd",
+        "args": [
+          "mcp"
+        ],
+        "description": "On-device hybrid search (BM25 + vector + LLM rerank) over indexed markdown collections: skills, agents, rules, memory"
       }
     }
   },
