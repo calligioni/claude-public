@@ -199,16 +199,31 @@ mcp__browserless__execute_browserql({
 
 ## Browserless vs Other Tools
 
-| Need                            | Use                                     |
-| ------------------------------- | --------------------------------------- |
-| JS-rendered content extraction  | **Browserless** `get_content`           |
-| PDF from URL or HTML            | **Browserless** `generate_pdf`          |
-| Lighthouse performance audit    | **Browserless** `run_performance_audit` |
-| Bot-protected site access       | **Browserless** `unblock`               |
-| General web scraping (markdown) | **Firecrawl** `firecrawl_scrape`        |
-| Multi-site crawling             | **Firecrawl** `firecrawl_crawl`         |
-| Interactive browser testing     | **Chrome DevTools** MCP                 |
-| Full page interaction/clicks    | **Playwright** MCP                      |
+| Need                            | Use                                     | Notes                                          |
+| ------------------------------- | --------------------------------------- | ---------------------------------------------- |
+| JS-rendered content extraction  | **Browserless** `get_content`           | Remote, cloud-hosted                           |
+| PDF from URL or HTML            | **Browserless** `generate_pdf`          | Remote, cloud-hosted                           |
+| Lighthouse performance audit    | **Browserless** `run_performance_audit` | Remote, cloud-hosted                           |
+| Bot-protected site access       | **Browserless** `unblock`               | Remote, stealth mode                           |
+| Token-efficient page inspection | **PinchTab** `snap -i -c` / `text`      | Local, 5-13x cheaper than screenshots          |
+| Local browser automation        | **PinchTab** CLI/API                    | Local, a11y tree + stable refs, multi-instance |
+| General web scraping (markdown) | **Firecrawl** `firecrawl_scrape`        | Handles JS rendering                           |
+| Multi-site crawling             | **Firecrawl** `firecrawl_crawl`         | Proxy rotation, anti-bot                       |
+| Interactive browser testing     | **Chrome DevTools** MCP                 | Console/network monitoring                     |
+| Full page interaction/clicks    | **Playwright** MCP                      | Complex automation sequences                   |
+
+### PinchTab vs Browserless Decision
+
+| Scenario                        | Choose                    | Why                                        |
+| ------------------------------- | ------------------------- | ------------------------------------------ |
+| Need remote/cloud execution     | **Browserless**           | PinchTab is local-only                     |
+| Token budget is tight           | **PinchTab**              | `text` = ~800 tokens vs screenshot ~2K+    |
+| Need Lighthouse audit           | **Browserless**           | PinchTab has no Lighthouse                 |
+| Need element interaction by ref | **PinchTab**              | Stable refs, no coordinate guessing        |
+| Need anti-bot bypass            | **Browserless** `unblock` | Or Scrapling for TLS fingerprinting        |
+| PDF generation (remote)         | **Browserless**           | More options (margins, headers, etc.)      |
+| PDF generation (local)          | **PinchTab** `pdf`        | Faster, no network round-trip              |
+| Multi-instance parallel testing | **PinchTab**              | Built-in instance management + tab locking |
 
 ## Infrastructure
 
