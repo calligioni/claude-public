@@ -20,6 +20,7 @@ allowed-tools:
   - mcp__browserless__*
   - mcp__brave-search__*
   - mcp__memory__*
+  - mcp__qmd__*
 memory: user
 tool-annotations:
   Bash: { destructiveHint: true, idempotentHint: false }
@@ -78,6 +79,34 @@ Output a research plan before proceeding:
 - H1: [hypothesis] → Confirmed if: [criteria] / Rejected if: [criteria]
 - H2: ...
 ```
+
+### Phase 1.5: Local Context Retrieval (QMD Pre-Search)
+
+Before launching web research, query QMD for relevant existing knowledge. This surfaces past research findings, tech insights, patterns, and architectural decisions — avoiding redundant investigation.
+
+```
+# Search across all local collections for the research topic
+qmd query "<core question keywords>" --json -n 5
+
+# Also search Memory MCP for related entities
+mcp__memory__search_nodes({ query: "<topic>" })
+```
+
+**What to extract from local context:**
+
+- Previous research findings on the same or related topics (`research-finding:*` entities)
+- Tech insights or patterns that inform the investigation (`tech-insight:*`, `pattern:*`)
+- Design decisions that provide context (`design-decision:*`)
+- Known mistakes to avoid (`mistake:*`)
+
+**How to use local context:**
+
+1. If QMD returns high-confidence matches (score >= 0.7), summarize them in the Research Plan as "Prior Knowledge"
+2. Skip sub-questions already answered by prior research (with citation to the local source)
+3. Use prior findings as hypotheses to validate/update — not as settled conclusions (they may be outdated)
+4. If local context contradicts web findings, flag the discrepancy and investigate which is current
+
+**Skip this phase if:** the topic is entirely new with no possible local matches (e.g., researching a brand-new technology released this week).
 
 ### Phase 2: Parallel Investigation (Multi-Track Research)
 
