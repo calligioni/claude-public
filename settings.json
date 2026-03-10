@@ -307,14 +307,6 @@
         ],
         "description": "Chrome DevTools for browser automation and testing"
       },
-      "google-workspace": {
-        "command": "npx",
-        "args": [
-          "-y",
-          "@presto-ai/google-workspace-mcp"
-        ],
-        "description": "Gmail, Calendar, Drive, Docs, Sheets - OAuth authenticated"
-      },
       "firecrawl": {
         "command": "npx",
         "args": [
