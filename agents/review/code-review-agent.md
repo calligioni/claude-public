@@ -4,7 +4,7 @@ description: Multi-perspective code review orchestrator that spawns parallel spe
 isolation: worktree
 allowed-tools: "*"
 color: purple
-model: opus
+model: sonnet
 memory: user
 skills: [review-changes, verify]
 ---
