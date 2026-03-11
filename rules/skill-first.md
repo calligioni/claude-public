@@ -26,7 +26,6 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Design website/landing page   | `/website-design`       | Any web UI design task                      |
 | Full project lifecycle        | `/project-orchestrator` | New project from zero to production         |
 | End-of-session reflection     | `/meditate`             | After /ship, /cto, /parallel-dev, long work |
-| Commit + push (no PR)         | `/cp`                   | Ready to push, no PR needed                 |
 | Full product from idea        | `/cpo`                  | Product lifecycle: discovery → spec → build |
 | Git worktree management       | `/maketree`             | Create/manage isolated worktrees            |
 | Refactor for clarity          | `/simplify` (built-in)  | Clean up code after long session or PR      |

@@ -20,7 +20,6 @@ The Nuvinigroup/claude repo is a **public-facing showcase** of reusable Claude C
 ### Internal Tooling (personal workflow, not reusable)
 
 - `cs` — syncs escotilha/claude personal repo
-- `cp` — personal commit+push shortcut
 - `cpr` — personal commit+push+PR shortcut
 - `paperclip` — Paperclip control plane (internal orchestration)
 - `paperclip-create-agent` — Paperclip agent creation
