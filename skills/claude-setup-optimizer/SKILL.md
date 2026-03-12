@@ -1,8 +1,7 @@
 ---
 name: claude-setup-optimizer
-description: Analyzes Claude Code changelog, reviews your current agents/skills setup, and recommends improvements based on new features. Use when asked to "optimize claude setup", "check for claude updates", "improve my agents", "sync with claude changelog", or "/optimize-setup".
+description: Analyzes Claude Code changelog, reviews your current agents/skills/plugins setup, and recommends improvements based on new features. Use when asked to "optimize claude setup", "check for claude updates", "improve my agents", "sync with claude changelog", or "/optimize-setup".
 user-invocable: true
-context: fork
 model: sonnet
 allowed-tools:
   - WebFetch
@@ -15,10 +14,6 @@ allowed-tools:
   - Bash
   - Agent
   - AskUserQuestion
-  - TaskCreate
-  - TaskUpdate
-  - TaskList
-  - TaskGet
 hooks:
   Stop:
     - hooks:
@@ -32,54 +27,54 @@ tool-annotations:
 
 # Claude Setup Optimizer
 
-Automatically analyzes the Claude Code changelog and recommends improvements to your agents, skills, and configuration based on new features.
+Automatically analyzes the Claude Code changelog and recommends improvements to your agents, skills, plugins, and configuration based on new features.
 
 ## What This Skill Does
 
-1. **Fetches Latest Changelog** - Gets the most recent Claude Code changelog from official sources
-2. **Analyzes Your Setup** - Reviews all your agents, skills, commands, and configuration
+1. **Gets Latest Changelog** - Uses the built-in `/release-notes` command or conversation context
+2. **Analyzes Your Setup** - Reviews all your agents, skills, plugins, rules, and configuration
 3. **Identifies Opportunities** - Finds ways your setup could benefit from new Claude features
 4. **Recommends Improvements** - Provides specific, actionable recommendations
 5. **Implements Changes** - Optionally applies improvements automatically
 
 ## Paths
 
-### Portable iCloud Path Variable
+### Portable Path Variable
 
 **IMPORTANT:** Always use `$HOME` in bash commands and `~/` in documentation to ensure portability across different machines/users.
 
 **Define this variable at the start of any bash operations:**
 
 ```bash
-ICLOUD_SETUP="$HOME/.claude-setup"
+SETUP="$HOME/.claude-setup"
 ```
 
 **Source of Truth Structure:**
 
 ```
 ~/.claude-setup/
-├── skills/       ← All skills (SKILL.md per directory)
-├── agents/       ← All agents (.md files)
-├── commands/     ← Slash commands (.md files)
-├── rules/        ← Global instruction files (.md)
-├── hooks/        ← Hook scripts (.sh)
-├── memory/       ← Memory files (core-memory.json, etc.)
-└── settings.json ← Settings (hooks, MCP servers, env vars)
+├── skills/       <- All skills (SKILL.md per directory)
+├── agents/       <- All agents (.md files)
+├── commands/     <- Slash commands (.md files)
+├── rules/        <- Global instruction files (.md)
+├── hooks/        <- Hook scripts (.sh)
+├── memory/       <- Memory files (core-memory.json, etc.)
+└── settings.json <- Settings (hooks, MCP servers, env vars)
 ```
 
-**IMPORTANT:** Always read from AND write to the iCloud path directly. Do NOT use symlink paths like `~/.claude/` - use the iCloud path to ensure:
+**IMPORTANT:** Always read from AND write to `~/.claude-setup` directly. Do NOT use symlink paths like `~/.claude/` - use the source path to ensure:
 
 - Consistent behavior regardless of symlink state
-- Changes persist correctly to iCloud
+- Changes persist correctly
 - Syncs across all devices
 
 ### Background (FYI only)
 
-Claude Code searches for skills/agents in multiple locations, but symlinks point everything to iCloud:
+Claude Code searches for skills/agents in multiple locations, but symlinks point everything to the setup dir:
 
-- `~/.claude/skills` → iCloud
-- `~/.claude/agents` → iCloud
-- `~/.claude/commands` → iCloud
+- `~/.claude/skills` -> ~/.claude-setup/skills
+- `~/.claude/agents` -> ~/.claude-setup/agents
+- `~/.claude/commands` -> ~/.claude-setup/commands
 
 ## Workflow
 
@@ -87,28 +82,29 @@ Claude Code searches for skills/agents in multiple locations, but symlinks point
 
 **Run changelog fetch AND setup inventory simultaneously** — they are independent. Use a single message with parallel tool calls.
 
-#### 1a. Changelog (Bash — fast)
+#### 1a. Changelog
+
+The release notes are available directly inside Claude Code via the `/release-notes` command. **Check if the user already ran `/release-notes` in this conversation** — if the release notes are already in context, skip fetching entirely and use them.
+
+If the release notes are NOT already in context, get them via Bash:
 
 ```bash
-# Get 5 most recent releases in one shot
-gh release list --repo anthropics/claude-code --limit 5 --json tagName,publishedAt,name
+# Get the last ~300 lines of release notes (most recent versions)
+claude -p "/release-notes" 2>/dev/null | tail -300
 ```
 
-Then fetch details for the 2–3 most recent tags:
+If `claude -p` is unavailable, fall back to:
 
-```bash
-gh release view <tag> --repo anthropics/claude-code
-```
+1. WebSearch for "Claude Code changelog site:docs.anthropic.com" or "Claude Code release notes 2026"
+2. WebFetch on https://code.claude.com/docs/en/changelog (if it exists)
 
-If `gh` fails, fall back to WebSearch for "Claude Code changelog 2026".
+**Never fetch the full CHANGELOG.md from GitHub** — it exceeds token limits.
 
-**Never fetch the full CHANGELOG.md** — it exceeds token limits.
-
-Extract: new tools, skill/agent format changes, MCP updates, config options, breaking changes.
+Extract: new tools, skill/agent format changes, MCP updates, config options, hook events, plugin features, breaking changes.
 
 #### 1b. Setup Inventory (Bash — single command, no subagents)
 
-**Do NOT spawn Explore/Task agents for inventory.** Use Bash to extract all frontmatter in one pass:
+**Do NOT spawn Explore/Agent subagents for inventory.** Use Bash to extract all frontmatter in one pass:
 
 ```bash
 SETUP="$HOME/.claude-setup"
@@ -137,11 +133,13 @@ ls "$SETUP/rules/" 2>/dev/null
 echo "=== HOOKS ==="
 ls "$SETUP/hooks/" 2>/dev/null
 
+echo "=== PLUGINS ==="
+claude plugin list 2>/dev/null || echo "(no plugin CLI available)"
+
 echo "=== CONFIG (settings.json) ==="
 cat "$SETUP/settings.json" 2>/dev/null
 
 echo "=== MCP SERVERS ==="
-# Extract just the MCP server names and descriptions
 cat "$SETUP/settings.json" 2>/dev/null | grep -A1 '"description"' | grep description || true
 ```
 
@@ -156,17 +154,18 @@ Cross-reference changelog features against your current setup:
 **Feature Categories to Check:**
 
 1. **New Tools**: Are there new tools you're not using that could benefit your workflows?
-2. **Skill System Updates**: Has the skill format changed? Are there new frontmatter options?
-3. **Agent Improvements**: New agent capabilities, isolation modes (`isolation: worktree`), or team patterns?
-4. **MCP Updates**: New MCP servers, protocol changes, or OAuth improvements?
-5. **Hooks**: New hook events (HTTP hooks, ConfigChange, WorktreeCreate/Remove, TeammateIdle, TaskCompleted)?
-6. **Performance Optimizations**: Parallelization, caching, memory leak fixes, or context efficiency?
-7. **Security Features**: New permission patterns, sandbox changes, or security best practices?
-8. **Configuration Options**: New settings (spinnerTips, statusLine, plugins, plansDirectory)?
+2. **Skill/Agent Frontmatter Updates**: New frontmatter fields or format changes?
+3. **Agent Capabilities**: Isolation modes, team patterns, background agents, memory scopes?
+4. **MCP Updates**: New MCP servers, protocol changes, OAuth improvements, tool search?
+5. **Hooks**: New hook events, HTTP hooks, prompt-based hooks, agent-scoped hooks?
+6. **Plugin System**: Overlap between custom skills and available plugins?
+7. **Performance Optimizations**: Parallelization, caching, context efficiency?
+8. **Security Features**: New permission patterns, sandbox changes, security best practices?
+9. **Configuration Options**: New settings, model overrides, auto-memory directory?
 
-**Analysis Checklist:**
+**Analysis Checklist — Skills:**
 
-For each skill/agent, check:
+For each skill, check:
 
 - [ ] Uses latest skill format (SKILL.md with YAML frontmatter)
 - [ ] Takes advantage of parallel tool calls where applicable
@@ -174,8 +173,61 @@ For each skill/agent, check:
 - [ ] Uses appropriate model tier selection (haiku/sonnet/opus per model-tier-strategy)
 - [ ] Has proper tool-annotations in frontmatter (destructiveHint, readOnlyHint, etc.)
 - [ ] Follows current best practices for triggers/descriptions
-- [ ] Uses new tools/features that weren't available before
-- [ ] Leverages relevant hook events (WorktreeCreate, ConfigChange, etc.)
+- [ ] Uses YAML-style lists in `allowed-tools` (cleaner than inline arrays)
+- [ ] Leverages `${CLAUDE_SKILL_DIR}` for self-referencing paths where useful
+- [ ] Leverages `${CLAUDE_SESSION_ID}` where session tracking is needed
+- [ ] Uses `context: fork` where appropriate (runs in sub-agent, protects main context)
+- [ ] Uses `agent` field to specify agent type for execution where applicable
+- [ ] Has `hooks` in frontmatter for skill-scoped lifecycle events where needed
+- [ ] Uses `skills` frontmatter field to auto-load dependencies for subagents
+
+**Analysis Checklist — Agents:**
+
+For each agent, check:
+
+- [ ] Has `memory` frontmatter field (`user`, `project`, or `local` scope) where persistent state is useful
+- [ ] Has `background: true` if it should always run as a background task
+- [ ] Has `isolation: worktree` if it modifies files that could conflict with main session
+- [ ] Has `permissionMode` set appropriately (e.g., `bypassPermissions` for trusted automated agents)
+- [ ] Has `disallowedTools` to explicitly block tools that shouldn't be available
+- [ ] Has `hooks` in frontmatter for agent-scoped lifecycle events where needed
+- [ ] Specifies `model` explicitly when not inheriting from parent is desired
+
+**Analysis Checklist — Hooks:**
+
+Check for adoption of newer hook events:
+
+- [ ] `PermissionRequest` — auto-approve/deny tool permissions with custom logic
+- [ ] `SubagentStart` / `SubagentStop` — lifecycle management for subagents
+- [ ] `Setup` — repository setup/maintenance via `--init` or `--maintenance` flags
+- [ ] `InstructionsLoaded` — fires when CLAUDE.md or rules files load into context
+- [ ] `ConfigChange` — fires when config files change mid-session (audit/security)
+- [ ] `WorktreeCreate` / `WorktreeRemove` — custom VCS setup/teardown for worktree isolation
+- [ ] `TeammateIdle` / `TaskCompleted` — multi-agent workflow coordination
+- [ ] `SessionStart` / `SessionEnd` — session lifecycle
+- [ ] HTTP hooks (`type: http`) — POST to webhook URLs instead of shell commands
+- [ ] Prompt-based stop hooks — model-evaluated conditions for stopping
+
+**Analysis Checklist — Configuration:**
+
+Check for newer settings:
+
+- [ ] `autoMemoryDirectory` — custom directory for auto-memory storage
+- [ ] `modelOverrides` — map model picker entries to custom provider model IDs
+- [ ] `spinnerVerbs` / `spinnerTipsOverride` — customized spinner experience
+- [ ] `plansDirectory` — custom location for plan files
+- [ ] `language` — configure Claude's response language
+- [ ] `attribution` — customize commit and PR bylines
+- [ ] `sandbox.enableWeakerNetworkIsolation` — for Go programs behind MITM proxies
+- [ ] `includeGitInstructions` — remove built-in git instructions from system prompt
+- [ ] `CLAUDE_CODE_DISABLE_CRON` — disable scheduled cron jobs
+- [ ] `CLAUDE_CODE_FILE_READ_MAX_OUTPUT_TOKENS` — override file read token limit
+
+**Analysis Checklist — Plugins:**
+
+- [ ] Are any custom skills duplicated by available plugins?
+- [ ] Are installed plugins up-to-date?
+- [ ] Could any skills benefit from being distributed as plugins for team use?
 
 ### Step 3: Generate Recommendations
 
@@ -201,7 +253,7 @@ Description of how it works now
 What should be changed and why
 
 **New Feature Reference:**
-Link to changelog or documentation
+Version and feature name from changelog
 
 **Implementation:**
 Specific steps or code changes needed
@@ -223,7 +275,8 @@ Present findings to the user:
 ## Your Setup Analysis
 - X skills analyzed
 - Y agents analyzed
-- Z commands analyzed
+- Z plugins installed
+- W rules loaded
 
 ## Recommendations Found: N
 
@@ -247,16 +300,17 @@ Would you like me to:
 
 ### Step 5: Implement Improvements with Parallel Agents
 
-**IMPORTANT: iCloud is the source of truth.** All changes MUST be made directly in the iCloud path to ensure they sync across devices.
+**IMPORTANT: `~/.claude-setup` is the source of truth.** All changes MUST be made directly in the setup path to ensure they sync across devices.
 
 **CRITICAL: Use parallel agents to implement changes concurrently.** Group approved changes into independent work streams and launch them as parallel agents. This dramatically speeds up implementation.
 
 #### 5a. Back up affected files first
 
 ```bash
-ICLOUD_SETUP="$HOME/.claude-setup"
-mkdir -p "$ICLOUD_SETUP/backups/$(date +%Y%m%d-%H%M%S)"
-cp <file> "$ICLOUD_SETUP/backups/$(date +%Y%m%d-%H%M%S)/"
+SETUP="$HOME/.claude-setup"
+BACKUP="$SETUP/backups/$(date +%Y%m%d-%H%M%S)"
+mkdir -p "$BACKUP"
+cp <file> "$BACKUP/"
 ```
 
 #### 5b. Group changes into independent work streams
@@ -300,63 +354,63 @@ After all agents complete, spot-check key files to confirm changes were applied 
 
 #### 5e. Git commit and push (automatic)
 
-A `Stop` hook in this skill's frontmatter automatically commits and pushes all changes to the GitHub backup repo (`github.com/escotilha/claude`) when the skill finishes. No manual git commands needed.
+A `Stop` hook in this skill's frontmatter automatically commits and pushes all changes to the GitHub backup repo when the skill finishes. No manual git commands needed.
 
 ## Example Recommendations
 
-### Example 1: New Tool Usage
+### Example 1: New Frontmatter Feature
 
 ````markdown
-## [MEDIUM] Add Agent tool to deep-research skill
+## [MEDIUM] Add memory scope to persistent agents
 
-**Affected Items:** deep-research
+**Affected Items:** qa-runner.md, research-tracker.md
 
 **Current State:**
-Skill uses Task tool for spawning parallel research tracks
+Agents have no `memory` field — they lose context between sessions
 
 **Recommended Change:**
-Replace `Task` with `Agent` in allowed-tools. The `Task` tool was renamed to `Agent` and now supports `model` parameter for per-agent tier selection.
+Add `memory: project` to agents that benefit from remembering past runs within the same project.
 
 **New Feature Reference:**
-Claude Code v2.1.x unified agent spawning under the Agent tool
+v2.1.33 — Added `memory` frontmatter field support for agents
 
 **Implementation:**
-Update allowed-tools in frontmatter:
+Add to agent frontmatter:
 
 ```yaml
-allowed-tools:
-  - Agent # was: Task
+memory: project
 ```
 
-And update spawn calls to use `model: "sonnet"` for research tracks.
-````
-
 **Effort:** Low
-
 ````
 
-### Example 2: Parallel Execution
-```markdown
-## [HIGH] Enable parallel agent execution in project-orchestrator
+### Example 2: Worktree Isolation
 
-**Affected Items:** project-orchestrator.md
+````markdown
+## [HIGH] Enable worktree isolation for parallel-dev agents
+
+**Affected Items:** parallel-dev skill agent spawning
 
 **Current State:**
-Agent launches subagents sequentially
+Feature agents run in manually-created worktrees
 
 **Recommended Change:**
-Update orchestrator to launch independent agents (frontend, backend, database) in parallel using multiple Task tool calls in single message.
+Use `isolation: worktree` on Agent tool calls to let Claude Code manage worktree lifecycle automatically, including cleanup.
 
 **New Feature Reference:**
-Task tool now supports parallel agent launches
+v2.1.49 — Subagents support `isolation: "worktree"` for working in a temporary git worktree
 
 **Implementation:**
-Update the workflow section to specify parallel launch pattern for independent tasks.
+Update Agent spawning calls:
+
+```
+Agent(subagent_type="general-purpose", model="sonnet", isolation="worktree", prompt="Implement feature X...")
+```
 
 **Effort:** Medium
 ````
 
-### Example 3: New Hook Event
+### Example 3: HTTP Hook
 
 ````markdown
 ## [MEDIUM] Add HTTP hook for deployment notifications
@@ -367,10 +421,10 @@ Update the workflow section to specify parallel launch pattern for independent t
 No deployment notification hook configured
 
 **Recommended Change:**
-Use the new HTTP hooks feature to POST deployment status to a webhook URL when skills complete. HTTP hooks run a POST request instead of a shell command.
+Use HTTP hooks to POST deployment status to a webhook URL when skills complete. HTTP hooks are simpler and more portable than shell command hooks.
 
 **New Feature Reference:**
-Claude Code v2.1.63 added HTTP hooks support
+v2.1.63 — Added HTTP hooks support
 
 **Implementation:**
 Add to hooks section in settings.json:
@@ -393,11 +447,9 @@ Add to hooks section in settings.json:
   }
 }
 ```
-````
 
 **Effort:** Low
-
-```
+````
 
 ## Triggers
 
@@ -413,16 +465,21 @@ This skill activates on:
 
 ## Error Handling
 
+### Changelog Not Available
+
+If `/release-notes` output is not in context and `claude -p` fails:
+
+1. **WebSearch** — Search for "Claude Code changelog" or "Claude Code new features 2026"
+2. **Read with limits** — Use `Read` tool with `limit=500` on any local changelog file
+3. **WebFetch** — Fetch the official docs changelog page
+
 ### Large File Errors
 
-If you encounter "File content exceeds maximum allowed tokens" when fetching changelog:
+If you encounter "File content exceeds maximum allowed tokens":
 
-1. **Use `gh` CLI instead** - Fetch releases via `gh release list` and `gh release view`
-2. **Read with limits** - Use `Read` tool with `limit=500` to get only recent entries
-3. **Use WebSearch** - Search for "Claude Code new features 2026" for recent announcements
-4. **Fetch releases page** - WebFetch the releases page with a focused prompt
-
-Never attempt to fetch the full CHANGELOG.md via WebFetch - it's too large.
+1. Use `Read` tool with `limit` and `offset` parameters to paginate
+2. Use Bash `tail -N` to get only recent entries
+3. Never attempt to fetch the full CHANGELOG.md via WebFetch — it's too large
 
 ## Notes
 
@@ -432,4 +489,3 @@ Never attempt to fetch the full CHANGELOG.md via WebFetch - it's too large.
 - Some recommendations may require manual review
 - Keep track of which changelog versions have been reviewed to avoid duplicate work
 - All paths use `$HOME` variable for cross-machine compatibility
-```
