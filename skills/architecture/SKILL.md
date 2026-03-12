@@ -526,42 +526,52 @@ Write `docs/architecture/.architecture-meta.json`:
 
 ### 5c. Export to PDF (if requested or default)
 
-Always attempt PDF export. Use pandoc:
+Two-step pipeline: pandoc converts markdown to styled HTML, then puppeteer renders to PDF.
 
 ```bash
-# Check pandoc is available
+# Step 1: Convert markdown to standalone HTML with pandoc
 which pandoc || { echo "pandoc not found — install with: brew install pandoc"; exit 1; }
 
-# Convert to PDF via HTML (better Mermaid support in markdown)
 pandoc docs/architecture/ARCHITECTURE.md \
-  -o docs/architecture/exports/ARCHITECTURE.pdf \
+  -o docs/architecture/exports/ARCHITECTURE.html \
   --from markdown \
-  --to pdf \
+  --to html5 \
+  --standalone \
   --toc \
   --toc-depth=3 \
   --metadata title="{Project Name} — Software Architecture" \
   --metadata date="$(date +%Y-%m-%d)" \
-  -V geometry:margin=1in \
-  -V fontsize=11pt \
-  -V colorlinks=true \
+  --css=https://cdn.jsdelivr.net/npm/water.css@2/out/water.min.css \
   2>&1
+
+# Step 2: Render HTML to PDF with puppeteer (handles CSS, layout, pagination)
+NODE_PATH=/opt/homebrew/lib/node_modules node -e "
+const puppeteer = require('puppeteer');
+(async () => {
+  const browser = await puppeteer.launch({ headless: 'new' });
+  const page = await browser.newPage();
+  const htmlPath = 'file://' + require('path').resolve('docs/architecture/exports/ARCHITECTURE.html');
+  await page.goto(htmlPath, { waitUntil: 'networkidle0', timeout: 15000 });
+  await page.pdf({
+    path: 'docs/architecture/exports/ARCHITECTURE.pdf',
+    format: 'A4',
+    margin: { top: '1.5cm', right: '1.5cm', bottom: '1.5cm', left: '1.5cm' },
+    printBackground: true,
+    displayHeaderFooter: true,
+    headerTemplate: '<div style=\"font-size:8px;text-align:right;width:100%;padding-right:1.5cm;color:#666\">{Project Name} — Software Architecture</div>',
+    footerTemplate: '<div style=\"font-size:8px;text-align:center;width:100%;color:#666\"><span class=\"pageNumber\"></span> / <span class=\"totalPages\"></span></div>'
+  });
+  await browser.close();
+  console.log('PDF generated successfully');
+})();
+" 2>&1
 ```
 
-If PDF generation fails (missing LaTeX engine), fall back to DOCX:
+If puppeteer is not installed, install it: `npm install -g puppeteer`
 
-```bash
-pandoc docs/architecture/ARCHITECTURE.md \
-  -o docs/architecture/exports/ARCHITECTURE.docx \
-  --from markdown \
-  --to docx \
-  --toc \
-  --toc-depth=3 \
-  --metadata title="{Project Name} — Software Architecture" \
-  --metadata date="$(date +%Y-%m-%d)" \
-  2>&1
-```
+If both pandoc and puppeteer fail, fall back to DOCX-only export.
 
-### 5d. Export to DOCX (if specifically requested)
+### 5d. Export to DOCX (if specifically requested, or as fallback)
 
 ```bash
 pandoc docs/architecture/ARCHITECTURE.md \
