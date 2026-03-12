@@ -524,16 +524,84 @@ Write `docs/architecture/.architecture-meta.json`:
 }
 ```
 
-### 5c. Export to PDF (if requested or default)
+### 5c. Render Mermaid Diagrams to SVG
 
-Two-step pipeline: pandoc converts markdown to styled HTML, then puppeteer renders to PDF.
+Before exporting to PDF/DOCX, render all Mermaid code blocks to SVG images so they appear as actual diagrams in the final output.
 
 ```bash
-# Step 1: Convert markdown to standalone HTML with pandoc
+mkdir -p docs/architecture/diagrams
+```
+
+Use a Python script to extract all `mermaid` code blocks from `ARCHITECTURE.md`, save each as a `.mmd` file, render to SVG via mmdc, then create `ARCHITECTURE-rendered.md` with `<img>` tags pointing to the SVGs.
+
+````python
+import re, subprocess, os
+
+src = "docs/architecture/ARCHITECTURE.md"
+diagrams_dir = "docs/architecture/diagrams"
+output = "docs/architecture/ARCHITECTURE-rendered.md"
+
+with open(src) as f:
+    content = f.read()
+
+# Extract mermaid blocks, name by nearest heading
+lines = content.split("\n")
+blocks = []
+i = 0
+idx = 0
+while i < len(lines):
+    if lines[i].strip() == "```mermaid":
+        heading = f"diagram-{idx}"
+        for j in range(i - 1, max(i - 10, -1), -1):
+            if lines[j].strip().startswith("#"):
+                heading = re.sub(r'[^a-z0-9]+', '-', lines[j].strip().lstrip('#').strip().lower()).strip('-')
+                break
+        mermaid = []
+        i += 1
+        while i < len(lines) and lines[i].strip() != "```":
+            mermaid.append(lines[i])
+            i += 1
+        name = f"{idx:02d}-{heading}"
+        mmd_path = os.path.join(diagrams_dir, f"{name}.mmd")
+        with open(mmd_path, "w") as f2:
+            f2.write("\n".join(mermaid))
+        # Render to SVG (run from /tmp to avoid pnpm workspace conflicts)
+        svg_path = os.path.join(diagrams_dir, f"{name}.svg")
+        subprocess.run(
+            ["npx", "-y", "-p", "@mermaid-js/mermaid-cli", "mmdc",
+             "-i", os.path.abspath(mmd_path), "-o", os.path.abspath(svg_path),
+             "-t", "default", "-b", "white", "-w", "1200", "-q"],
+            cwd="/tmp", timeout=30
+        )
+        blocks.append(name)
+        idx += 1
+    i += 1
+
+# Replace mermaid code blocks with <img> tags in rendered markdown
+bi = 0
+def replace(m):
+    global bi
+    name = blocks[bi]; bi += 1
+    abs_path = os.path.abspath(f"docs/architecture/diagrams/{name}.svg")
+    return f'<img src="file://{abs_path}" alt="{name}" style="width:100%;max-width:1200px;" />'
+
+rendered = re.sub(r'```mermaid\n.*?```', replace, content, flags=re.DOTALL)
+with open(output, "w") as f:
+    f.write(rendered)
+````
+
+**Important:** The `npx` call MUST use `-p @mermaid-js/mermaid-cli mmdc` syntax (not `@mermaid-js/mermaid-cli mmdc` directly) and should run from `/tmp` to avoid pnpm workspace conflicts.
+
+### 5d. Export to PDF
+
+Three-step pipeline: render Mermaid to SVG (5c above), pandoc converts rendered markdown to HTML, puppeteer renders to PDF.
+
+```bash
+# Step 1: Convert rendered markdown (with SVG images) to HTML
 which pandoc || { echo "pandoc not found — install with: brew install pandoc"; exit 1; }
 
-pandoc docs/architecture/ARCHITECTURE.md \
-  -o docs/architecture/exports/ARCHITECTURE.html \
+pandoc docs/architecture/ARCHITECTURE-rendered.md \
+  -o docs/architecture/exports/ARCHITECTURE-rendered.html \
   --from markdown \
   --to html5 \
   --standalone \
@@ -544,14 +612,15 @@ pandoc docs/architecture/ARCHITECTURE.md \
   --css=https://cdn.jsdelivr.net/npm/water.css@2/out/water.min.css \
   2>&1
 
-# Step 2: Render HTML to PDF with puppeteer (handles CSS, layout, pagination)
+# Step 2: Render HTML to PDF with puppeteer (renders SVG diagrams natively)
 NODE_PATH=/opt/homebrew/lib/node_modules node -e "
 const puppeteer = require('puppeteer');
+const path = require('path');
 (async () => {
   const browser = await puppeteer.launch({ headless: 'new' });
   const page = await browser.newPage();
-  const htmlPath = 'file://' + require('path').resolve('docs/architecture/exports/ARCHITECTURE.html');
-  await page.goto(htmlPath, { waitUntil: 'networkidle0', timeout: 15000 });
+  const htmlPath = 'file://' + path.resolve('docs/architecture/exports/ARCHITECTURE-rendered.html');
+  await page.goto(htmlPath, { waitUntil: 'networkidle0', timeout: 20000 });
   await page.pdf({
     path: 'docs/architecture/exports/ARCHITECTURE.pdf',
     format: 'A4',
@@ -570,6 +639,8 @@ const puppeteer = require('puppeteer');
 If puppeteer is not installed, install it: `npm install -g puppeteer`
 
 If both pandoc and puppeteer fail, fall back to DOCX-only export.
+
+### 5e. Export to DOCX (if specifically requested, or as fallback)
 
 ### 5d. Export to DOCX (if specifically requested, or as fallback)
 
