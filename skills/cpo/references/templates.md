@@ -30,8 +30,18 @@ Complete structure for the master project file:
       "authentication": "[auth solution]",
       "orm": "[Prisma|Drizzle|etc]"
     },
+    "northStarMetric": {
+      "businessGame": "[attention|transaction|productivity]",
+      "metric": "[Single customer-centric metric]",
+      "inputMetrics": [
+        { "name": "[Metric 1]", "relationship": "[How it drives NSM]" },
+        { "name": "[Metric 2]", "relationship": "[How it drives NSM]" },
+        { "name": "[Metric 3]", "relationship": "[How it drives NSM]" }
+      ]
+    },
     "successMetrics": ["[metric 1]", "[metric 2]"],
-    "nonGoals": ["[explicitly out of scope]"]
+    "nonGoals": ["[explicitly out of scope]"],
+    "prdFile": "prd-definition.md"
   },
   "epics": [
     {
@@ -188,6 +198,7 @@ Complete structure for the master project file:
 ## Phase History
 
 ### Phase 1: Discovery
+
 - **Started:** [Date]
 - **Completed:** [Date]
 - **Key Decisions:**
@@ -197,6 +208,7 @@ Complete structure for the master project file:
   - Success Metric: [Primary metric]
 
 ### Phase 2: Planning
+
 - **Started:** [Date]
 - **Completed:** [Date]
 - **Epics Defined:** [N]
@@ -209,14 +221,17 @@ Complete structure for the master project file:
   - Hosting: [Platform + rationale]
 
 ### Phase 3: Implementation
+
 - **Started:** [Date]
 - **Status:** [Stage N of M]
 - **Stages Completed:** [X/M]
 
 ### Phase 4: Validation
+
 - **Status:** [Not started | In progress | Complete]
 
 ### Phase 5: Delivery
+
 - **Status:** [Not started | In progress | Complete]
 - **Production URL:** [If deployed]
 
@@ -224,12 +239,12 @@ Complete structure for the master project file:
 
 ## Stage Progress
 
-| Stage | Epic | Status | Started | Completed | Tested | Stories |
-|-------|------|--------|---------|-----------|--------|---------|
-| S1: Project Init | E1 | Tested | 2024-01-15 | 2024-01-15 | 2024-01-15 | 5/5 |
-| S2: Authentication | E2 | In Progress | 2024-01-16 | - | - | 2/4 |
-| S3: Core Features | E2 | Pending | - | - | - | 0/7 |
-| S4: UI Polish | E3 | Pending | - | - | - | 0/6 |
+| Stage              | Epic | Status      | Started    | Completed  | Tested     | Stories |
+| ------------------ | ---- | ----------- | ---------- | ---------- | ---------- | ------- |
+| S1: Project Init   | E1   | Tested      | 2024-01-15 | 2024-01-15 | 2024-01-15 | 5/5     |
+| S2: Authentication | E2   | In Progress | 2024-01-16 | -          | -          | 2/4     |
+| S3: Core Features  | E2   | Pending     | -          | -          | -          | 0/7     |
+| S4: UI Polish      | E3   | Pending     | -          | -          | -          | 0/6     |
 
 ---
 
@@ -242,6 +257,7 @@ Complete structure for the master project file:
 **Commit:** a3f2d9c
 
 **Key Implementations:**
+
 - Next.js 14 with App Router and TypeScript
 - Supabase PostgreSQL database connected
 - Prisma ORM with initial schema
@@ -249,11 +265,13 @@ Complete structure for the master project file:
 - Environment configuration templates
 
 **Learnings:**
+
 - Using Supabase for rapid setup
 - Prisma schema-first approach works well
 - NextAuth v5 beta has cleaner API
 
 **Issues Encountered:**
+
 - None
 
 ---
@@ -264,36 +282,40 @@ Complete structure for the master project file:
 **Current Story:** Registration flow with email verification
 
 **Progress:**
+
 - ✅ NextAuth configuration complete
 - ✅ Login page UI implemented
 - 🔄 Registration form in progress
 - ⏳ Email verification pending
 
 **Blockers:**
+
 - None
 
 ---
 
 ## Metrics
 
-| Metric | Value |
-|--------|-------|
-| Total Commits | 12 |
-| Total Stories Completed | 7 |
-| Test Pass Rate | 100% |
-| Stages Completed | 1/8 |
-| Overall Progress | 12.5% |
+| Metric                  | Value |
+| ----------------------- | ----- |
+| Total Commits           | 12    |
+| Total Stories Completed | 7     |
+| Test Pass Rate          | 100%  |
+| Stages Completed        | 1/8   |
+| Overall Progress        | 12.5% |
 
 ---
 
 ## Research Findings
 
 ### Competitor Analysis
+
 - **Primary Competitors:** [List]
 - **Key Differentiators:** [What makes us unique]
 - **Design Inspiration:** [Reference products]
 
 ### Technical Decisions
+
 - **CTO Recommendations:** [Link to tech-stack-recommendation.md]
 - **Architecture:** [Link to architecture-overview.md]
 
@@ -312,7 +334,7 @@ Complete structure for the master project file:
 
 Complete structure for `docs/user-guide.md`:
 
-```markdown
+````markdown
 # [Product Name] User Guide
 
 **Version:** 1.0.0
@@ -325,6 +347,7 @@ Complete structure for `docs/user-guide.md`:
 [Product description and value proposition - 2-3 sentences]
 
 **Key Features:**
+
 - [Feature 1]
 - [Feature 2]
 - [Feature 3]
@@ -336,6 +359,7 @@ Complete structure for `docs/user-guide.md`:
 ### Prerequisites
 
 Before using [Product Name], ensure you have:
+
 - [Requirement 1 - e.g., Modern web browser]
 - [Requirement 2 - e.g., GitHub account (if required)]
 - [Requirement 3 - e.g., API keys for integrations]
@@ -348,7 +372,9 @@ Get up and running in 3 steps:
    ```bash
    [Command or action]
    ```
-   [Brief explanation]
+````
+
+[Brief explanation]
 
 2. **[Step 2 Title]**
    [Instructions]
@@ -408,11 +434,13 @@ Access at: `http://localhost:3000`
 3. [Step 3]
 
 **Example:**
+
 ```
 [Example usage or screenshot description]
 ```
 
 **Tips:**
+
 - [Tip 1]
 - [Tip 2]
 
@@ -432,16 +460,17 @@ Access at: `http://localhost:3000`
 
 ### Environment Variables
 
-| Variable | Description | Required | Default |
-|----------|-------------|----------|---------|
-| `DATABASE_URL` | PostgreSQL connection string | Yes | - |
-| `NEXTAUTH_SECRET` | Authentication secret | Yes | - |
-| `NEXTAUTH_URL` | Application URL | Yes | `http://localhost:3000` |
-| `[CUSTOM_VAR]` | [Description] | No | `[default]` |
+| Variable          | Description                  | Required | Default                 |
+| ----------------- | ---------------------------- | -------- | ----------------------- |
+| `DATABASE_URL`    | PostgreSQL connection string | Yes      | -                       |
+| `NEXTAUTH_SECRET` | Authentication secret        | Yes      | -                       |
+| `NEXTAUTH_URL`    | Application URL              | Yes      | `http://localhost:3000` |
+| `[CUSTOM_VAR]`    | [Description]                | No       | `[default]`             |
 
 ### Advanced Configuration
 
 **[Config Topic]:**
+
 ```javascript
 // Example configuration
 ```
@@ -477,10 +506,12 @@ Complete end-to-end guide for [task]:
 #### Issue: [Problem Description]
 
 **Symptoms:**
+
 - [What users see]
 - [Error message if applicable]
 
 **Solution:**
+
 ```bash
 [Fix command or instructions]
 ```
@@ -492,6 +523,7 @@ Complete end-to-end guide for [task]:
 #### Issue: [Another Problem]
 
 **Quick Fix:**
+
 1. [Step 1]
 2. [Step 2]
 
@@ -507,6 +539,7 @@ If you encounter issues not covered here:
 4. **Contact Support:** [Email or contact method]
 
 When reporting bugs, include:
+
 - Steps to reproduce
 - Expected vs actual behavior
 - Browser/environment info
@@ -532,6 +565,7 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
 [Description]
 
 **Request:**
+
 ```json
 {
   "param1": "value1"
@@ -539,6 +573,7 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
 ```
 
 **Response:**
+
 ```json
 {
   "data": [],
@@ -589,7 +624,8 @@ See [CHANGELOG.md](../CHANGELOG.md) for version history.
 ---
 
 **Built with [Tech Stack]** | **Version 1.0.0** | **Last Updated: [Date]**
-```
+
+````
 
 ---
 
@@ -610,25 +646,27 @@ Structure for `docs/technical-docs.md`:
 
 ### High-Level Architecture
 
-```
+````
+
 ┌─────────────────────────────────────────────────────┐
-│                    Client Layer                      │
-│  [Next.js App Router + React + Tailwind CSS]        │
+│ Client Layer │
+│ [Next.js App Router + React + Tailwind CSS] │
 └───────────────────┬─────────────────────────────────┘
-                    │
-                    │ HTTPS / API Routes
-                    │
+│
+│ HTTPS / API Routes
+│
 ┌───────────────────▼─────────────────────────────────┐
-│                 Application Layer                    │
-│  [Next.js API Routes / Server Actions / tRPC]       │
+│ Application Layer │
+│ [Next.js API Routes / Server Actions / tRPC] │
 └───────────────────┬─────────────────────────────────┘
-                    │
-                    │ ORM (Prisma)
-                    │
+│
+│ ORM (Prisma)
+│
 ┌───────────────────▼─────────────────────────────────┐
-│                   Data Layer                         │
-│  [Supabase PostgreSQL + RLS + Auth]                 │
+│ Data Layer │
+│ [Supabase PostgreSQL + RLS + Auth] │
 └─────────────────────────────────────────────────────┘
+
 ```
 
 **Key Components:**
@@ -662,32 +700,34 @@ Structure for `docs/technical-docs.md`:
 ## Project Structure
 
 ```
+
 [project-name]/
-├── app/                    # Next.js App Router pages
-│   ├── (auth)/            # Auth-protected routes
-│   ├── api/               # API route handlers
-│   ├── layout.tsx         # Root layout
-│   └── page.tsx           # Homepage
-├── components/            # React components
-│   ├── ui/               # Reusable UI components
-│   └── features/         # Feature-specific components
-├── lib/                   # Utility functions and configs
-│   ├── db.ts             # Database client
-│   ├── auth.ts           # Auth configuration
-│   └── utils.ts          # Helper functions
-├── prisma/               # Database schema and migrations
-│   ├── schema.prisma     # Prisma schema
-│   └── migrations/       # Migration files
-├── public/               # Static assets
-├── tests/                # Test files
-│   ├── unit/
-│   ├── integration/
-│   └── e2e/
-├── docs/                 # Documentation
-├── .env.example          # Environment template
-├── package.json          # Dependencies
-└── tsconfig.json         # TypeScript config
-```
+├── app/ # Next.js App Router pages
+│ ├── (auth)/ # Auth-protected routes
+│ ├── api/ # API route handlers
+│ ├── layout.tsx # Root layout
+│ └── page.tsx # Homepage
+├── components/ # React components
+│ ├── ui/ # Reusable UI components
+│ └── features/ # Feature-specific components
+├── lib/ # Utility functions and configs
+│ ├── db.ts # Database client
+│ ├── auth.ts # Auth configuration
+│ └── utils.ts # Helper functions
+├── prisma/ # Database schema and migrations
+│ ├── schema.prisma # Prisma schema
+│ └── migrations/ # Migration files
+├── public/ # Static assets
+├── tests/ # Test files
+│ ├── unit/
+│ ├── integration/
+│ └── e2e/
+├── docs/ # Documentation
+├── .env.example # Environment template
+├── package.json # Dependencies
+└── tsconfig.json # TypeScript config
+
+````
 
 ---
 
@@ -707,14 +747,16 @@ Structure for `docs/technical-docs.md`:
    git clone [repo-url]
    cd [project-name]
    npm install
-   ```
+````
 
 2. **Environment Configuration:**
+
    ```bash
    cp .env.example .env
    ```
 
    Edit `.env` with your values:
+
    ```env
    DATABASE_URL="postgresql://user:pass@host:5432/db"
    NEXTAUTH_SECRET="generate-with-openssl-rand-base64-32"
@@ -722,6 +764,7 @@ Structure for `docs/technical-docs.md`:
    ```
 
 3. **Database Setup:**
+
    ```bash
    # Run migrations
    npm run db:migrate
@@ -731,6 +774,7 @@ Structure for `docs/technical-docs.md`:
    ```
 
 4. **Start Development Server:**
+
    ```bash
    npm run dev
    ```
@@ -744,6 +788,7 @@ Structure for `docs/technical-docs.md`:
 ### Tables
 
 #### users
+
 ```prisma
 model User {
   id            String    @id @default(cuid())
@@ -761,11 +806,13 @@ model User {
 ```
 
 #### [Other Tables]
+
 [Document key tables and relationships]
 
 ### Migrations
 
 Run migrations:
+
 ```bash
 # Development
 npm run db:migrate
@@ -775,6 +822,7 @@ npm run db:migrate:prod
 ```
 
 Create new migration:
+
 ```bash
 npm run db:migrate:create
 ```
@@ -786,9 +834,11 @@ npm run db:migrate:create
 ### Authentication
 
 #### POST /api/auth/signin
+
 Sign in user
 
 **Request:**
+
 ```json
 {
   "email": "user@example.com",
@@ -797,6 +847,7 @@ Sign in user
 ```
 
 **Response:**
+
 ```json
 {
   "user": { "id": "...", "email": "..." },
@@ -809,9 +860,11 @@ Sign in user
 ### [Feature] Endpoints
 
 #### GET /api/[resource]
+
 [Description]
 
 #### POST /api/[resource]
+
 [Description]
 
 ---
@@ -852,14 +905,15 @@ npm run test:coverage
 ### Writing Tests
 
 **Unit Test Example:**
-```typescript
-import { describe, it, expect } from 'vitest';
-import { myFunction } from '@/lib/utils';
 
-describe('myFunction', () => {
-  it('should do something', () => {
-    const result = myFunction('input');
-    expect(result).toBe('expected');
+```typescript
+import { describe, it, expect } from "vitest";
+import { myFunction } from "@/lib/utils";
+
+describe("myFunction", () => {
+  it("should do something", () => {
+    const result = myFunction("input");
+    expect(result).toBe("expected");
   });
 });
 ```
@@ -871,6 +925,7 @@ describe('myFunction', () => {
 ### Environment Setup
 
 **Required Environment Variables:**
+
 - `DATABASE_URL` - Production database connection
 - `NEXTAUTH_SECRET` - Strong random secret
 - `NEXTAUTH_URL` - Production URL
@@ -886,6 +941,7 @@ describe('myFunction', () => {
    - Add production env vars in Vercel project settings
 
 3. **Deploy:**
+
    ```bash
    # Via Git push
    git push origin main
@@ -897,6 +953,7 @@ describe('myFunction', () => {
 ### Database Migrations
 
 Run migrations on production:
+
 ```bash
 # Using Prisma
 npx prisma migrate deploy
@@ -905,6 +962,7 @@ npx prisma migrate deploy
 ### Health Checks
 
 Verify deployment:
+
 ```bash
 # Health endpoint
 curl https://[your-domain]/api/health
@@ -962,17 +1020,20 @@ curl https://[your-domain]/api/health
 ### GitHub Actions
 
 **On Pull Request:**
+
 1. Lint code
 2. Run type checking
 3. Run unit tests
 4. Run integration tests
 
 **On Merge to Main:**
+
 1. All PR checks
 2. Build project
 3. Deploy to staging (if configured)
 
 **On Release Tag:**
+
 1. All checks
 2. Build production bundle
 3. Deploy to production
@@ -1038,6 +1099,7 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for development workflow and PR guidel
 ### Common Development Issues
 
 **Issue: Database connection failed**
+
 ```bash
 # Verify DATABASE_URL is correct
 echo $DATABASE_URL
@@ -1047,6 +1109,7 @@ npm run db:test
 ```
 
 **Issue: TypeScript errors after pulling**
+
 ```bash
 # Regenerate Prisma client
 npm run db:generate
@@ -1068,7 +1131,8 @@ npm run build
 ---
 
 **Maintained by [Team/Individual]** | **Version 1.0.0** | **Last Updated: [Date]**
-```
+
+````
 
 ---
 
@@ -1398,7 +1462,7 @@ Focus on user acquisition, gather feedback, and plan the next iteration based on
 **CPO AI Skill Version:** 2.0.0
 **Deployment:** Production
 **Status:** ✅ Complete
-```
+````
 
 ---
 

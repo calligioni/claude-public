@@ -308,11 +308,12 @@ ls -la master-project.json cpo-progress.md docs/user-guide.md 2>/dev/null
 
 1. Receive and acknowledge the product idea
 2. Ask 5-8 strategic discovery questions (target users, scope, tech constraints, success criteria)
-3. Synthesize product definition with vision, features, and non-goals
-4. Invoke Product Research Agent for competitor analysis and design inspiration
-5. Get user approval on product definition
+3. Synthesize as structured PRD (`prd-definition.md`) with 8 sections: Summary, Contacts, Background, Objective (incl. North Star Metric), Market Segments, Value Proposition, Solution, Release
+4. Define North Star Metric using Business Game classification (Attention/Transaction/Productivity) + 3-5 input metrics
+5. Invoke Product Research Agent for competitor analysis and design inspiration
+6. Get user approval on PRD
 
-**Output:** Product definition document with research findings
+**Output:** `prd-definition.md` (structured PRD with North Star Metric) + research findings
 
 **Detailed Steps:** [references/phase-details.md#phase-1](references/phase-details.md)
 
@@ -327,13 +328,13 @@ ls -la master-project.json cpo-progress.md docs/user-guide.md 2>/dev/null
 1. Invoke CTO Advisor Agent for tech stack recommendations and architecture
 2. Decompose product into epics (major feature areas)
 3. Break epics into stages (implementable chunks)
-4. Define user stories for each stage
-5. Generate `master-project.json` with complete plan
+4. Define user stories for each stage, validated against INVEST criteria (Independent, Negotiable, Valuable, Estimable, Small, Testable)
+5. Generate `master-project.json` with complete plan (includes `northStarMetric` from PRD)
 6. Initialize `cpo-progress.md` for tracking
 7. Calculate cost estimates for MVP and scale
 8. Present plan for user approval
 
-**Output:** Complete project plan with epics, stages, stories, and cost estimates
+**Output:** Complete project plan with epics, stages, INVEST-validated stories, and cost estimates
 
 **Detailed Steps:** [references/phase-details.md#phase-2](references/phase-details.md)
 
@@ -723,14 +724,15 @@ If implementation expands beyond plan:
 
 ## Key Files Reference
 
-| File                     | Purpose                 | Created             | Template                                |
-| ------------------------ | ----------------------- | ------------------- | --------------------------------------- |
-| `master-project.json`    | Complete project state  | Phase 2             | [templates.md](references/templates.md) |
-| `cpo-progress.md`        | Progress log            | Phase 2             | [templates.md](references/templates.md) |
-| `prd.json`               | Current stage stories   | Phase 3 (per stage) | [templates.md](references/templates.md) |
-| `progress.md`            | Stage-level progress    | Phase 3 (per stage) | autonomous-dev format                   |
-| `docs/user-guide.md`     | End-user documentation  | Phase 5             | [templates.md](references/templates.md) |
-| `docs/technical-docs.md` | Developer documentation | Phase 5             | [templates.md](references/templates.md) |
+| File                     | Purpose                 | Created             | Template                                        |
+| ------------------------ | ----------------------- | ------------------- | ----------------------------------------------- |
+| `prd-definition.md`      | Structured PRD with NSM | Phase 1             | [phase-details.md](references/phase-details.md) |
+| `master-project.json`    | Complete project state  | Phase 2             | [templates.md](references/templates.md)         |
+| `cpo-progress.md`        | Progress log            | Phase 2             | [templates.md](references/templates.md)         |
+| `prd.json`               | Current stage stories   | Phase 3 (per stage) | [templates.md](references/templates.md)         |
+| `progress.md`            | Stage-level progress    | Phase 3 (per stage) | autonomous-dev format                           |
+| `docs/user-guide.md`     | End-user documentation  | Phase 5             | [templates.md](references/templates.md)         |
+| `docs/technical-docs.md` | Developer documentation | Phase 5             | [templates.md](references/templates.md)         |
 
 ---
 

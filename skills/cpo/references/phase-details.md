@@ -409,6 +409,19 @@ For each stage, define user stories following autonomous-dev format:
 }
 ```
 
+**INVEST quality gate** — before adding any story to the plan, verify it passes all 6 criteria:
+
+| Criterion       | Check                                               | Fail Signal                     |
+| --------------- | --------------------------------------------------- | ------------------------------- |
+| **I**ndependent | Can be implemented in any order (no hidden deps)    | "We need to do X first"         |
+| **N**egotiable  | Description leaves room for implementation choices  | Prescribes exact UI/code        |
+| **V**aluable    | Delivers observable value to a user or the business | Only benefits developers        |
+| **E**stimable   | Team can roughly size the effort                    | "It depends on too many things" |
+| **S**mall       | Fits within a single stage (3-7 stories per stage)  | Takes more than a few hours     |
+| **T**estable    | Acceptance criteria are observable and automatable  | "Works correctly" (vague)       |
+
+Stories that fail INVEST should be split, rewritten, or merged before implementation. Use plain language a primary school graduate can understand — avoid jargon in descriptions and acceptance criteria.
+
 ### Step 2.4: Generate Master Project File
 
 Create complete `master-project.json` (see templates.md for full structure).
