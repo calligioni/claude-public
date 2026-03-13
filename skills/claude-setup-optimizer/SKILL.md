@@ -230,6 +230,52 @@ Check for newer settings:
 - [ ] Are installed plugins up-to-date?
 - [ ] Could any skills benefit from being distributed as plugins for team use?
 
+### Step 2b: Skill Execution History Analysis
+
+Check if `~/.claude-setup/memory/skill-executions.jsonl` exists. If it does, analyze it for drift signals:
+
+```bash
+# Summary: invocation counts, error rates per skill, last 30 days
+LOGFILE="$HOME/.claude-setup/memory/skill-executions.jsonl"
+if [ -f "$LOGFILE" ]; then
+  CUTOFF=$(date -v-30d +%Y-%m-%d 2>/dev/null || date -d '30 days ago' +%Y-%m-%d)
+  jq -r --arg cutoff "$CUTOFF" 'select(.date >= $cutoff)' "$LOGFILE" | \
+    jq -s 'group_by(.skill) | map({
+      skill: .[0].skill,
+      invocations: length,
+      errors: [.[] | select(.hadError)] | length,
+      errorRate: (([.[] | select(.hadError)] | length) / length * 100 | floor),
+      projects: [.[].project] | unique,
+      lastUsed: (sort_by(.timestamp) | last | .timestamp)
+    }) | sort_by(-.invocations)'
+fi
+```
+
+**Drift Detection Signals:**
+
+| Signal                  | Threshold                          | Action                                                     |
+| ----------------------- | ---------------------------------- | ---------------------------------------------------------- |
+| Error rate > 30%        | Last 30 days                       | Flag skill for SKILL.md review — likely stale instructions |
+| Zero invocations        | Last 60 days                       | Flag as potentially unused — consider archiving            |
+| Single-project usage    | All invocations from one project   | Check if skill should be project-specific                  |
+| High error + high usage | > 10 invocations with > 20% errors | **HIGH priority** — skill is actively used but degrading   |
+
+For each flagged skill, include in the recommendations:
+
+```markdown
+## [Priority] Skill Drift: {skill-name}
+
+**Signal:** {error rate / unused / single-project}
+**Data:** {N} invocations, {M}% error rate, last used {date}
+**Projects:** {list}
+
+**Recommended Action:**
+Review SKILL.md for stale instructions, outdated tool references, or missing error handling.
+Check if recent codebase changes broke assumptions in the skill.
+
+**Effort:** Low (review) / Medium (amend)
+```
+
 ### Step 3: Generate Recommendations
 
 Create a structured report with:
