@@ -53,6 +53,16 @@
             "command": "\"$HOME/.claude-setup/hooks/format-file.sh\""
           }
         ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.claude-setup/hooks/skill-execution-log.sh\"",
+            "timeout": 3000
+          }
+        ]
       }
     ],
     "PreToolUse": [
