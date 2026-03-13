@@ -13,6 +13,7 @@ color: #8B5CF6
 model: sonnet
 memory: project
 isolation: worktree
+skills: [verify, test-and-fix]
 ---
 
 # Database Agent

@@ -535,3 +535,4 @@ Both modes produce identical outputs. Agent Teams mode adds:
 4. **3-4 teammates max.** Above that, coordination degrades and costs explode.
 5. **Always include a fallback.** Agent Teams is experimental. Every skill that uses it must work without it.
 6. **Measure before committing.** No migration is final until token costs are measured on real tasks.
+7. **Leverage 1M context (Opus 4.6).** Max/Team plans now get 1M tokens by default. This relaxes context pressure for orchestrator skills — the cost calculus for teammate count and spawn prompt size shifts in favor of richer context.

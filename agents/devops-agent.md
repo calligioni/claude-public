@@ -13,6 +13,7 @@ color: #FBBF24
 model: sonnet
 memory: project
 isolation: worktree
+skills: [verify, test-and-fix]
 ---
 
 # DevOps/Infrastructure Agent

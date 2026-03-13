@@ -9,7 +9,7 @@ model: opus
 memory: project
 skills:
   - run-local
-  - cp
+  - cpr
 ---
 
 You are the **Project Orchestrator** - the master coordinator that takes a codebase from analysis to fully tested, working state.

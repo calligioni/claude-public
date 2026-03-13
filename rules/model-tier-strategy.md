@@ -109,6 +109,14 @@ Even without local models, apply the delegation mindset now:
 2. **Split reasoning from generation** — if a subagent needs to analyze AND format, consider two passes
 3. **Push formatting to Haiku** — any subagent whose final step is "format findings as markdown table" could delegate that step
 
+## Context Window Considerations
+
+As of v2.1.75, Opus 4.6 defaults to **1M context** for Max/Team/Enterprise. This changes the cost calculus:
+
+- Orchestrator skills (cto, ship, parallel-dev) can hold more codebase context without aggressive compaction
+- Spawn prompts can include richer pre-computed context (Section 3.5) without crowding the window
+- Subagents inheriting Opus also get 1M, reducing the need for aggressive scope-limiting in spawn prompts
+
 ## Rule of Thumb
 
 **If the subagent only reads files and reports results → haiku.**
