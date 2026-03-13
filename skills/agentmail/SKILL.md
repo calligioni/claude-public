@@ -299,7 +299,7 @@ $PYTHON "/Volumes/AI/Code/agentmail/agentmail_helper.py" org_info
 
 ## Resend CLI — Transactional Send Channel
 
-For **one-way transactional emails from verified business domains** (nuvini.ai, contably.ai), use the Resend CLI instead of AgentMail. AgentMail is for agent inboxes (receive, reply, thread); Resend is for professional outbound sends.
+For **one-way transactional emails from verified business domains** (contably.ai, xurman.com, agentwave.io), use the Resend CLI instead of AgentMail. AgentMail is for agent inboxes (receive, reply, thread); Resend is for professional outbound sends.
 
 ### When to Use Resend vs AgentMail
 
@@ -327,14 +327,14 @@ export RESEND_API_KEY="re_..."
 ```bash
 # Basic send
 resend emails send \
-  --from "onboarding@nuvini.ai" \
+  --from "onboarding@contably.ai" \
   --to "client@example.com" \
   --subject "Welcome" \
   --text "Plain text body"
 
 # HTML send
 resend emails send \
-  --from "Pierre <pierre@nuvini.ai>" \
+  --from "Pierre <pierre@xurman.com>" \
   --to "client@example.com" \
   --subject "Report Ready" \
   --html "<h1>Your report</h1><p>Details...</p>"
@@ -353,7 +353,7 @@ The Resend CLI auto-detects non-TTY environments and outputs JSON — perfect fo
 
 ```bash
 # Returns JSON: { "id": "msg_..." }
-resend emails send --from "bot@nuvini.ai" --to "user@example.com" --subject "Alert" --text "Body" 2>/dev/null
+resend emails send --from "bot@contably.ai" --to "user@example.com" --subject "Alert" --text "Body" 2>/dev/null
 ```
 
 ### Routing Logic
