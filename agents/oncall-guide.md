@@ -12,7 +12,7 @@ allowed-tools:
   - mcp__brave-search__brave_web_search
 color: "#EF4444"
 model: opus
-memory: local
+memory: project
 skills: [run-local, verify]
 ---
 

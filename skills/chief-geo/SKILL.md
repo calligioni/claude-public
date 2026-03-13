@@ -577,6 +577,7 @@ After all 3 specialists report back:
 
 6. **Write change log:**
    Append to `.claude/geo/manual-updates.md`:
+
    ```markdown
    ## {date}
 
@@ -876,6 +877,14 @@ Observations follow the standard format:
 - **PostgreSQL unavailable:** Skip monitoring data cross-reference, note in visibility report
 - **Production site down:** Log alert in report, still run knowledge base and doc updates
 - **Previous knowledge base missing:** Create from scratch (first run behavior)
+
+---
+
+## Troubleshooting
+
+### Stopping Scheduled Cron Jobs Mid-Session
+
+Set `CLAUDE_CODE_DISABLE_CRON=1` in your environment to immediately stop all scheduled cron jobs in the current session.
 
 ---
 
