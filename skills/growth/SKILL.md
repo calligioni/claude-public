@@ -18,6 +18,8 @@ allowed-tools:
   - mcp__firecrawl__*
   - mcp__chrome-devtools__*
   - mcp__playwright__*
+tool-annotations:
+  Bash: { destructiveHint: false, idempotentHint: true }  # browse CLI runs via Bash
   - AskUserQuestion
   - mcp__memory__*
 memory: user

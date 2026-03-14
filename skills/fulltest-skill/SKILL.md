@@ -17,12 +17,12 @@ allowed-tools:
   - Read
   - Write
   - Edit
-  - Bash
+  - Bash # Primary browser tool: `browse` CLI (~/.local/bin/browse) — zero MCP overhead
   - Glob
   - Grep
-  - mcp__chrome-devtools__*
-  - mcp__playwright__*
-  - mcp__browserless__*
+  - mcp__chrome-devtools__* # Fallback when browse binary unavailable
+  - mcp__playwright__* # Fallback
+  - mcp__browserless__* # Fallback (cloud)
   - mcp__context-mode__*
   - mcp__memory__*
 memory: user
@@ -181,37 +181,40 @@ If the site has chat/assistant/AI features (detected in Phase 1 via presence of 
 
 Report any finding as severity P0 with category `ai-prompt-integrity`.
 
-#### 2c. Visual Verification (NEW)
+#### 2c. Visual Verification (Primary: browse)
 
-Execute this JavaScript via `mcp__chrome-devtools__evaluate_script`:
+Use `browse` for visual inspection. It has zero MCP overhead and returns results instantly after warm-up:
+
+```bash
+# Navigate and inspect (cold start ~3s, subsequent calls ~100ms)
+browse goto "$PAGE_URL"
+browse snapshot -i          # Interactive element tree — check for visible styled content
+browse console              # Console errors — CSS 404s appear here
+browse network              # Network requests — look for 4xx/5xx on CSS/font/asset URLs
+```
+
+Check for unstyled pages by examining the snapshot output for signs of missing layout/styling, combined with CSS 404s in the network log. If the snapshot shows only raw unstyled HTML structure and the network log has `.css` files returning 404, this is a **CRITICAL** visual issue that should fail the test.
+
+For ambiguous cases where computed style inspection is required, fall back to Chrome DevTools:
 
 ```javascript
+// Fallback only: mcp__chrome-devtools__evaluate_script
 () => {
   const body = document.body;
   const computedStyle = window.getComputedStyle(body);
   const bgColor = computedStyle.backgroundColor;
   const fontFamily = computedStyle.fontFamily;
-
-  // Check for unstyled page (CSS not loaded)
   const defaultBgs = ["rgba(0, 0, 0, 0)", "rgb(255, 255, 255)", "transparent"];
   const defaultFonts = ["times new roman", "times", "serif"];
-
   const bgIsDefault = defaultBgs.some((d) =>
     bgColor.toLowerCase().includes(d.toLowerCase()),
   );
   const fontIsDefault = defaultFonts.some((d) =>
     fontFamily.toLowerCase().includes(d.toLowerCase()),
   );
-
-  // Count loaded CSS files
-  const cssLinks = document.querySelectorAll('link[rel="stylesheet"]');
-  const cssCount = cssLinks.length;
-
-  // Check for visible styled content
-  const hasStyledContent = !bgIsDefault || !fontIsDefault || cssCount > 0;
-
+  const cssCount = document.querySelectorAll('link[rel="stylesheet"]').length;
   return {
-    cssLoaded: hasStyledContent,
+    cssLoaded: !bgIsDefault || !fontIsDefault || cssCount > 0,
     backgroundColor: bgColor,
     fontFamily: fontFamily,
     cssFileCount: cssCount,
@@ -223,8 +226,6 @@ Execute this JavaScript via `mcp__chrome-devtools__evaluate_script`:
   };
 };
 ```
-
-If `isUnstyled` is true, this is a **CRITICAL** visual issue that should fail the test.
 
 ### Phase 3: Pattern Learning (NEW)
 
@@ -260,9 +261,17 @@ After testing each page, if there are failures:
 
 ### Phase 4: Screenshot on Failure (NEW)
 
-When visual issues are detected:
+When visual issues are detected, capture a screenshot for debugging. Use `browse` (primary) or Chrome DevTools MCP (fallback):
+
+```bash
+# Primary: browse (zero MCP overhead, annotated with element refs)
+browse screenshot /tmp/fulltest-failure-$(date +%s).png
+# Or annotated version with interactive element overlays:
+browse snapshot -a -o /tmp/fulltest-annotated-$(date +%s).png
+```
 
 ```
+# Fallback when browse unavailable:
 mcp__chrome-devtools__take_screenshot with filePath to save for debugging
 ```
 

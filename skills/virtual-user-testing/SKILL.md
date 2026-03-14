@@ -24,6 +24,7 @@ allowed-tools:
   - mcp__playwright__*
   - mcp__browserless__*
   - mcp__memory__*
+# browse CLI (~/.local/bin/browse) is the PRIMARY browser tool; mcp__chrome-devtools__* is fallback
 memory: user
 tool-annotations:
   Bash: { destructiveHint: true, idempotentHint: false }

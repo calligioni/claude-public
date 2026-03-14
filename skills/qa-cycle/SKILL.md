@@ -152,6 +152,75 @@ Everything else — you decide, you execute, you verify.
 
 ---
 
+## Browser Automation: browse CLI
+
+`browse` is the **primary** browser automation tool for all persona testers and verification agents in this skill.
+
+- **Binary:** `~/.local/bin/browse` (compiled headless Chromium CLI)
+- **Token cost:** Zero MCP overhead — plain stdout, ~100ms per call after cold start
+- **Savings:** Avoids 1500-2000 tokens per Chrome DevTools MCP call
+
+### Detection
+
+```bash
+if command -v browse >/dev/null 2>&1 || test -x ~/.local/bin/browse; then
+  BROWSER_MODE="browse"
+else
+  BROWSER_MODE="chrome-mcp"  # fallback
+fi
+```
+
+### Command Reference
+
+```bash
+browse goto <url>                        # Navigate
+browse snapshot -i                       # Interactive elements with @e refs
+browse snapshot -i -C                    # + non-ARIA clickable @c refs
+browse snapshot -D                       # Diff vs previous snapshot
+browse snapshot -a -o path.png           # Annotated screenshot with ref labels
+browse screenshot [path]                 # Plain screenshot
+browse text                              # Page text
+browse click @e3                         # Click element by ref
+browse fill @e4 "value"                  # Fill input by ref
+browse console                           # Console log ring buffer
+browse network                           # Network request ring buffer
+browse links                             # Extract all links
+browse forms                             # Extract all forms
+browse js "expr"                         # Evaluate JS expression
+browse cookies                           # Get cookies
+browse cookie-import-browser [browser]   # Import from Chrome/Arc/Brave/Edge
+browse perf                              # Performance metrics
+browse stop                              # Shutdown instance
+```
+
+### Isolation: Per-Agent Instances
+
+Each spawned persona or verification agent must set its own `BROWSE_STATE_FILE` to get an isolated Chromium instance — agents running in parallel must not share state:
+
+```bash
+export BROWSE_STATE_FILE="/tmp/browse-{persona-slug}-{session_id}.json"
+```
+
+### Authenticated Testing
+
+If test credentials are unavailable, agents can import cookies from the user's browser for authenticated sessions:
+
+```bash
+browse cookie-import-browser chrome   # or: arc, brave, edge
+```
+
+### Fallback
+
+If `browse` is not found, fall back to Chrome DevTools MCP:
+
+- `browse goto <url>` → `mcp__chrome-devtools__navigate_page`
+- `browse screenshot <path>` → `mcp__chrome-devtools__take_screenshot`
+- `browse js "expr"` → `mcp__chrome-devtools__evaluate_script`
+- `browse console` → `mcp__chrome-devtools__list_console_messages`
+- `browse network` → `mcp__chrome-devtools__list_network_requests`
+
+---
+
 ## Phase 0: Detect + Route
 
 ### 0a. Identify the Project
@@ -348,15 +417,35 @@ Agent({
 })
 ```
 
+Each persona agent spawn prompt must include:
+
+```
+Browser tool: use browse CLI (~/.local/bin/browse). Set:
+  export BROWSE_STATE_FILE="/tmp/browse-{slug}-{session_id}.json"
+before any browse command to get an isolated Chromium instance.
+
+Navigation:      browse goto <url>
+Screenshots:     browse screenshot /tmp/{slug}-{page}.png
+Element refs:    browse snapshot -i          (gets @e1, @e2, ... refs)
+Click/fill:      browse click @e3 / browse fill @e4 "value"
+JS evaluation:   browse js "document.title"
+Console errors:  browse console
+Network calls:   browse network
+Page text:       browse text
+
+If browse binary not found, fall back to mcp__chrome-devtools__* equivalents.
+```
+
 Each persona:
 
 1. Starts persona session in DB
-2. Tests every assigned feature via Chrome DevTools MCP
-3. Marks features as `approved` or `blocked` (with blocking issue IDs)
-4. Creates issues in DB (with duplicate check first)
-5. Broadcasts failures to team
-6. Verifies fixed bugs from queue
-7. Sends final report to orchestrator
+2. Sets `BROWSE_STATE_FILE` for isolated Chromium instance
+3. Tests every assigned feature using `browse` commands
+4. Marks features as `approved` or `blocked` (with blocking issue IDs)
+5. Creates issues in DB (with duplicate check first)
+6. Broadcasts failures to team
+7. Verifies fixed bugs from queue
+8. Sends final report to orchestrator
 
 ### 3d. Cross-Persona Detection
 
