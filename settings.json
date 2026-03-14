@@ -95,7 +95,7 @@
           },
           {
             "type": "prompt",
-            "prompt": "A teammate has gone idle. Check TaskList for unassigned tasks and assign work if available."
+            "prompt": "A teammate has gone idle. Check TaskList for unassigned tasks and assign work if available. If no tasks remain, shut down this teammate to save tokens."
           }
         ]
       }
@@ -160,6 +160,16 @@
           {
             "type": "command",
             "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Instructions loaded: ${INSTRUCTIONS_FILE}\" >> ~/.claude/logs/instructions.log"
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Compaction completed\" >> ~/.claude/logs/compaction.log"
           }
         ]
       }
