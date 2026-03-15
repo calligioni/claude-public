@@ -53,7 +53,7 @@ for f in "$MEMORY_DIR"/*.md; do
   [[ -z "$desc" ]] && continue
 
   # Check if we've already seen this description
-  existing=$(grep -F "	$desc" "$DEDUP_INDEX" 2>/dev/null | head -1 | cut -f1)
+  existing=$(grep -F "	$desc" "$DEDUP_INDEX" 2>/dev/null | head -1 | cut -f1 || true)
 
   if [[ -n "$existing" && -f "$existing" ]]; then
     # Keep the newer file (higher mtime), remove the older
@@ -97,7 +97,11 @@ log "Removed $DUPES duplicates"
 
     if [[ ${#type_files[@]} -gt 0 ]]; then
       # Capitalize the type name for the section header
-      section_name="$(echo "${memory_type:0:1}" | tr '[:lower:]' '[:upper:]')${memory_type:1}s"
+      if [[ "$memory_type" == "feedback" ]]; then
+        section_name="Feedback"
+      else
+        section_name="$(echo "${memory_type:0:1}" | tr '[:lower:]' '[:upper:]')${memory_type:1}s"
+      fi
       echo "## $section_name"
       echo ""
       for f in "${type_files[@]}"; do
