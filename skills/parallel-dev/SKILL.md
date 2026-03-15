@@ -624,6 +624,28 @@ async function buildProjectContext(projectRoot) {
 }
 ```
 
+**Memory search for past patterns:**
+
+Before dispatching agents, search memory for past decisions, patterns, and lessons related to the features being implemented. This surfaces relevant context from prior sessions (e.g., "last time we built auth, we hit X", "the team prefers Y pattern for API routes"):
+
+```bash
+# For each feature, search memory for relevant patterns
+for feature in "${features[@]}"; do
+  mem_results=$(~/.claude-setup/tools/mem-search "${feature.name} ${feature.type}" 2>/dev/null || true)
+  if [[ -n "$mem_results" ]]; then
+    context.memoryHits["${feature.id}"]="$mem_results"
+  fi
+done
+
+# Also search for project-wide patterns
+project_memories=$(~/.claude-setup/tools/mem-search "${context.package.name} architecture patterns" 2>/dev/null || true)
+if [[ -n "$project_memories" ]]; then
+  context.memoryHits["_project"]="$project_memories"
+fi
+```
+
+Include any relevant hits in the feature agent's spawn prompt so agents benefit from accumulated experience without burning tokens rediscovering known patterns or repeating past mistakes.
+
 **Embedding in spawn prompts:**
 
 The orchestrator formats the context as a `## Project Context` block and prepends it to every agent's prompt (both Agent Teams and Task mode):
@@ -646,9 +668,13 @@ The orchestrator formats the context as a `## Project Context` block and prepend
 
 **Recent Commits:**
 {recentCommits}
+
+**Relevant Past Patterns/Lessons (from memory):**
+{memoryHits[feature.id] || "No prior patterns found for this feature."}
+{memoryHits["_project"] ? "**Project-wide:** " + memoryHits["_project"] : ""}
 ```
 
-This block is generated once and reused for all agents. It costs ~200-500 tokens per agent prompt but saves 3-10 tool calls per agent that would otherwise be spent on `Glob`, `Read(package.json)`, `Bash(git log)`, etc.
+This block is generated once and reused for all agents (memory hits are per-feature where available). It costs ~200-500 tokens per agent prompt but saves 3-10 tool calls per agent that would otherwise be spent on `Glob`, `Read(package.json)`, `Bash(git log)`, etc.
 
 **When to skip:** If the project has no `package.json` (non-JS project), the orchestrator should adapt the pre-load list to the detected stack (e.g., `Cargo.toml` for Rust, `pyproject.toml` for Python, `go.mod` for Go).
 

@@ -59,6 +59,18 @@ Structured frameworks for optimizing SaaS conversion funnels, pricing, retention
 
 ---
 
+## Pre-Analysis: Memory Search
+
+Before starting any mode, search memory for prior CRO findings, A/B test results, or growth insights:
+
+```bash
+~/.claude-setup/tools/mem-search "growth OR cro OR conversion OR pricing"
+```
+
+Include relevant past findings in the analysis context to avoid re-deriving known insights.
+
+---
+
 ## Mode 1: Landing Page CRO
 
 **Goal:** Increase visitor → signup conversion rate.

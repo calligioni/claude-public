@@ -35,6 +35,9 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Recurring interval task       | `/loop` (built-in)      | Poll status, repeat a command on a schedule              |
 | Fetch API docs for a library  | `/get-api-docs`         | Before writing code that uses external APIs              |
 | Build with Claude API/SDK     | `/claude-api`           | Code imports anthropic SDK or user asks about Claude API |
+| Context recovery              | `/primer`               | After compaction, new session, or "where was I?"         |
+| Search memory                 | `mem-search "<query>"`  | Find past decisions, patterns, learnings (CLI tool)      |
+| Advisory board deliberation   | `/vibc`                 | Complex decision needing diverse perspectives            |
 
 ### QA & Testing
 

@@ -39,6 +39,7 @@ Walk through these steps with the user, pausing for input at each stage:
 
 ### 3. Decompose
 
+- **Search memory first:** Before breaking down the problem, search for prior first-principles analyses: `~/.claude-setup/tools/mem-search "<problem keywords>"`. If relevant prior analysis exists, use it as a starting point rather than decomposing from scratch.
 - Break the problem into independent subproblems
 - Identify which subproblems are already solved (existing code, libraries)
 - Identify which subproblems are novel and need design

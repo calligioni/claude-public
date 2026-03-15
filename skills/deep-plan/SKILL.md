@@ -114,6 +114,23 @@ Track commits made during implementation in the `commits` array for potential re
 
 Deeply read the relevant parts of the codebase. Understand all intricacies.
 
+> **Note:** Check mem-search for prior deep-plan artifacts, design decisions, and architectural patterns before starting fresh research.
+
+### 1.0 Search Memory for Prior Context
+
+Before exploring the codebase, search memory for related past plans and research:
+
+```bash
+~/.claude-setup/tools/mem-search "<feature/topic keywords from user's request>"
+```
+
+If relevant memories are found (prior deep-plan artifacts, design decisions, architectural patterns, past research), include them as **Prior Context** in the research.md output to avoid re-researching known territory. Specifically look for:
+
+- Previous `deep-plan` sessions on the same or related features
+- `design-decision:` and `architecture:` entities
+- `pattern:` entities relevant to the feature area
+- `tech-insight:` entries about the tech stack involved
+
 ### 1.1 Identify Scope
 
 Based on the user's description, determine which files and directories to read:
@@ -141,6 +158,10 @@ Write findings to `research.md` in the project root:
 
 **Date:** [date]
 **Scope:** [what was analyzed]
+
+## Prior Context (from memory)
+
+[Any relevant findings from mem-search: prior plans, design decisions, architectural patterns. Write "No prior context found." if mem-search returned nothing relevant.]
 
 ## Current Architecture
 

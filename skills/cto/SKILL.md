@@ -225,6 +225,23 @@ Repository patterns inform:
 - Previous architectural decisions
 - Code organization
 
+**Search memory for past findings (mem-search):**
+
+Before spawning analysts, query persistent memory for relevant prior knowledge so analysts don't re-discover known issues:
+
+```bash
+# Architecture decisions from past reviews
+~/.claude-setup/tools/mem-search "architecture decisions"
+
+# Known security vulnerabilities and patterns
+~/.claude-setup/tools/mem-search "security vulnerabilities"
+
+# Project-specific findings (if project name is known)
+~/.claude-setup/tools/mem-search "<project name>"
+```
+
+Include any relevant results (architecture decisions, known vulnerabilities, past recommendations) in the context passed to analyst subagents. This avoids redundant discovery and lets analysts focus on new or changed areas.
+
 ### Directive Language
 
 When prompting subagents or analyzing code, use thorough directive language:
@@ -935,6 +952,24 @@ When reviewing Next.js App Router code, check:
 **Decision:** [What is the proposed solution?]
 **Consequences:** [What are the trade-offs?]
 ```
+
+### Step 4b: Cross-Reference Findings with Memory
+
+After generating findings, check memory for known patterns to enrich the report with historical context:
+
+```bash
+# Check for known common bugs that match current findings
+~/.claude-setup/tools/mem-search "common-bug"
+
+# Check for tech insights relevant to the stack/issues found
+~/.claude-setup/tools/mem-search "tech-insight"
+```
+
+If any current findings match known patterns from memory:
+
+- Note them as **recurring issues** in the report (e.g., "This N+1 query pattern was also found in [previous project] on [date]")
+- Elevate their priority — recurring patterns indicate systemic habits, not one-off mistakes
+- Include the memory entity reference so the user can trace the history
 
 ### Step 5: Present and Discuss
 

@@ -98,6 +98,22 @@ For each candidate, calculate a quick relevance score using the criteria from me
 
 ## Phase 4: Save to Memory MCP
 
+### Deduplicate via mem-search
+
+Before creating any new entity, check for existing similar memories using FTS5 search:
+
+```bash
+~/.claude-setup/tools/mem-search "<entity-type> <key-learning-keywords>"
+```
+
+- If a result comes back with **score >= 5.0** and covers the same insight, **do not create a new entity**. Instead, add observations to the existing memory via `mcp__memory__add_observations` (e.g., "Applied in: {project} - {date} - HELPFUL", updated use count).
+- If a result comes back with **score >= 3.0** but is only partially overlapping, create the new entity and add a `supersedes` or `related_to` relation to the existing one.
+- If no relevant results, proceed with creation as normal.
+
+This prevents the memory graph from accumulating near-duplicate entries across sessions.
+
+### Create new entities
+
 For each entity that passes the filter:
 
 ```javascript
@@ -154,6 +170,16 @@ await mcp__memory__add_observations({
   ],
 });
 ```
+
+### Reindex search index
+
+After all memory writes (creates, updates, new observations) are complete, rebuild the FTS5 index so subsequent searches reflect the new entries:
+
+```bash
+~/.claude-setup/tools/mem-search --reindex
+```
+
+This is a fast operation (~1s) and ensures `/meditate`, `/consolidate`, and any other skill using `mem-search` will find the freshly written memories.
 
 ## Phase 5: Report
 

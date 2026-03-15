@@ -76,6 +76,16 @@ qmd query "<query>" -c rules --json -n 3
 qmd query $'lex: security audit OWASP\nvec: how to review code for vulnerabilities' --json -n 5
 ```
 
+**Fallback: mem-search for low-confidence or zero results:**
+
+When QMD's hybrid/vector search returns no results or low-confidence matches (scores below ~0.3), fall back to FTS5 keyword search over auto-memory files:
+
+```bash
+~/.claude-setup/tools/mem-search "<query>"
+```
+
+This catches cases where the query uses exact terms (entity names, tool names, error strings) that vector search misses. Use it as a complementary second pass, not a replacement for QMD.
+
 ### Step 3: Present Results
 
 For **user-direct** invocation, format results as:
@@ -134,3 +144,4 @@ qmd embed   # Refresh embeddings
 - Use `--intent` parameter for disambiguation when the query is ambiguous
 - Use `-c <collection>` to scope search to specific collections
 - Use `--full` flag to get full document content instead of snippets
+- If QMD returns zero or low-confidence results, try `~/.claude-setup/tools/mem-search "<query>"` — FTS5 keyword search that catches exact entity names and terms vector search misses

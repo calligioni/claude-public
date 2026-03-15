@@ -45,6 +45,19 @@ During consolidation, source types enable targeted pruning:
 - `failure` sources are retained longer (180 days) — mistakes are expensive to relearn
 - `user-feedback` sources never auto-decay — explicit user preferences are stable
 
+## Dedup Before Write
+
+Before creating any new memory file, check for duplicates using `mem-search`:
+
+```bash
+~/.claude-setup/tools/mem-search "<key terms from the memory>"
+```
+
+- If a high-relevance match exists → UPDATE the existing file instead of creating a new one
+- If partial match (related but different) → consider merging into the existing file
+- If no match → create new file as normal
+- After writing → run `~/.claude-setup/tools/mem-search --reindex` to update the search index
+
 ## Save vs Skip
 
 **Save when:** high generality, learned from failure, user explicitly shared, expensive to regenerate, high severity.

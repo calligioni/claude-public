@@ -100,9 +100,18 @@ When this skill activates:
 | `memory health` asked    | Generate health report only        |
 | Automatic (post-project) | Run if 10+ new memories since last |
 
-**First Action:** Load current state:
+**First Action:** Run mechanical consolidation, then load current state:
 
 ```bash
+# Step 0: Run mechanical consolidation first (prune stale >90d, deduplicate, rebuild MEMORY.md index)
+# This handles the grunt work before the LLM does semantic analysis.
+# NOTE: This runs automatically every night at 23:00 via launchd
+# (com.claude-setup.mem-consolidate), so this skill focuses on the
+# SEMANTIC work that needs LLM judgment: merging conceptually similar
+# memories, promoting patterns, and scoring relevance.
+~/.claude-setup/tools/mem-consolidate
+
+# Then load current state
 cat $HOME/.claude-setup/memory/core-memory.json
 ls $HOME/.claude-setup/memory/archive/ 2>/dev/null | wc -l
 ```
@@ -466,6 +475,9 @@ async function mergeMemories(memory1, memory2) {
     ],
   });
 
+  // Keep search index current after writes/deletes
+  await Bash("~/.claude-setup/tools/mem-search --reindex");
+
   return { merged: mergedName, from: [memory1.name, memory2.name] };
 }
 ```
@@ -622,6 +634,9 @@ async function generateCrossMemoryInsights(memories, lastConsolidationDate) {
     await mcp__memory__create_entities({ entities: allInsights });
   }
 
+  // Keep search index current after writes
+  await Bash("~/.claude-setup/tools/mem-search --reindex");
+
   return {
     insights: allInsights,
     relations: allRelations,
@@ -735,6 +750,9 @@ async function forgetMemories(memories) {
   for (const name of names) {
     await mcp__memory__delete_entities({ entityNames: [name] });
   }
+
+  // Keep search index current after deletes
+  await Bash("~/.claude-setup/tools/mem-search --reindex");
 
   return {
     forgotten: names.length,

@@ -296,6 +296,31 @@ TaskCreate({ subject: "Run QA discovery cycle", ... })
 TaskCreate({ subject: "Generate /qa-{project} skill", ... })
 ```
 
+### 1pre. Search Memory for Past QA Patterns
+
+Before spawning explore agents, query the local memory index for historical bugs and QA patterns relevant to this project. This informs persona design and gives testers a head start on known problem areas.
+
+```bash
+# Search for project-specific QA history
+~/.claude-setup/tools/mem-search "${PROJECT_NAME} QA"
+
+# Search for common bugs across all projects
+~/.claude-setup/tools/mem-search "common-bug"
+```
+
+If results are returned, extract:
+
+- **Known regression areas** — features or routes that broke before
+- **Common bug patterns** — error categories that recur across projects (e.g., auth bypass, missing RLS, broken pagination)
+- **Past persona insights** — which personas found the most bugs, which workflows were most fragile
+
+Include these findings in:
+
+1. The persona spawn prompts (Phase 3c) as "historical hotspots — test these first"
+2. The cross-persona detection watchlist (Phase 3d) as known regression signals
+
+If no results are returned, proceed normally — this is a first-time project.
+
 ### 1a. Tech Stack + Routes (Parallel)
 
 Spawn two explore agents simultaneously:

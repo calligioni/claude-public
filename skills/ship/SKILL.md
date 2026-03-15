@@ -381,19 +381,28 @@ Runs automatically on first invocation. Detects project type and stores config i
 
 ### Process
 
-1. **Read context:** If a sprint plan or feature description was provided, read it thoroughly. Also read:
+1. **Search memory for prior decisions:** Before reading the codebase, search for relevant prior decisions, patterns, and lessons learned about this feature area:
+
+   ```bash
+   ~/.claude-setup/tools/mem-search "<feature keywords from user's request>"
+   ```
+
+   If results are found, carry forward any relevant design decisions, architecture patterns, past mistakes, or user preferences into the CPO spec context below.
+
+2. **Read context:** If a sprint plan or feature description was provided, read it thoroughly. Also read:
    - CLAUDE.md, package.json, existing feature files
    - Recent git history for context
    - Any existing .claude/ship/ artifacts
+   - Memory search results from step 1 (prior decisions, patterns, lessons)
 
-2. **Analyze as CPO:**
+3. **Analyze as CPO:**
    - Who is the user? What problem does this solve?
    - What's the competitive landscape?
    - What's the MVP scope vs nice-to-have?
    - What are the success metrics?
    - What are the risks?
 
-3. **Write product-spec.md:**
+4. **Write product-spec.md:**
 
 ```markdown
 # Product Spec: {Feature Name}
@@ -436,7 +445,7 @@ Runs automatically on first invocation. Detects project type and stores config i
 | ---- | ------ | ---------- |
 ```
 
-4. **Update state.json** → phase complete
+5. **Update state.json** → phase complete
 
 ### Skip Condition
 

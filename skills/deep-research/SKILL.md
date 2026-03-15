@@ -86,6 +86,9 @@ Output a research plan before proceeding:
 Before launching web research, query QMD for relevant existing knowledge. This surfaces past research findings, tech insights, patterns, and architectural decisions — avoiding redundant investigation.
 
 ```
+# Search mem-search for prior research on this topic
+~/.claude-setup/tools/mem-search "<research question keywords>"
+
 # Search across all local collections for the research topic
 qmd query "<core question keywords>" --json -n 5
 
@@ -95,6 +98,7 @@ mcp__memory__search_nodes({ query: "<topic>" })
 
 **What to extract from local context:**
 
+- Prior research from mem-search — if relevant results are found, note: "Prior memory context found — building on existing research rather than starting from scratch"
 - Previous research findings on the same or related topics (`research-finding:*` entities)
 - Tech insights or patterns that inform the investigation (`tech-insight:*`, `pattern:*`)
 - Design decisions that provide context (`design-decision:*`)
@@ -102,10 +106,11 @@ mcp__memory__search_nodes({ query: "<topic>" })
 
 **How to use local context:**
 
-1. If QMD returns high-confidence matches (score >= 0.7), summarize them in the Research Plan as "Prior Knowledge"
-2. Skip sub-questions already answered by prior research (with citation to the local source)
-3. Use prior findings as hypotheses to validate/update — not as settled conclusions (they may be outdated)
-4. If local context contradicts web findings, flag the discrepancy and investigate which is current
+1. Run mem-search first — if it returns relevant prior research, include it as a starting point in the Research Plan under "Prior Knowledge" to avoid re-researching known territory
+2. If QMD returns high-confidence matches (score >= 0.7), summarize them in the Research Plan as "Prior Knowledge"
+3. Skip sub-questions already answered by prior research (with citation to the local source)
+4. Use prior findings as hypotheses to validate/update — not as settled conclusions (they may be outdated)
+5. If local context contradicts web findings, flag the discrepancy and investigate which is current
 
 **Skip this phase if:** the topic is entirely new with no possible local matches (e.g., researching a brand-new technology released this week).
 

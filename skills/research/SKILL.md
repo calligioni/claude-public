@@ -218,6 +218,15 @@ Use `AskUserQuestion` with recommendations as options. Each option label MUST in
 
 **Save to memory only when max relevance score >= 5:**
 
+First, dedup check — search for existing memories on the same topic:
+
+```bash
+~/.claude-setup/tools/mem-search "<topic keywords>"
+```
+
+- If a **high-relevance match** is found (same URL, tool, or concept), **update the existing memory file** with new observations instead of creating a duplicate entity.
+- If **no match**, proceed with creating a new memory:
+
 ```javascript
 mcp__memory__create_entities({
   entities: [
@@ -236,10 +245,16 @@ mcp__memory__create_entities({
 });
 ```
 
+After writing any new or updated memory, reindex:
+
+```bash
+~/.claude-setup/tools/mem-search --reindex
+```
+
 ## Edge Cases
 
 - **URL unreachable**: Try WebSearch for cached/discussed versions
 - **Paywalled**: Extract what's available, supplement with WebSearch
 - **Irrelevant content**: Report "No actionable recommendations" and offer to save as general reference
-- **Already processed**: Check memory for existing `research-finding:` entities with same URL first
+- **Already processed**: Run `~/.claude-setup/tools/mem-search "<url or topic>"` to check for existing `research-finding:` entities with same URL first
 - **Image unreadable**: Report what's visible, ask user for context
