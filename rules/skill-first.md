@@ -34,6 +34,7 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Reproducible demo document    | `/demo`                 | Executable narrative with captured output                |
 | Recurring interval task       | `/loop` (built-in)      | Poll status, repeat a command on a schedule              |
 | Fetch API docs for a library  | `/get-api-docs`         | Before writing code that uses external APIs              |
+| Split large docs into tree    | `/skill-tree`           | API docs or references too large for subagent context    |
 | Build with Claude API/SDK     | `/claude-api`           | Code imports anthropic SDK or user asks about Claude API |
 | Context recovery              | `/primer`               | After compaction, new session, or "where was I?"         |
 | Search memory                 | `mem-search "<query>"`  | Find past decisions, patterns, learnings (CLI tool)      |

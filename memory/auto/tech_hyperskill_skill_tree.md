@@ -21,7 +21,7 @@ This is directly applicable to `/get-api-docs`, `/cto` swarm analysts, and `/dee
 
 ## Recommendations Applied
 
-1. **Skill tree navigation** (Score 8/10): Add `.claude/commands/skill-tree.md` to split deep-knowledge skills into navigable hierarchies. Target: `/get-api-docs`, `/cto`, `/deep-research`.
+1. **Skill tree navigation** (Score 8/10): APPLIED — Created `/skill-tree` skill at `~/.claude-setup/skills/skill-tree/SKILL.md`. Added to routing table in `skill-first.md`.
 2. **Auto-generate SKILL.md from live docs** (Score 7/10): Use HyperSkill pipeline to bootstrap skill files for new libraries instead of writing by hand. Enhances `/get-api-docs`.
 3. **Hyperbrowser SDK as scraping fallback** (Score 5/10): Could slot into `/research` fallback chain between Scrapling and WebFetch.
 
@@ -29,5 +29,5 @@ This is directly applicable to `/get-api-docs`, `/cto` swarm analysts, and `/dee
 
 - Discovered: 2026-03-16
 - Source: research — https://x.com/hyperbrowser/status/2033608785953267759
-- Applied in: not yet applied - 2026-03-16
-- Use count: 0
+- Applied in: claude-setup - 2026-03-16 - HELPFUL
+- Use count: 1
