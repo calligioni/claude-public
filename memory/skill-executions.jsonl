@@ -11168,3 +11168,13 @@
   "cwd": "/Users/ps/code/openclaw-vps",
   "hadError": false
 }
+{
+  "timestamp": "2026-03-17T16:40:54Z",
+  "date": "2026-03-17",
+  "skill": "deep-plan",
+  "args": "Migrate Contably CI/CD from GitHub Actions to OCI DevOps. Current state: GHA workflows at .github/workflows/ handle CI (typecheck, tests, lint, security), Docker image builds (API, Admin, Portal), and K8s deployment to OKE. Target: OCI DevOps build pipelines + deployment pipelines, using OCIR for images and OKE for deployment. The OCI tenancy is in sa-saopaulo-1, cluster is contably-oke-staging (Enhanced Cluster), images go to sa-saopaulo-1.ocir.io/gr5ovmlswwos/. Current GHA deploy workflow is at .github/workflows/oci-deploy.yaml. K8s manifests at infrastructure/kubernetes/overlays/oci/. Three images: contably-api (Python), contably-admin (React/Vite/nginx), contably-portal (Next.js).",
+  "sessionId": "1212e42b-50aa-4e2c-b3c0-d7c6b9a10d9a",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
