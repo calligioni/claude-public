@@ -130,11 +130,11 @@ TOKEN=$(curl -s "$API_URL/api/v1/auth/login" \
 | Content         | `GET /api/v1/brands/:id/content`                                                               |
 | Competitors     | `GET /api/v1/brands/:id/competitors`                                                           |
 | Authority       | `GET /api/v1/brands/:id/authority`                                                             |
-| Competitive     | `GET /api/v1/competitive/share-of-voice`                                                       |
+| Competitive     | `GET /api/v1/brands/:id/competitive/share-of-voice`                                            |
 | Intelligence    | `GET /api/v1/brands/:id/topics`, `GET /api/v1/brands/:id/gaps`                                 |
 | Analytics       | `GET /api/v1/analytics/:id/overview`, `/trends`, `/attribution`, `/predictions`, `/benchmarks` |
 | Recommendations | `GET /api/v1/brands/:id/recommendations`                                                       |
-| Readiness       | `GET /api/v1/brands/:id/readiness`                                                             |
+| Readiness       | `GET /api/v1/brands/:id/readiness/latest`                                                      |
 | Site Audit      | `GET /api/v1/brands/:id/site-audits`                                                           |
 | Backlog         | `GET /api/v1/brands/:id/backlog`                                                               |
 | Visibility      | `GET /api/v1/visibility/objectives`                                                            |
