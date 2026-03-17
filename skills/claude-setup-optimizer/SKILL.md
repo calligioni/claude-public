@@ -171,12 +171,13 @@ For each skill, check:
 - [ ] Uses latest skill format (SKILL.md with YAML frontmatter)
 - [ ] Takes advantage of parallel tool calls where applicable
 - [ ] Uses `Agent` tool (not deprecated `Task`) for spawning subagents
+- [ ] No skill uses `Agent(..., resume=...)` — use `SendMessage({to: agentId})` to resume agents (v2.1.77)
 - [ ] Uses appropriate model tier selection (haiku/sonnet/opus per model-tier-strategy)
 - [ ] Has proper tool-annotations in frontmatter (destructiveHint, readOnlyHint, etc.)
 - [ ] Follows current best practices for triggers/descriptions
 - [ ] Uses YAML-style lists in `allowed-tools` (cleaner than inline arrays)
-- [ ] Leverages `${CLAUDE_SKILL_DIR}` for self-referencing paths where useful
-- [ ] Leverages `${CLAUDE_SESSION_ID}` where session tracking is needed
+- [ ] Leverages `${CLAUDE_SKILL_DIR}` for self-referencing paths where useful (resolved at runtime to the skill's absolute directory path)
+- [ ] Leverages `${CLAUDE_SESSION_ID}` where session tracking is needed (resolved at runtime to the current session UUID)
 - [ ] Uses `context: fork` where appropriate (runs in sub-agent, protects main context)
 - [ ] Uses `agent` field to specify agent type for execution where applicable
 - [ ] Has `hooks` in frontmatter for skill-scoped lifecycle events where needed
@@ -206,6 +207,8 @@ Check for adoption of newer hook events:
 - [ ] `WorktreeCreate` / `WorktreeRemove` — custom VCS setup/teardown for worktree isolation
 - [ ] `TeammateIdle` / `TaskCompleted` — multi-agent workflow coordination
 - [ ] `SessionStart` / `SessionEnd` — session lifecycle
+- [ ] `PostCompact` — fires after context compaction completes; useful for re-injecting critical state in long-running skills (v2.1.76)
+- [ ] `Elicitation` / `ElicitationResult` — intercept and override MCP server structured input requests; useful for browserless, firecrawl, and other MCP-heavy skills (v2.1.76)
 - [ ] HTTP hooks (`type: http`) — POST to webhook URLs instead of shell commands
 - [ ] Prompt-based stop hooks — model-evaluated conditions for stopping
 
@@ -223,6 +226,9 @@ Check for newer settings:
 - [ ] `includeGitInstructions` — remove built-in git instructions from system prompt
 - [ ] `CLAUDE_CODE_DISABLE_CRON` — disable scheduled cron jobs
 - [ ] `CLAUDE_CODE_FILE_READ_MAX_OUTPUT_TOKENS` — override file read token limit
+- [ ] `worktree.sparsePaths` — configure sparse checkout for `claude --worktree` in large monorepos (v2.1.76)
+- [ ] `allowRead` — sandbox setting to allow read access to specific paths (v2.1.77)
+- [ ] Opus 4.6 now defaults to 64k output tokens (128k upper bound) — skills spawning Opus subagents for long-form generation benefit without extra config (v2.1.77)
 
 **Analysis Checklist — Plugins:**
 
@@ -394,6 +400,7 @@ Agent(subagent_type="general-purpose", model="sonnet", description="Update confi
 - Use `run_in_background=true` to launch them concurrently
 - Wait for all agents to complete, then verify results
 - If a change depends on another change, put them in the same agent or run sequentially
+- **Breaking change (v2.1.77):** The Agent tool no longer accepts a `resume` parameter. To continue a previously spawned agent, use `SendMessage({to: agentId})` instead. Update any skill instructions that reference `Agent(..., resume=...)`
 
 #### 5d. Verify all changes
 
