@@ -11258,3 +11258,13 @@
   "cwd": "/Volumes/AI/Code/Sourcerankai",
   "hadError": false
 }
+{
+  "timestamp": "2026-03-17T23:00:13Z",
+  "date": "2026-03-17",
+  "skill": "deep-research",
+  "args": "OCI DevOps build pipeline \"Failed to clone build source\" error. The connection validates successfully (PASS), the GitHub classic PAT works for git clone locally, the mirrored repository is synced, but the build runner fails with \"Failed to clone build source: contably with git exit code: {}\". Dynamic group uses resource.type = 'devopsbuildpipeline' with compartment matching. Policy has \"Allow dynamic-group ContablyDevOps to manage devops-family in tenancy\" and \"read secret-family in tenancy\". The build sometimes gets to IN_PROGRESS (meaning clone succeeded) but then fails with clone error on retry. Region is sa-saopaulo-1. Build source type is DEVOPS_CODE_REPOSITORY (mirrored). The user is in the Default identity domain. What is the exact fix?",
+  "sessionId": "d9aa91b6-14ea-4f03-88a6-7213cb0e3da2",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
