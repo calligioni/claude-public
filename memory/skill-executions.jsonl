@@ -11338,3 +11338,13 @@
   "cwd": "/Volumes/AI/Code/openclaw-vps",
   "hadError": false
 }
+{
+  "timestamp": "2026-03-18T16:26:08Z",
+  "date": "2026-03-18",
+  "skill": "codebase-cleanup",
+  "args": "Full cleanup of /Volumes/AI/Code/contably/infrastructure/ directory. Focus on:\n\n1. Legacy/obsolete files from the OCI migration (old scripts, docs, templates that reference the wrong cluster, old server, DigitalOcean, etc.)\n2. Files that reference the decommissioned prod cluster OCID (ocid1.cluster.oc1.sa-saopaulo-1.aaaaaaaak6kfvaibonj2axticenu2qhhv7ztvk7rhfo3v2yklc3xnftms6ua)\n3. Files referencing the old prod LB IP (137.131.234.85) or wrong VCN\n4. Duplicate/redundant Terraform configs (PostgreSQL references when MySQL is used)\n5. Unused scripts (fix-oci-pending-items.sh, complete-oci-setup.sh, etc.)\n6. Stale documentation (EXECUTION_SUMMARY.md, OCI_SETUP_IMPLEMENTATION.md)\n7. .claude/agent-memory/ directory left by the devops agent\n8. Any hardcoded credentials, passwords, or sensitive values in committed files\n9. Dead Terraform resources in state that no longer exist\n10. Kubernetes manifests referencing wrong images or configs\n\nAlso check the apps/ directory for any .env files that shouldn't be committed, or references to the old infrastructure.",
+  "sessionId": "d9aa91b6-14ea-4f03-88a6-7213cb0e3da2",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
