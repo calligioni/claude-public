@@ -201,24 +201,9 @@ Score relevance 0-10 against three targets:
 
 Use `AskUserQuestion` with recommendations as options. Each option label MUST include the score (e.g., "8/10 — Update /cto with new pattern"). Sort options by score descending. Include "Just save to memory" and "Skip".
 
-#### 2c. Implement Approved Changes
+#### 2c. Do NOT Auto-Install
 
-**Improving a skill:**
-
-1. Read the full SKILL.md
-2. Make minimal, targeted changes (add tools, update workflow)
-3. Don't rewrite the skill
-
-**Creating a new skill:**
-
-1. Create `$ICLOUD_SETUP/skills/<name>/SKILL.md`
-2. Follow existing skill patterns (frontmatter + workflow)
-3. Use sonnet model unless complex reasoning needed
-
-**Benefiting a project:**
-
-1. Save as memory entity: `research-finding:<project>-<topic>`
-2. Optionally create a GitHub issue
+Never automatically implement changes (skill edits, new skill creation, project modifications). Only present the recommendations and let the user decide what to do next. If the user explicitly asks you to implement a recommendation, then proceed.
 
 **Save to memory only when max relevance score >= 5:**
 
