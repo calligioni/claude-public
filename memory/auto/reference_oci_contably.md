@@ -32,6 +32,19 @@ Cloud Shell setup script at: `/Volumes/AI/Code/contably/.local/cloud-shell-setup
 - Changed `--deploy-environment-id` → `--environment-id` (OCI CLI version difference)
 - Changed `oci vault secret update-secret-content` → `oci vault secret update-base64`
 
+### OCI DevOps Pipeline Learnings
+
+- Build source `repository_url` must point to OCI internal mirror URL (not GitHub) when `connection_type=DEVOPS_CODE_REPOSITORY`
+- SHELL deploy stages require `container_config` block with `CONTAINER_INSTANCE_CONFIG` shape and network
+- Deploy specs must use `component: command` (not `deployment`)
+- Deploy specs must use single-step format — multi-step with `${VAR}` in env causes failures
+- Set `argument_substitution_mode = "NONE"` on COMMAND_SPEC artifacts to prevent OCI treating `$VAR` as pipeline params
+- SHELL stages have NO repo checkout — use `kubectl set image` instead of `kustomize`
+- SHELL stages need explicit `oci ce cluster create-kubeconfig --auth resource_principal`
+- Dynamic group needs `computecontainerinstance` type for SHELL stage containers
+- Force mirror sync: `oci devops repository mirror --repository-id <id>`
+- OAuth tokens (`gho_`) don't work for OCI DevOps git clone — need classic PAT (`ghp_`)
+
 ### ESO (External Secrets Operator) Learnings
 
 - Use `external-secrets.io/v1` API version (NOT `v1beta1`)
