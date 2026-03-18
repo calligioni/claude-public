@@ -92,16 +92,18 @@ Within the current Claude API ecosystem, this is already partially implemented v
 
 With [OpenClaw-RL](https://github.com/Gen-Verse/OpenClaw-RL) (Princeton, 2026), Tier 0 is now concrete. OpenClaw-RL is a fully async RL framework that turns conversations into training signals — no manual labeling. Every reply, tool output, and environment state change becomes a reward signal. A personal agent improved from score 0.17 → 0.81 after 36 conversations.
 
-**Architecture:** Four async loops — agent serving, rollout collection, PRM/judge evaluation, policy training (PPO/GRPO). Models deploy as OpenAI-compatible APIs. Supports local GPU (Qwen 3.5-4B/8B via LoRA) and serverless cloud (Tinker).
+**Architecture:** Four async loops — agent serving, rollout collection, PRM/judge evaluation, policy training (PPO/GRPO). Models deploy as OpenAI-compatible APIs. Supports local GPU via LoRA and serverless cloud (Tinker).
 
-| Tier       | Model                            | Cost   | Use For                                                                              |
-| ---------- | -------------------------------- | ------ | ------------------------------------------------------------------------------------ |
-| **Tier 0** | Local (Qwen 3.5-8B, OpenClaw-RL) | Free   | Pure text generation, template expansion, formatting — continuously improving via RL |
-| **Tier 1** | Haiku                            | Low    | Deterministic execution with tool use                                                |
-| **Tier 2** | Sonnet                           | Medium | Nuanced judgment, code review, implementation                                        |
-| **Tier 3** | Opus                             | High   | Architecture, security, complex reasoning                                            |
+**Reference model: Nvidia Nemotron 3 Super** — 120B MoE (12B active params), 1M native context, DeepSeek-R1-style chain-of-thought, native tool-call support, 85.6% on PinchBench (OpenClaw agentic benchmark). Freely available via Ollama (`ollama pull nemotron-3-super`). NVIDIA and Ollama co-announced it as the reference deployment target for OpenClaw (`ollama launch openclaw --model nemotron-3-super:cloud`). Native tool-call support means Tier 0 can now handle light agentic tasks, not just pure text generation.
 
-**Deployment path:** Qwen 3.5-4B (edge) or Qwen 3.5-8B (quality) + OpenClaw-RL for continuous improvement + Ollama/LM Studio for local serving. Still requires Ollama integration in Claude Code subagent spawning for full automation. MLX-optimized variants available for Apple Silicon.
+| Tier       | Model                                 | Cost   | Use For                                                                                              |
+| ---------- | ------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------- |
+| **Tier 0** | Local (Nemotron 3 Super, OpenClaw-RL) | Free   | Text generation, template expansion, formatting, light agentic tasks — continuously improving via RL |
+| **Tier 1** | Haiku                                 | Low    | Deterministic execution with tool use                                                                |
+| **Tier 2** | Sonnet                                | Medium | Nuanced judgment, code review, implementation                                                        |
+| **Tier 3** | Opus                                  | High   | Architecture, security, complex reasoning                                                            |
+
+**Deployment path:** Nemotron 3 Super via Ollama (primary) + OpenClaw-RL for continuous improvement. Fallback: Qwen 3.5-4B (edge) or Qwen 3.5-8B (quality) via Ollama/LM Studio. MLX-optimized variants available for Apple Silicon.
 
 ### Practical Takeaway
 
@@ -124,4 +126,4 @@ As of v2.1.75, Opus 4.6 defaults to **1M context** for Max/Team/Enterprise. This
 **If the subagent only reads files and reports results → haiku.**
 **If the subagent writes code or makes judgment calls → sonnet.**
 **If the subagent makes architectural or security decisions → opus.**
-**If the task is pure text generation with no tool use → candidate for Tier 0 (future).**
+**If the task is pure text generation or light agentic work with tool calls → Tier 0 (Nemotron 3 Super via Ollama).**
