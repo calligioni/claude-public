@@ -49,7 +49,7 @@ Contably is an AI-powered accounting SaaS for Brazilian companies. The stack:
 - **Database:** MySQL 8.0 (migrated from PostgreSQL) with async drivers
 - **Infrastructure:** OCI (Oracle Cloud), OKE (Kubernetes), OCIR (container registry)
 - **Auth:** Clerk (JWT via clerk_user_id) + legacy JWT auth
-- **CI/CD:** GitHub Actions (ci.yaml, oci-deploy.yaml)
+- **CI/CD:** OCI DevOps (build_spec_ci.yaml → build_spec_images.yaml → deploy specs)
 
 ### Why This Skill Exists
 
@@ -88,16 +88,16 @@ These are the key paths the guardian must analyze. Pass these to subagents to av
 - `infrastructure/kubernetes/overlays/staging/` -- staging overlay
 - `infrastructure/kubernetes/overlays/prod/` -- production overlay
 
-### CI/CD
+### CI/CD (OCI DevOps)
 
-- `.github/workflows/ci.yaml` -- lint, typecheck, test, security scans
-- `.github/workflows/oci-deploy.yaml` -- build, push to OCIR, deploy to OKE
-- `.github/workflows/security-scan-reusable.yml` -- reusable security scanning
+- `infrastructure/oci-devops/build_spec_ci.yaml` -- lint, typecheck, tests, security scans
+- `infrastructure/oci-devops/build_spec_images.yaml` -- build Docker images, push to OCIR
+- `infrastructure/oci-devops/deploy_spec_staging.yaml` -- deploy to staging OKE
+- `infrastructure/oci-devops/deploy_spec_prod.yaml` -- deploy to production OKE
 
 ### Templates & Config
 
-- `apps/api/.env.production.template` -- production env template (known issue: still references DigitalOcean)
-- `apps/api/.env.digitalocean.template` -- legacy DO template (should be deprecated)
+- `apps/api/.env.production.template` -- production env template
 - `apps/api/.env.example` -- dev env example
 - `infrastructure/.env.production.template` -- infra-level production template
 
