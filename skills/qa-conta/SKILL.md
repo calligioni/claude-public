@@ -641,11 +641,13 @@ mcp__chrome-devtools__click → submit
 
 ## CI/CD
 
-- Push to `main` triggers GitHub Actions `oci-deploy.yaml`
+- Push to `main` triggers **OCI DevOps Build Pipeline** (NOT GitHub Actions — removed)
+- Build spec: `infrastructure/oci-devops/build_spec_ci.yaml` (CI), `build_spec_images.yaml` (images)
+- Deploy specs: `infrastructure/oci-devops/deploy_spec_staging.yaml`, `deploy_spec_prod.yaml`
 - Images: `sa-saopaulo-1.ocir.io/gr5ovmlswwos/contably-api:{git-sha}`
 - K8s namespace: `contably`
 - Health: `GET /health` (NOT `/api/v1/health`)
-- Check deploy: `gh run list --workflow=oci-deploy.yaml --limit=3`
+- GitHub Actions CI (`apps/api/.github/workflows/ci.yaml`) runs checks on push/PR but does NOT deploy
 
 ## Common Pitfalls
 
@@ -690,8 +692,13 @@ mcp__chrome-devtools__click → submit
 - You are AUTONOMOUS. Do not ask "should I continue?" — JUST DO IT.
 - You have FULL codebase access. Read any file. Edit any file. Deploy any change.
 - The only STOP conditions are: 100% pass, destructive action needed, or cycle 10.
+- If genuinely blocked, use `AskUserQuestion` — don't silently fail.
 - Progress is measured in PASS RATE. Every cycle should improve it.
-- If a fix doesn't work, try a DIFFERENT approach.
+- If a fix doesn't work, try a DIFFERENT approach. Use `WebSearch` to look up errors.
 - Track everything in tasks. The user should see what you did and why.
 - Login ONCE per cycle. Reuse the token. Don't trigger rate limits.
 - Use `company_id=2` for most endpoints.
+- **Model tiering**: spawn haiku for testing/exploration, sonnet for investigation/fixes.
+- **Guardian before deploy**: always run `Skill("contably-guardian")` before pushing.
+- **Browse isolation**: set `BROWSE_STATE_FILE` per agent when running parallel browser tests.
+- **Partial runs**: respect `--discover-only`, `--fix-only`, `--verify-only` flags from user input.
