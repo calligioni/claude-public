@@ -11478,3 +11478,63 @@
   "cwd": "/Users/ps/code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-03-21T21:03:02Z",
+  "date": "2026-03-21",
+  "skill": "fulltest-skill",
+  "args": "Test https://contably.ai (production site on OCI - LB IP 137.131.156.136). Check all pages for console errors, network failures, CSS/visual issues, broken links, and AI prompt integrity. Fix any issues found.",
+  "sessionId": "c23bf350-06d6-47db-bb1d-224bb4af43d7",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
+{
+  "timestamp": "2026-03-21T21:03:12Z",
+  "date": "2026-03-21",
+  "skill": "fulltest-skill",
+  "args": "Test https://contably.ai (production site on OCI - LB IP 137.131.156.136). Check all pages for console errors, network failures, CSS/visual issues, broken links, and AI prompt integrity. Fix any issues found.",
+  "sessionId": "c23bf350-06d6-47db-bb1d-224bb4af43d7",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
+{
+  "timestamp": "2026-03-21T21:03:18Z",
+  "date": "2026-03-21",
+  "skill": "fulltest-skill",
+  "args": "Test https://contably.ai (production site on OCI - LB IP 137.131.156.136). Check all pages for console errors, network failures, CSS/visual issues, broken links, and AI prompt integrity. Fix any issues found.",
+  "sessionId": "c23bf350-06d6-47db-bb1d-224bb4af43d7",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
+{
+  "timestamp": "2026-03-21T21:03:30Z",
+  "date": "2026-03-21",
+  "skill": "fulltest-skill",
+  "args": "Test https://contably.ai (production site on OCI - LB IP 137.131.156.136). Check all pages for console errors, network failures, CSS/visual issues, broken links, and AI prompt integrity. Fix any issues found.",
+  "sessionId": "c23bf350-06d6-47db-bb1d-224bb4af43d7",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
+{
+  "timestamp": "2026-03-21T21:03:36Z",
+  "date": "2026-03-21",
+  "skill": "fulltest-skill",
+  "args": "Test https://contably.ai (production site on OCI - LB IP 137.131.156.136). Check all pages for console errors, network failures, CSS/visual issues, broken links, and AI prompt integrity. Fix any issues found.",
+  "sessionId": "c23bf350-06d6-47db-bb1d-224bb4af43d7",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
+{
+  "timestamp": "2026-03-21T21:03:41Z",
+  "date": "2026-03-21",
+  "skill": "fulltest-skill",
+  "args": "Test https://contably.ai (production site on OCI - LB IP 137.131.156.136). Check all pages for console errors, network failures, CSS/visual issues, broken links, and AI prompt integrity. Fix any issues found.",
+  "sessionId": "c23bf350-06d6-47db-bb1d-224bb4af43d7",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
