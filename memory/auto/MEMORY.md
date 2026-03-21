@@ -24,7 +24,8 @@
 - [tech_token_efficient_search.md](tech_token_efficient_search.md) — Web search token efficiency findings: Brave LLM Context (token-budgeted), Exa highlights (50-75% fewer tokens), pre-search orchestrator pattern, SearXNG+Crawl4AI on VPS
 - [reference_paperclip_vps.md](reference_paperclip_vps.md) — Paperclip AI orchestration on VPS with 3 companies (Nuvini, Contably, SourceRank) connected to OpenClaw gateway — ports, company IDs, agent roster, architecture
 - [reference_oci_contably.md](reference_oci_contably.md) — OCI infrastructure credentials, OCIDs, kubectl auth workaround, and OCIR details for Contably OKE clusters
+- [tech_lightpanda_browser.md](tech_lightpanda_browser.md) — Lightpanda headless browser (Zig, CDP) — not ready as Chrome replacement, revisit Q3 2026
 
 # currentDate
 
-Today's date is 2026-03-15.
+Today's date is 2026-03-21.
