@@ -11448,3 +11448,13 @@
   "cwd": "/Users/ps/code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-03-21T17:12:19Z",
+  "date": "2026-03-21",
+  "skill": "codebase-cleanup",
+  "args": "Scan the Contably project at /Users/ps/code/contably for unused files. Focus on apps/api/src/ directory. Look for: dead imports, orphaned files not imported anywhere, duplicate utility functions, unused test fixtures, stale configs, and any code that was replaced by the new OCR pipeline modules (old Tesseract-specific helpers that are now dead).",
+  "sessionId": "99e64d0a-a935-4685-ade9-37ed302324af",
+  "project": "Contably",
+  "cwd": "/Users/ps/code/contably",
+  "hadError": false
+}
