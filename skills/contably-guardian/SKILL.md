@@ -449,13 +449,9 @@ These are known issues from past reviews. The guardian should still check for th
 
 1. **entrypoint.sh migration race:** `apps/api/entrypoint.sh` runs `alembic upgrade head` on every pod startup. With replicas=2, two pods race to migrate. Mitigation: Dockerfile.migrate exists for a dedicated migration Job, but entrypoint.sh still has the inline path.
 
-2. **DigitalOcean references in templates:** `apps/api/.env.production.template` references DigitalOcean (DB host, Redis, Spaces, registry). Infrastructure is on OCI. Template needs updating.
+2. **PostgreSQL dialect in base model:** `apps/api/src/models/base.py` imports `UUID` from `sqlalchemy.dialects.postgresql`. DB is MySQL. This may work if UUID is used generically but is a compatibility risk.
 
-3. **PostgreSQL dialect in base model:** `apps/api/src/models/base.py` imports `UUID` from `sqlalchemy.dialects.postgresql`. DB is MySQL. This may work if UUID is used generically but is a compatibility risk.
-
-4. **Register_routers docstring:** `apps/api/src/api/routers/__init__.py` docstring and comments reference "DigitalOcean App Platform". Cosmetic but indicates incomplete migration cleanup.
-
-5. **CI non-blocking:** Several CI jobs have `continue-on-error: true` (backend-lint, backend-typecheck, backend-test, python-audit, npm-audit). This means deploy can proceed even with test failures.
+3. **CI non-blocking:** Several CI jobs have `continue-on-error: true` (backend-lint, backend-typecheck, backend-test, python-audit, npm-audit). This means deploy can proceed even with test failures.
 
 ## Invocation Examples
 
