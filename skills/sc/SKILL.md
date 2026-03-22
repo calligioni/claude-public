@@ -5,7 +5,7 @@ argument-hint: "[PR title or commit message]"
 user-invocable: true
 context: fork
 model: sonnet
-effort: low
+effort: medium
 allowed-tools:
   - Bash
   - Read

@@ -113,7 +113,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '[$(date)] Teammate idle - checking for pending work' >> ~/.claude/logs/teammates.log"
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Teammate idle - checking for pending work\" >> ~/.claude/logs/teammates.log"
           },
           {
             "type": "prompt",
@@ -127,7 +127,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "mkdir -p ~/.claude/logs && echo '[$(date)] First-run setup completed' >> ~/.claude/logs/setup.log"
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] First-run setup completed\" >> ~/.claude/logs/setup.log"
           }
         ]
       }
@@ -137,7 +137,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '[$(date)] Task completed: ${TASK_ID}' >> ~/.claude/logs/tasks.log"
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Task completed: ${TASK_ID}\" >> ~/.claude/logs/tasks.log"
           },
           {
             "type": "prompt",
@@ -151,7 +151,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "mkdir -p ~/.claude/logs && echo '[$(date)] Config changed: ${CONFIG_FILE}' >> ~/.claude/logs/config-changes.log"
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Config changed: ${CONFIG_FILE}\" >> ~/.claude/logs/config-changes.log"
           }
         ]
       }
@@ -194,8 +194,12 @@
             "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Compaction completed in $(pwd)\" >> ~/.claude/logs/compaction.log"
           },
           {
+            "type": "command",
+            "command": "found=$(ls .deep-plan-state.json qa-state.json .claude/ship/*/state.json 2>/dev/null); if [ -n \"$found\" ]; then echo \"Active state files found: $found\"; else echo \"NO_STATE_FILES\"; fi"
+          },
+          {
             "type": "prompt",
-            "prompt": "Context compaction just completed. Re-orient yourself by checking for active state files in the current directory: .ship-state.json, .parallel-dev-state.json, .deep-plan-state.json, qa-state.json, or deploy-state.json. If any exist, read them and summarize your current task phase and progress so you can continue without losing context. If none exist, continue normally."
+            "prompt": "Context compaction just completed. If the hook output lists active state files, read them and summarize your current task phase and progress so you can continue without losing context. If it says NO_STATE_FILES, continue normally."
           }
         ]
       }
