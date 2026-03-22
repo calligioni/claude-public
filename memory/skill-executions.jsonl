@@ -13098,3 +13098,13 @@
   "cwd": "/Users/ps/code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-03-22T12:22:55Z",
+  "date": "2026-03-22",
+  "skill": "deep-plan",
+  "args": "Drop Clerk auth back to legacy HS256 JWT auth. The legacy system is fully intact in the codebase (create_access_token, decode_token HS256 path, /auth/login, /auth/refresh, /auth/logout, /auth/change-password, TOTP MFA). Clerk was added as a layer on top via dual-auth (RS256 JWKS + HS256 auto-detection by JWT kid header). We need to: 1) Disable Clerk in the API (remove RS256 path, set clerk_auth_enabled=false or remove it), 2) Remove Clerk from admin frontend (ClerkProvider, ClerkAuthSync, clerk-token.ts — revert to legacy login), 3) Remove Clerk from client portal (ClerkProvider, clerkMiddleware, ClerkAuthSync — revert to legacy login), 4) Clean up infra (build args, CSP headers, K8s secrets, Terraform vault secrets), 5) Keep the clerk_user_id DB column for now (no migration needed). Goal: minimal changes, just turn off the Clerk layer and let legacy auth handle everything.",
+  "sessionId": "d46dfb8b-cbbb-413b-8fe8-d04d541a9ed3",
+  "project": "Contably",
+  "cwd": "/Users/ps/code/contably",
+  "hadError": false
+}

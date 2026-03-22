@@ -54,11 +54,13 @@ End-to-end deployment skill that takes code from current state to production on 
 
 - **OCI Region:** `sa-saopaulo-1`
 - **OCIR Registry:** `sa-saopaulo-1.ocir.io/gr5ovmlswwos`
-- **K8s Namespace:** `contably`
+- **K8s Namespace:** `contably-staging` (staging) / `contably` (production)
 - **OKE Cluster OCID:** `ocid1.cluster.oc1.sa-saopaulo-1.aaaaaaaarqeang2k3wo452nek7zaw5ufjtdmaqxupo6m2zgofckxzb7tcsvq`
 - **Git Remote:** `origin` → `https://github.com/Contably/contably.git`
 - **Main Branch:** `main`
 - **VPS SSH:** `root@100.77.51.51` (Tailscale — for staging endpoint tests)
+- **Staging URLs:** `https://staging-api.contably.ai` (API), `https://staging.contably.ai` (dashboard), `https://staging-portal.contably.ai` (portal)
+- **Production URLs:** `https://api.contably.ai` (API), `https://contably.ai` / `https://admin.contably.ai` (dashboard), `https://portal.contably.ai` (portal)
 
 ### OCI DevOps Pipeline Chain
 
@@ -273,7 +275,7 @@ After staging deployment succeeds (or after a timeout if we couldn't poll):
    - Invoke the `oci-health` skill via the Skill tool with argument `staging`
    - If ALL UP: proceed to Phase 6
    - If DEGRADED or DOWN:
-     - Pull pod logs: `kubectl logs -n contably -l app=contably-api --tail=50`
+     - Pull pod logs: `kubectl logs -n contably-staging -l app=contably-api --tail=50`
      - If the issue is a code bug (import error, config error): auto-fix, commit, re-push (return to Phase 2)
      - If the issue is infra (node pressure, image pull failure): report to user
      - Max 2 health-check retry cycles
@@ -281,12 +283,15 @@ After staging deployment succeeds (or after a timeout if we couldn't poll):
 3. **Additional staging smoke tests** (beyond what /oci-health does):
 
    ```bash
-   # Test that the new admin nginx config is working
-   ssh root@100.77.51.51 "curl -sI http://137.131.156.136/robots.txt" 2>/dev/null | head -5
-   ssh root@100.77.51.51 "curl -sI http://137.131.156.136/sitemap.xml" 2>/dev/null | head -5
+   # Test that the staging dashboard is responding
+   curl -sI https://staging.contably.ai/robots.txt 2>/dev/null | head -5
+   curl -sI https://staging.contably.ai/sitemap.xml 2>/dev/null | head -5
 
-   # Verify security headers
-   ssh root@100.77.51.51 "curl -sI http://137.131.156.136/" 2>/dev/null | grep -iE 'x-frame|x-content|x-xss|referrer|permissions|content-security'"
+   # Verify security headers on staging
+   curl -sI https://staging.contably.ai/ 2>/dev/null | grep -iE 'x-frame|x-content|x-xss|referrer|permissions|content-security'
+
+   # Test staging API health endpoint
+   curl -s --max-time 10 https://staging-api.contably.ai/health 2>/dev/null
    ```
 
 ### Phase 6: Production Gate

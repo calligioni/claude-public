@@ -41,9 +41,9 @@ Check whether Contably is up on OCI (staging and/or production). If anything is 
 - **Platform**: OCI (Oracle Cloud Infrastructure) — NO VPS, everything runs on OKE (Kubernetes)
 - **Active cluster**: `contably-oke-staging` (this serves PRODUCTION traffic despite the name)
 - **Load Balancer IP**: `137.131.156.136`
-- **Staging URLs**: `https://staging.contably.ai`, `https://staging-api.contably.ai`
-- **Production URLs**: `https://contably.ai`, `https://api.contably.ai`, `https://portal.contably.ai`
-- **K8s namespace**: `contably`
+- **Staging URLs**: `https://staging-api.contably.ai` (API), `https://staging.contably.ai` (dashboard), `https://staging-portal.contably.ai` (portal)
+- **Production URLs**: `https://api.contably.ai` (API), `https://contably.ai` / `https://admin.contably.ai` (dashboard), `https://portal.contably.ai` (portal)
+- **K8s namespace**: `contably-staging` (staging) / `contably` (production)
 - **Health endpoint**: `GET /health` (returns JSON with status, timestamp, environment, version, git_commit)
 - **Registry**: `sa-saopaulo-1.ocir.io/gr5ovmlswwos/`
 - **kubectl auth**: Session-based (`oci session authenticate`), expires in 1 hour
@@ -59,6 +59,8 @@ Run these checks **in parallel where possible** (group independent checks togeth
 
 ### 1. Kubernetes Cluster Health
 
+Use `-n contably-staging` for staging checks and `-n contably` for production checks.
+
 ```bash
 # Cluster connectivity
 kubectl cluster-info 2>&1 | head -3
@@ -66,20 +68,20 @@ kubectl cluster-info 2>&1 | head -3
 # Node health
 kubectl get nodes 2>&1
 
-# All deployments in contably namespace
-kubectl get deployments -n contably -o wide 2>&1
+# All deployments in namespace (use -n contably-staging or -n contably)
+kubectl get deployments -n <NAMESPACE> -o wide 2>&1
 
 # All pods with status
-kubectl get pods -n contably -o wide 2>&1
+kubectl get pods -n <NAMESPACE> -o wide 2>&1
 
 # Any pods NOT in Running state (critical signal)
-kubectl get pods -n contably --field-selector='status.phase!=Running' 2>&1
+kubectl get pods -n <NAMESPACE> --field-selector='status.phase!=Running' 2>&1
 
 # Recent events sorted by timestamp (errors, warnings)
-kubectl get events -n contably --sort-by='.lastTimestamp' --field-selector type=Warning 2>&1 | tail -20
+kubectl get events -n <NAMESPACE> --sort-by='.lastTimestamp' --field-selector type=Warning 2>&1 | tail -20
 
 # HPA status (are we at capacity?)
-kubectl get hpa -n contably 2>&1
+kubectl get hpa -n <NAMESPACE> 2>&1
 ```
 
 ### 2. Endpoint Health Checks
@@ -105,21 +107,27 @@ curl -s -w '\nHTTP_CODE:%{http_code} TIME:%{time_total}s' --max-time 10 https://
 echo ''
 echo '=== Staging Dashboard ==='
 curl -s -o /dev/null -w 'HTTP_CODE:%{http_code} TIME:%{time_total}s' --max-time 10 https://staging.contably.ai/ 2>&1
+
+echo ''
+echo '=== Staging Portal ==='
+curl -s -o /dev/null -w 'HTTP_CODE:%{http_code} TIME:%{time_total}s' --max-time 10 https://staging-portal.contably.ai/ 2>&1
 ```
 
 For staging-only, skip the production checks. For production-only, skip staging.
 
 ### 3. Service-Level Checks
 
+Use `-n contably-staging` for staging, `-n contably` for production.
+
 ```bash
 # Ingress status
-kubectl get ingress -n contably 2>&1
+kubectl get ingress -n <NAMESPACE> 2>&1
 
 # Services
-kubectl get svc -n contably 2>&1
+kubectl get svc -n <NAMESPACE> 2>&1
 
 # Check if any pods have restarted recently (CrashLoopBackOff indicator)
-kubectl get pods -n contably -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{range .status.containerStatuses[*]}{.restartCount}{"\t"}{.state}{"\n"}{end}{end}' 2>&1
+kubectl get pods -n <NAMESPACE> -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{range .status.containerStatuses[*]}{.restartCount}{"\t"}{.state}{"\n"}{end}{end}' 2>&1
 ```
 
 ### 4. OCI DevOps Pipeline Status
@@ -182,22 +190,26 @@ oci devops deployment list \
 
 If any check fails, pull diagnostic logs:
 
+Use `-n contably-staging` for staging logs, `-n contably` for production logs.
+
 ```bash
 # API pod logs (last 50 lines)
-kubectl logs -n contably -l app=contably-api --tail=50 --since=10m 2>&1
+kubectl logs -n <NAMESPACE> -l app=contably-api --tail=50 --since=10m 2>&1
 
 # Celery worker logs
-kubectl logs -n contably -l app=contably-celery-worker --tail=30 --since=10m 2>&1
+kubectl logs -n <NAMESPACE> -l app=contably-celery-worker --tail=30 --since=10m 2>&1
 
 # Describe failing pods
-kubectl describe pod -n contably <pod-name> 2>&1
+kubectl describe pod -n <NAMESPACE> <pod-name> 2>&1
 ```
 
 ### 6. Image Version Check
 
+Use `-n contably-staging` for staging, `-n contably` for production.
+
 ```bash
 # What's deployed vs what's latest on main
-kubectl get deployments -n contably -o jsonpath='{range .items[*]}{.metadata.name}: {.spec.template.spec.containers[*].image}{"\n"}{end}' 2>&1
+kubectl get deployments -n <NAMESPACE> -o jsonpath='{range .items[*]}{.metadata.name}: {.spec.template.spec.containers[*].image}{"\n"}{end}' 2>&1
 
 # Latest commit on main
 git log --oneline -1 origin/main 2>&1
@@ -275,8 +287,10 @@ CI Pipeline: Last 3 builds SUCCEEDED | Deploy Pipeline: Last deploy SUCCEEDED
 
 ### Quick Recovery Commands
 
-- Rollback API: `kubectl rollout undo deployment/contably-api -n contably`
-- Restart API: `kubectl rollout restart deployment/contably-api -n contably`
+- Rollback API (staging): `kubectl rollout undo deployment/contably-api -n contably-staging`
+- Rollback API (production): `kubectl rollout undo deployment/contably-api -n contably`
+- Restart API (staging): `kubectl rollout restart deployment/contably-api -n contably-staging`
+- Restart API (production): `kubectl rollout restart deployment/contably-api -n contably`
 - Force mirror sync: `oci devops repository mirror --repository-id <MIRROR_REPO_OCID>`
 - Check CI pipeline: `oci devops build-run list --build-pipeline-id <CI_PIPELINE_OCID> --limit 3`
 - Check deploy pipeline: `oci devops deployment list --deploy-pipeline-id <DEPLOY_PIPELINE_OCID> --limit 3`
