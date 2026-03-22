@@ -286,10 +286,10 @@ curl -s https://api.contably.ai/health
 
 ### 9. CROSS RECONCILIATION (`/cross-reconciliation`)
 
-| #   | Test             | Method | Endpoint                                       | Expected |
-| --- | ---------------- | ------ | ---------------------------------------------- | -------- |
-| 9.1 | Get status       | GET    | /cross-reconciliation/status?company_id=2      | 200      |
-| 9.2 | List differences | GET    | /cross-reconciliation/differences?company_id=2 | 200      |
+| #   | Test                 | Method | Endpoint                                                                  | Expected |
+| --- | -------------------- | ------ | ------------------------------------------------------------------------- | -------- |
+| 9.1 | List types           | GET    | /cross-reconciliation/types                                               | 200      |
+| 9.2 | Verify trial balance | GET    | /cross-reconciliation/companies/2/verify-trial-balance?year=2025&month=12 | 200      |
 
 ### 10. DASHBOARD
 
@@ -363,10 +363,13 @@ curl -s https://api.contably.ai/health
 
 ### 18. ACCOUNTING LEDGER (`/accounting`)
 
-| #    | Test           | Method | Endpoint                               | Expected |
-| ---- | -------------- | ------ | -------------------------------------- | -------- |
-| 18.1 | Ledger entries | GET    | /accounting/entries?company_id=2       | 200      |
-| 18.2 | Trial balance  | GET    | /accounting/trial-balance?company_id=2 | 200      |
+| #    | Test             | Method | Endpoint                                                    | Expected |
+| ---- | ---------------- | ------ | ----------------------------------------------------------- | -------- |
+| 18.1 | Journal entries  | GET    | /accounting/companies/2/journal-entries                     | 200      |
+| 18.2 | Trial balance    | GET    | /accounting/companies/2/trial-balance?year=2025&month=12    | 200      |
+| 18.3 | Account balances | GET    | /accounting/companies/2/account-balances?year=2025&month=12 | 200      |
+| 18.4 | Chart of accts   | GET    | /accounting/companies/2/chart-of-accounts                   | 200      |
+| 18.5 | Periods          | GET    | /accounting/companies/2/periods                             | 200      |
 
 ### 19. PAYROLL (`/payroll`)
 
@@ -461,9 +464,13 @@ curl -s https://api.contably.ai/health
 
 ### 32. ANALYTICS (`/analytics`)
 
-| #    | Test            | Method | Endpoint                                | Expected |
-| ---- | --------------- | ------ | --------------------------------------- | -------- |
-| 32.1 | Forecast models | GET    | /analytics/forecast/models?company_id=2 | 200      |
+| #    | Test             | Method | Endpoint                                                           | Expected |
+| ---- | ---------------- | ------ | ------------------------------------------------------------------ | -------- |
+| 32.1 | Forecast models  | GET    | /analytics/forecast/models/2                                       | 200      |
+| 32.2 | Time series      | GET    | /analytics/time-series/2?metric_type=GROSS_REVENUE                 | 200      |
+| 32.3 | Metrics          | GET    | /analytics/metrics/2                                               | 200      |
+| 32.4 | Metric types     | GET    | /analytics/metric-types                                            | 200      |
+| 32.5 | Forecast summary | GET    | /analytics/forecast/summary/2?metric_type=gross_revenue&periods=12 | 200      |
 
 ### 33. ML PIPELINE (`/ml-pipeline`)
 
