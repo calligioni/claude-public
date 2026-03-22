@@ -44,6 +44,10 @@
           {
             "type": "command",
             "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Subagent stopped: ${SUBAGENT_ID:-unknown}\" >> ~/.claude/logs/subagents.log; rm -rf /tmp/claude-agent-* 2>/dev/null || true"
+          },
+          {
+            "type": "command",
+            "command": "\"$HOME/.claude-setup/hooks/worktree-cleanup.sh\""
           }
         ]
       }
@@ -104,6 +108,10 @@
           {
             "type": "command",
             "command": "\"$HOME/.claude-setup/hooks/session-end.sh\""
+          },
+          {
+            "type": "command",
+            "command": "\"$HOME/.claude-setup/hooks/worktree-cleanup.sh\""
           }
         ]
       }
