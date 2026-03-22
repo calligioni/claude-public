@@ -1,6 +1,6 @@
 ---
 name: oci-health
-description: "Check if Contably on OCI is up. Tests API, admin dashboard, client portal, K8s pods, and services. If anything is down, generates a diagnostic report with root cause and fix steps. Triggers on: oci health, is contably up, check staging, check production, contably status, oci status."
+description: "Check if Contably on OCI is up. Tests API, admin dashboard, client portal, K8s pods, OCI DevOps pipelines, and services. If anything is down, generates a diagnostic report with root cause and fix steps. Triggers on: oci health, is contably up, check staging, check production, contably status, oci status."
 argument-hint: "[environment: staging|production|both]"
 user-invocable: true
 context: fork
@@ -31,33 +31,40 @@ Check whether Contably is up on OCI (staging and/or production). If anything is 
 
 ## Arguments
 
-- `/oci-health` — check staging (default)
+- `/oci-health` — check both environments (default)
 - `/oci-health staging` — check staging only
 - `/oci-health production` or `/oci-health prod` — check production only
 - `/oci-health both` or `/oci-health all` — check both environments
 
 ## Infrastructure Context
 
-- **VPS SSH**: `root@100.77.51.51` (Tailscale) — has kubectl access and can reach staging ingress
-- **Staging ingress IP**: `137.131.156.136` (mapped in VPS /etc/hosts)
+- **Platform**: OCI (Oracle Cloud Infrastructure) — NO VPS, everything runs on OKE (Kubernetes)
+- **Active cluster**: `contably-oke-staging` (this serves PRODUCTION traffic despite the name)
+- **Load Balancer IP**: `137.131.156.136`
 - **Staging URLs**: `https://staging.contably.ai`, `https://staging-api.contably.ai`
 - **Production URLs**: `https://contably.ai`, `https://api.contably.ai`, `https://portal.contably.ai`
 - **K8s namespace**: `contably`
 - **Health endpoint**: `GET /health` (returns JSON with status, timestamp, environment, version, git_commit)
 - **Registry**: `sa-saopaulo-1.ocir.io/gr5ovmlswwos/`
-- **kubectl context**: `context-ckxzb7tcsvq` (available on local Mac via `kubectl`, NOT on VPS)
+- **kubectl auth**: Session-based (`oci session authenticate`), expires in 1 hour
+- **CI/CD**: OCI DevOps pipelines (CI pipeline + build/push pipeline + deploy pipeline)
+- **Pipeline OCIDs**: Obtained via `terraform output` from `infrastructure/terraform/oci/`
+  - `devops_project_id` — DevOps project OCID
+  - `devops_ci_pipeline_id` — CI build pipeline (lint, type-check, tests)
+  - `devops_deploy_pipeline_id` — Deploy pipeline (staging -> approval -> production)
 
 ## Check Sequence
 
-Run these checks **in parallel where possible** (group independent checks together). Use the local `kubectl` for K8s checks (the Mac has the kubeconfig), and SSH to VPS for HTTP endpoint checks (VPS has /etc/hosts mapping for staging).
+Run these checks **in parallel where possible** (group independent checks together). All checks run from the **local Mac** which has kubectl and OCI CLI access.
 
 ### 1. Kubernetes Cluster Health
-
-Run from **local Mac** (has kubeconfig):
 
 ```bash
 # Cluster connectivity
 kubectl cluster-info 2>&1 | head -3
+
+# Node health
+kubectl get nodes 2>&1
 
 # All deployments in contably namespace
 kubectl get deployments -n contably -o wide 2>&1
@@ -68,7 +75,7 @@ kubectl get pods -n contably -o wide 2>&1
 # Any pods NOT in Running state (critical signal)
 kubectl get pods -n contably --field-selector='status.phase!=Running' 2>&1
 
-# Recent events (errors, warnings)
+# Recent events sorted by timestamp (errors, warnings)
 kubectl get events -n contably --sort-by='.lastTimestamp' --field-selector type=Warning 2>&1 | tail -20
 
 # HPA status (are we at capacity?)
@@ -77,22 +84,9 @@ kubectl get hpa -n contably 2>&1
 
 ### 2. Endpoint Health Checks
 
-Run from **VPS** (has DNS/hosts mapping):
+Run from **local Mac** using public URLs:
 
 ```bash
-ssh root@100.77.51.51 "
-echo '=== API Health ==='
-curl -s -w '\nHTTP_CODE:%{http_code} TIME:%{time_total}s' --max-time 10 http://137.131.156.136/health 2>&1
-
-echo ''
-echo '=== Admin Dashboard ==='
-curl -s -o /dev/null -w 'HTTP_CODE:%{http_code} TIME:%{time_total}s' --max-time 10 http://137.131.156.136/ 2>&1
-
-echo ''
-echo '=== API v1 Check ==='
-curl -s -w '\nHTTP_CODE:%{http_code} TIME:%{time_total}s' --max-time 10 http://137.131.156.136/api/v1/companies/ 2>&1
-
-echo ''
 echo '=== Production API ==='
 curl -s -w '\nHTTP_CODE:%{http_code} TIME:%{time_total}s' --max-time 10 https://api.contably.ai/health 2>&1
 
@@ -103,14 +97,19 @@ curl -s -o /dev/null -w 'HTTP_CODE:%{http_code} TIME:%{time_total}s' --max-time 
 echo ''
 echo '=== Production Portal ==='
 curl -s -o /dev/null -w 'HTTP_CODE:%{http_code} TIME:%{time_total}s' --max-time 10 https://portal.contably.ai/ 2>&1
-"
+
+echo ''
+echo '=== Staging API ==='
+curl -s -w '\nHTTP_CODE:%{http_code} TIME:%{time_total}s' --max-time 10 https://staging-api.contably.ai/health 2>&1
+
+echo ''
+echo '=== Staging Dashboard ==='
+curl -s -o /dev/null -w 'HTTP_CODE:%{http_code} TIME:%{time_total}s' --max-time 10 https://staging.contably.ai/ 2>&1
 ```
 
 For staging-only, skip the production checks. For production-only, skip staging.
 
 ### 3. Service-Level Checks
-
-Run from **local Mac**:
 
 ```bash
 # Ingress status
@@ -123,7 +122,63 @@ kubectl get svc -n contably 2>&1
 kubectl get pods -n contably -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{range .status.containerStatuses[*]}{.restartCount}{"\t"}{.state}{"\n"}{end}{end}' 2>&1
 ```
 
-### 4. Recent Logs (only if issues found)
+### 4. OCI DevOps Pipeline Status
+
+Check recent CI builds and deployments:
+
+```bash
+# Get pipeline OCIDs from terraform (run from project root)
+cd /Users/ps/code/contably/infrastructure/terraform/oci
+CI_PIPELINE_ID=$(terraform output -raw devops_ci_pipeline_id 2>/dev/null)
+DEPLOY_PIPELINE_ID=$(terraform output -raw devops_deploy_pipeline_id 2>/dev/null)
+PROJECT_ID=$(terraform output -raw devops_project_id 2>/dev/null)
+
+# Recent CI build runs (last 5)
+if [ -n "$CI_PIPELINE_ID" ]; then
+  echo '=== Recent CI Builds ==='
+  oci devops build-run list \
+    --build-pipeline-id "$CI_PIPELINE_ID" \
+    --sort-by timeCreated \
+    --sort-order DESC \
+    --limit 5 \
+    --query 'data.items[*].{id:id, status:"lifecycle-state", commit:"commit-info"."commit-hash", started:"time-created"}' \
+    --output table 2>&1
+fi
+
+# Recent deployments (last 5)
+if [ -n "$DEPLOY_PIPELINE_ID" ]; then
+  echo '=== Recent Deployments ==='
+  oci devops deployment list \
+    --deploy-pipeline-id "$DEPLOY_PIPELINE_ID" \
+    --sort-by timeCreated \
+    --sort-order DESC \
+    --limit 5 \
+    --query 'data.items[*].{id:id, status:"lifecycle-state", type:"deployment-type", started:"time-created"}' \
+    --output table 2>&1
+fi
+```
+
+If terraform output is unavailable, fall back to listing by project:
+
+```bash
+# Fallback: list all build runs in the DevOps project
+oci devops build-run list \
+  --project-id "$PROJECT_ID" \
+  --sort-by timeCreated \
+  --sort-order DESC \
+  --limit 5 \
+  --output table 2>&1
+
+# Fallback: list all deployments in the DevOps project
+oci devops deployment list \
+  --project-id "$PROJECT_ID" \
+  --sort-by timeCreated \
+  --sort-order DESC \
+  --limit 5 \
+  --output table 2>&1
+```
+
+### 5. Recent Logs (only if issues found)
 
 If any check fails, pull diagnostic logs:
 
@@ -138,14 +193,14 @@ kubectl logs -n contably -l app=contably-celery-worker --tail=30 --since=10m 2>&
 kubectl describe pod -n contably <pod-name> 2>&1
 ```
 
-### 5. Image Version Check
+### 6. Image Version Check
 
 ```bash
-# What's deployed vs what's latest on master
+# What's deployed vs what's latest on main
 kubectl get deployments -n contably -o jsonpath='{range .items[*]}{.metadata.name}: {.spec.template.spec.containers[*].image}{"\n"}{end}' 2>&1
 
-# Latest commit on master
-git log --oneline -1 origin/master 2>&1
+# Latest commit on main
+git log --oneline -1 origin/main 2>&1
 ```
 
 ## Decision Logic
@@ -168,13 +223,14 @@ After running checks, categorize the status:
 
 | Component        | Status | Response Time | Version    |
 |-----------------|--------|---------------|------------|
-| API (staging)    | UP     | 0.23s         | abc1234    |
+| API (production) | UP     | 0.23s         | abc1234    |
 | Dashboard        | UP     | 0.15s         |            |
 | Portal           | UP     | 0.18s         |            |
 | Celery Workers   | UP     | 2/2 pods      |            |
 | Celery Beat      | UP     | 1/1 pods      |            |
 
 Pods: 8/8 Running | Restarts (24h): 0 | HPA: nominal
+CI Pipeline: Last 3 builds SUCCEEDED | Deploy Pipeline: Last deploy SUCCEEDED
 ```
 
 ### If something is wrong:
@@ -186,7 +242,7 @@ Pods: 8/8 Running | Restarts (24h): 0 | HPA: nominal
 
 | Component        | Status | Details                    |
 |-----------------|--------|----------------------------|
-| API (staging)    | DOWN   | HTTP 502, pod CrashLoop    |
+| API (production) | DOWN   | HTTP 502, pod CrashLoop    |
 | Dashboard        | UP     | 0.15s                      |
 | ...              |        |                            |
 
@@ -211,8 +267,9 @@ Pods: 8/8 Running | Restarts (24h): 0 | HPA: nominal
 
 **Fix Steps:**
 1. Fix the import in `apps/api/src/api/routes/__init__.py`
-2. Push to master (auto-deploys)
-3. Or rollback: `kubectl rollout undo deployment/contably-api -n contably`
+2. Push to main (OCI DevOps mirror syncs every 15 min, then auto-deploys)
+3. Or force mirror sync: `oci devops repository mirror --repository-id <MIRROR_REPO_OCID>`
+4. Or rollback: `kubectl rollout undo deployment/contably-api -n contably`
 
 #### Problem 2: ...
 
@@ -220,19 +277,21 @@ Pods: 8/8 Running | Restarts (24h): 0 | HPA: nominal
 
 - Rollback API: `kubectl rollout undo deployment/contably-api -n contably`
 - Restart API: `kubectl rollout restart deployment/contably-api -n contably`
-- Check CI/CD: `gh run list --limit 3`
-- Manual deploy: see deploy pattern in MEMORY.md
+- Force mirror sync: `oci devops repository mirror --repository-id <MIRROR_REPO_OCID>`
+- Check CI pipeline: `oci devops build-run list --build-pipeline-id <CI_PIPELINE_OCID> --limit 3`
+- Check deploy pipeline: `oci devops deployment list --deploy-pipeline-id <DEPLOY_PIPELINE_OCID> --limit 3`
+- Re-auth kubectl: `oci session authenticate --region sa-saopaulo-1 --profile-name oke-session`
 ```
 
 ## Rules
 
 1. **Never modify anything** — this is a read-only diagnostic skill
-2. **Always check kubectl connectivity first** — if kubectl fails, say so and suggest `oci ce cluster create-kubeconfig`
-3. **Parallelize checks** — run kubectl checks and SSH health checks concurrently
+2. **Always check kubectl connectivity first** — if kubectl fails, say so and suggest `oci session authenticate --region sa-saopaulo-1 --profile-name oke-session`
+3. **Parallelize checks** — run kubectl checks and HTTP health checks concurrently
 4. **Only pull logs if something is wrong** — don't dump logs when everything is healthy
 5. **Include actionable fix steps** — don't just say "it's down", say exactly what to run to fix it
 6. **Show response times** — slow responses (>2s) are a degradation signal even if status is 200
-7. **Compare deployed version to master** — drift means CI/CD may be broken
+7. **Compare deployed version to main** — drift means CI/CD may be broken
 8. **Keep output concise when healthy** — a table is enough. Only expand for problems.
-9. **If kubectl is unavailable** — fall back to HTTP-only checks via VPS SSH
-10. **Report CI/CD status** — if deploy is failing, that's part of the health picture. Run `gh run list --limit 3` to check.
+9. **If kubectl auth expired** — report it clearly and suggest re-authentication via `oci session authenticate`
+10. **Report CI/CD status** — check OCI DevOps pipelines for recent build/deploy failures using `oci devops build-run list` and `oci devops deployment list`
