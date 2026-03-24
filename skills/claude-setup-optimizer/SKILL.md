@@ -283,6 +283,61 @@ Check if recent codebase changes broke assumptions in the skill.
 **Effort:** Low (review) / Medium (amend)
 ```
 
+### Step 2c: Cross-Skill Synergy Analysis
+
+After changelog-based analysis, scan all skills for **cross-skill improvement opportunities** — ways newer or existing skills can enhance other skills.
+
+#### Process
+
+1. **Identify "newer" skills** — skills added or significantly updated in the last 90 days (check git log on SKILL.md files):
+
+```bash
+SETUP="$HOME/.claude-setup"
+# Skills modified in last 90 days
+git -C "$SETUP" log --since="90 days ago" --name-only --pretty=format: -- "skills/*/SKILL.md" | sort -u | grep -v '^$'
+```
+
+2. **For each newer skill, check if it can improve existing skills.** Consider:
+   - Can it be composed into another skill's workflow? (e.g., `/get-api-docs` before API implementation in `/ship`)
+   - Does it replace a manual step in another skill? (e.g., `/pinchtab` replacing raw Chrome MCP calls)
+   - Does it provide better tooling for a subtask? (e.g., `/firecrawl` replacing `WebFetch` for scraping)
+   - Can it be added as a `skills` dependency in another skill's frontmatter?
+   - Does it offer a pattern that other skills should adopt?
+
+3. **Score each potential improvement (1-10):**
+
+| Score | Meaning                                                                   |
+| ----- | ------------------------------------------------------------------------- |
+| 1-3   | Minor convenience, not worth the integration effort                       |
+| 4-5   | Moderate improvement, but adds complexity                                 |
+| 6-7   | Clear improvement, worth noting but not urgent                            |
+| 8-9   | Significant improvement — reduces tokens, time, or errors substantially   |
+| 10    | Critical — the existing skill is broken or severely degraded without this |
+
+**Scoring criteria:**
+
+- **Token savings** — does it reduce context usage? (+2 if >30% reduction)
+- **Reliability** — does it fix a known failure mode? (+2 if yes)
+- **Speed** — does it parallelize or eliminate steps? (+1 per step eliminated)
+- **Quality** — does it improve output quality? (+1 if measurably better)
+- **Complexity cost** — does the integration add significant complexity? (-1 to -3)
+
+4. **Auto-implement improvements scoring ≥ 8.** These are high-value, clear wins. Apply them directly following the same parallel agent pattern in Step 5.
+
+5. **List improvements scoring < 8** in the report under a dedicated section:
+
+```markdown
+## Cross-Skill Synergy Opportunities (Not Auto-Applied)
+
+| Existing Skill | Newer Skill   | Improvement                                       | Score | Notes                                        |
+| -------------- | ------------- | ------------------------------------------------- | ----- | -------------------------------------------- |
+| /ship          | /get-api-docs | Auto-fetch API docs before implementation phase   | 6     | Adds a step but improves code quality        |
+| /qa-cycle      | /pinchtab     | Replace Chrome MCP with PinchTab for page testing | 7     | 5-13x cheaper, but requires PinchTab running |
+| ...            | ...           | ...                                               | ...   | ...                                          |
+```
+
+**Important:** Only evaluate genuine improvements. Do not force synergies where none exist. If no cross-skill improvements are found, skip this section entirely.
+
 ### Step 3: Generate Recommendations
 
 Create a structured report with:
