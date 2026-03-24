@@ -12,7 +12,7 @@ type: reference
 - **Config:** `/home/paperclip/.paperclip/instances/default/config.json`
 - **Mode:** `authenticated` / `private` (HTTP cookies, no Secure flag)
 - **Public URL:** `http://100.77.51.51:3100` (Tailscale only)
-- **Version:** 0.3.1 (npm: paperclipai)
+- **Version:** 2026.318.0 (npm: paperclipai, updated 2026-03-23)
 - **Login:** p@xurman.com / Paperclip2026!
 - **Claude Auth:** Max subscription (oauth login on paperclip user, no API key needed)
 
