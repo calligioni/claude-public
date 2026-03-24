@@ -60,6 +60,7 @@ You are an autonomous QA orchestrator for Contably. Your job is to deliver a **f
 /qa-conta --api-only         # Skip browser tests, API only
 /qa-conta --browser-only     # Skip API tests, browser only
 /qa-conta --severity p0      # Full cycle, P0 issues only
+/qa-conta --gov-portals      # Test government portal integrations (eSocial, Receita Federal)
 ```
 
 Parse flags from user input. Default (no flags) = full cycle.
@@ -553,6 +554,8 @@ curl -s https://api.contably.ai/health
 
 After API tests pass, verify the frontend apps render correctly.
 
+> **Computer Use Fallback**: If browse CLI and Chrome MCP both fail to interact with a page (anti-bot, client certificate requirements, Java applets), escalate to computer use via `Skill("computer-use")`. This is especially relevant for government portals (eSocial, Receita Federal, SPED) that require desktop-level interaction.
+
 **Primary tool:** `browse` CLI (`~/.local/bin/browse`) — zero MCP overhead, ~100ms per call.
 **Fallback:** Chrome DevTools MCP (`mcp__chrome-devtools__*`) if `browse` is unavailable.
 
@@ -694,6 +697,45 @@ mcp__chrome-devtools__click → submit
 
 - Commit {sha}: {message}
 ```
+
+## Phase 6: Government Portal Tests (--gov-portals)
+
+When `--gov-portals` flag is set, or when running a full cycle with eSocial module active, test government portal integrations using computer use.
+
+**Prerequisite**: Claude Desktop app with computer use enabled. If running in CLI mode, skip this phase and log a warning.
+
+### 45. ESOCIAL INTEGRATION
+
+| #    | Test                      | Portal                | Check                                |
+| ---- | ------------------------- | --------------------- | ------------------------------------ |
+| 45.1 | eSocial status page loads | portal.esocial.gov.br | Page renders, no certificate errors  |
+| 45.2 | Event submission flow     | portal.esocial.gov.br | S-1000 form accessible, fields valid |
+| 45.3 | Event query works         | portal.esocial.gov.br | Can query submitted events by period |
+
+### 46. RECEITA FEDERAL
+
+| #    | Test                | Portal                          | Check                              |
+| ---- | ------------------- | ------------------------------- | ---------------------------------- |
+| 46.1 | CNPJ lookup works   | servicos.receita.fazenda.gov.br | Returns company data for test CNPJ |
+| 46.2 | Tax situation query | cav.receita.fazenda.gov.br      | Returns fiscal status              |
+
+### 47. SPED / FGTS
+
+| #    | Test                           | Portal/App               | Check                         |
+| ---- | ------------------------------ | ------------------------ | ----------------------------- |
+| 47.1 | SPED PVA app launches          | Desktop (PVA app)        | App opens, accepts XML import |
+| 47.2 | FGTS Digital portal accessible | fgtsdigital.caixa.gov.br | Login page renders            |
+
+**Implementation:**
+
+```
+# Delegate to computer-use skill for each portal test
+Skill("computer-use", args="Test eSocial portal: navigate to portal.esocial.gov.br, verify page loads, check for certificate errors, screenshot evidence to /tmp/qa-conta-esocial.png")
+```
+
+**Important:** Government portal tests are non-blocking — failures in this phase do NOT prevent deployment. They are informational only, since portal availability depends on external government infrastructure.
+
+---
 
 ## REMEMBER
 
