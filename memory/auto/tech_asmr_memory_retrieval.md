@@ -1,7 +1,7 @@
 ---
 name: ASMR Memory Retrieval Architecture
 description: Supermemory ASMR pipeline — 3-agent parallel retrieval (facts/context/temporal) replacing vector DB, ~99% on LongMemEval_s. Open-source ~April 2026.
-type: reference
+type: tech
 ---
 
 **ASMR (Agentic Search and Memory Retrieval)** by Supermemory (Dhravya Shah).

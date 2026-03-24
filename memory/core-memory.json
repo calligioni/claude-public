@@ -24,16 +24,26 @@
     "documentation": "only when explicitly requested",
     "commits": "type(scope): description (conventional commits)"
   },
-  "lastConsolidation": "2026-03-22",
+  "lastConsolidation": "2026-03-24",
   "memoryConfig": {
     "relevanceThreshold": 5,
     "decayThresholdDays": 90,
     "minUsesToRetain": 3
   },
-  "activeProjects": ["Contably", "AgentCreator", "M&A Toolkit", "NuvinOS"],
+  "activeProjects": [
+    "Contably",
+    "AgentCreator",
+    "M&A Toolkit",
+    "NuvinOS"
+  ],
   "integrations": {
     "github": "escotilha",
-    "resend": { "domains": ["nuvini.ai", "contably.ai"] },
+    "resend": {
+      "domains": [
+        "nuvini.ai",
+        "contably.ai"
+      ]
+    },
     "agentmail": [
       "xurman@agentmail.to",
       "marcopolo@agentmail.to",

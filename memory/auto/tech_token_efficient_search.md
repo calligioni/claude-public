@@ -1,7 +1,7 @@
 ---
 name: tech_token_efficient_search
 description: Web search token efficiency research — Brave LLM Context API has explicit token budget, Exa highlights cut 50-75% tokens, pre-search orchestrator pattern saves 60-70% redundant searches
-type: reference
+type: tech
 ---
 
 ## Token-Efficient Web Search Strategy

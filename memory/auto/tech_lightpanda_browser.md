@@ -1,7 +1,7 @@
 ---
 name: tech-insight:lightpanda-browser
 description: Lightpanda headless browser (Zig, CDP-compatible) — evaluated as Chrome/Browserless replacement, not ready due to missing PDF/Lighthouse/SPA gaps. Revisit Q3 2026.
-type: reference
+type: tech
 ---
 
 Lightpanda (github.com/lightpanda-io/browser) is a headless browser in Zig with V8, exposing CDP on port 9222. Claims 9x less memory, 11x faster than Chrome. 22.9k+ stars, AGPL-3.0 (fine for internal use).

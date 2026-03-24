@@ -1,7 +1,7 @@
 ---
 name: agent-sandbox-design-for-distrust
 description: Security principle for multi-agent systems — enforce isolation at OS/VM layer, not by trusting agent behavior. NanoClaw + Docker Sandbox as reference implementation.
-type: reference
+type: tech
 ---
 
 Enforce security outside the agentic surface (at the OS/VM layer), not by relying on agent behavior.

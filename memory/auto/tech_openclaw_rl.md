@@ -1,7 +1,7 @@
 ---
 name: tech-insight:openclaw-rl
 description: OpenClaw-RL — Princeton async RL framework that trains local AI agents from conversations; unlocks Tier 0 local model self-improvement with Qwen 3.5-4B/8B
-type: reference
+type: tech
 ---
 
 **OpenClaw-RL** (Princeton, Gen-Verse, 2026) — fully asynchronous RL framework that turns conversations into training signals for self-hosted AI agents.

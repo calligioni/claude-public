@@ -1,7 +1,7 @@
 ---
 name: AI platform attack surface patterns
 description: Attack chain from McKinsey Lilli breach — unauthenticated endpoints + JSON-key SQLi + system prompt write access = full AI platform compromise
-type: reference
+type: tech
 ---
 
 Specific attack chain (CodeWall vs McKinsey Lilli, Feb 2026):
