@@ -96,32 +96,32 @@ A disciplined 7-phase skill that takes a feature from idea to production. Each p
 ## Architecture
 
 ```
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                              /ship ORCHESTRATOR                                         │
-│                                                                                         │
-│  Phase -1       Phase 0       Phase 1        Phase 2        Phase 3                    │
-│  ┌──────────┐   ┌──────────┐  ┌──────────┐   ┌──────────┐   ┌──────────┐              │
-│  │ PROJECT  │──▶│ PROJECT  │─▶│ PRODUCT  │──▶│  TECH    │──▶│  PLAN    │              │
-│  │  INIT    │   │ DETECT   │  │  SPEC    │   │  SPEC    │   │          │              │
-│  │          │   │          │  │          │   │          │   │ Seq.     │              │
-│  │ git init │   │ Auto     │  │ CPO mind │   │ CTO mind │   │ Thinking │              │
-│  │ scaffold │   │          │  └──────────┘   └──────────┘   └─────┬────┘              │
-│  └──────────┘   └──────────┘                                      │                    │
-│  (conditional)                                                    ▼                    │
-│                        Phase 4       Phase 4.5      Phase 5                            │
-│                        ┌──────────┐  ┌──────────┐   ┌─────────┐                        │
-│                        │ EXECUTE  │─▶│REFLEXION │──▶│   QA    │                        │
-│                        │ (Swarm)  │  │  Self-   │   │  TEST   │                        │
-│                        │ haiku +  │  │ critique │   │         │                        │
-│                        │ sonnet   │  └──────────┘   └────┬────┘                        │
-│                        └──────────┘                      │                              │
-│                             ▲                            │                              │
-│  Phase 7     Phase 6       │                             │                              │
-│  ┌──────────┐ ┌──────────┐ └─────────────────────────────┘                              │
-│  │   DOC    │◀│   FIX    │◀── if issues found                                          │
-│  │          │ │  CYCLE   │                                                              │
-│  └──────────┘ └──────────┘                                                              │
-└────────────────────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────────────────┐
+│                              /ship ORCHESTRATOR                                                │
+│                                                                                                │
+│  Phase -1       Phase 0       Phase 1        Phase 2        Phase 3                           │
+│  ┌──────────┐   ┌──────────┐  ┌──────────┐   ┌──────────┐   ┌──────────┐                     │
+│  │ PROJECT  │──▶│ PROJECT  │─▶│ PRODUCT  │──▶│  TECH    │──▶│  PLAN    │                     │
+│  │  INIT    │   │ DETECT   │  │  SPEC    │   │  SPEC    │   │          │                     │
+│  │          │   │          │  │          │   │          │   │ Seq.     │                     │
+│  │ git init │   │ Auto     │  │ CPO mind │   │ CTO mind │   │ Thinking │                     │
+│  │ scaffold │   │          │  └──────────┘   └──────────┘   └─────┬────┘                     │
+│  └──────────┘   └──────────┘                                      │                           │
+│  (conditional)                                                    ▼                           │
+│                  Phase 4       Phase 4.5      Phase 4.7      Phase 5                          │
+│                  ┌──────────┐  ┌──────────┐   ┌──────────┐   ┌─────────┐                      │
+│                  │ EXECUTE  │─▶│ TWO-STAGE│──▶│EVALUATOR │──▶│   QA    │                      │
+│                  │ (Swarm)  │  │  REVIEW  │   │  (Indep. │   │  TEST   │                      │
+│                  │ haiku +  │  │ spec +   │   │   agent) │   │         │                      │
+│                  │ sonnet   │  │ quality  │   └──────────┘   └────┬────┘                      │
+│                  └──────────┘  └──────────┘        ▲              │                            │
+│                       ▲                            │              │                            │
+│  Phase 7     Phase 6  │                            │              │                            │
+│  ┌──────────┐ ┌──────────┐ ┌───────────────────────┘              │                            │
+│  │   DOC    │◀│   FIX    │◀── if issues found ◀──────────────────┘                            │
+│  │          │ │  CYCLE   │                                                                    │
+│  └──────────┘ └──────────┘                                                                    │
+└──────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -280,6 +280,7 @@ All state is persisted to `.claude/ship/{feature-slug}/`. This enables resuming 
       "completedTasks": 4,
       "totalTasks": 8
     },
+    "evaluation": { "status": "pending" },
     "qa": { "status": "pending" },
     "fix": { "status": "pending", "iterations": 0 },
     "document": { "status": "pending" }
@@ -751,7 +752,8 @@ c. **After each group completes — verify triple + mini spec check:**
 4. **Context checkpoint:** If context usage approaches 80%:
    - Commit all current work
    - Update state.json with exact progress
-   - Tell user: "Context getting full. Committed progress. Run `/ship --resume` to continue."
+   - **Write structured handoff document** (see Context Management section)
+   - Tell user: "Context pressure reached. Wrote handoff document. Run `/ship --resume` to continue with a fresh context."
 
 ### Phase 4.5: Two-Stage Review Loop
 
@@ -828,6 +830,143 @@ Agent(model="sonnet", subagent_type="code-review-agent", prompt="
 **Skip condition:** If the feature has fewer than 3 tasks, skip the two-stage review — overhead exceeds benefit. Proceed directly to Phase 5.
 
 **Cost:** Both reviewers run as sonnet subagents (~$0.50-1.00 combined). The orchestrator (opus) merges findings and decides which fixes to apply.
+
+### Phase 4.7: Interactive Evaluation (Evaluator Agent)
+
+After the two-stage code review (Phase 4.5) and before QA (Phase 5), run an **independent evaluator agent** that interacts with the running application and grades the implementation against rubric criteria. This closes the self-evaluation bias gap: generators systematically praise their own work regardless of quality. An independent evaluator tuned toward skepticism catches issues that code review alone misses.
+
+**Based on:** Anthropic's three-agent harness pattern (planner → generator → evaluator) from their engineering post on frontend design and long-running apps.
+
+#### When to Run
+
+- Feature has UI components (frontend, full-stack) → **always run**
+- Feature is API-only → **run with API testing** (curl/httpie against running server)
+- Feature is database/config only → **skip** (no interactive surface)
+
+#### Process
+
+1. **Start the dev server** if not already running:
+
+```bash
+# Auto-detect from project commands
+{project.commands.dev} &
+DEV_PID=$!
+sleep 5  # Wait for server startup
+```
+
+2. **Spawn evaluator agent** (sonnet, independent context — no access to generator's conversation):
+
+```
+Agent(model="sonnet", subagent_type="general-purpose", prompt="
+  You are an INDEPENDENT evaluator. You did NOT build this feature — your job is to
+  find what's wrong, not confirm what's right. Be skeptical.
+
+  ## Feature Under Evaluation
+  {feature name and description from product-spec.md}
+
+  ## Acceptance Criteria (from product spec)
+  {user stories and success metrics from product-spec.md}
+
+  ## Evaluation Rubric
+
+  Grade each criterion on a 1-5 scale:
+
+  ### 1. Functional Completeness (weight: 40%)
+  Does every acceptance criterion from the product spec actually work when you interact with it?
+  - 5: All criteria met, edge cases handled
+  - 3: Core flow works, some criteria missing or broken
+  - 1: Major functionality missing or broken
+
+  ### 2. Design Quality (weight: 20%)  [UI features only]
+  Does the UI have a coherent visual identity? Typography hierarchy, spacing, color consistency?
+  - 5: Polished, intentional design decisions throughout
+  - 3: Functional but generic/template-like
+  - 1: Inconsistent, broken layout, or unstyled
+
+  ### 3. Error Handling & Edge Cases (weight: 20%)
+  What happens with empty states, invalid input, network errors, unauthorized access?
+  - 5: Graceful handling for all edge cases
+  - 3: Happy path works, some edge cases unhandled
+  - 1: Crashes or shows raw errors on basic edge cases
+
+  ### 4. Performance & Responsiveness (weight: 20%)
+  Is the feature fast? Does it feel responsive? Any jank or unnecessary loading?
+  - 5: Instant feedback, no perceptible delays
+  - 3: Acceptable speed, minor jank
+  - 1: Slow, unresponsive, or freezes
+
+  ## Tools Available
+  Use Chrome DevTools MCP or browse CLI to:
+  - Navigate to the feature's pages/routes
+  - Click through all user flows from the acceptance criteria
+  - Test with invalid inputs, empty states, missing auth
+  - Check console for errors/warnings
+  - Check network tab for failed requests
+  - Take screenshots of key states
+
+  ## Output Format
+  ```markdown
+  # Evaluation Report: {feature name}
+
+  ## Scores
+  | Criterion                 | Score | Weight | Weighted |
+  |---------------------------|-------|--------|----------|
+  | Functional Completeness   | X/5   | 40%    | X.X      |
+  | Design Quality            | X/5   | 20%    | X.X      |
+  | Error Handling            | X/5   | 20%    | X.X      |
+  | Performance               | X/5   | 20%    | X.X      |
+  | **Total**                 |       |        | **X.X/5**|
+
+  ## Pass/Fail: {PASS if total >= 3.5, FAIL otherwise}
+
+  ## Critical Findings (must fix before QA)
+  - [finding with reproduction steps]
+
+  ## Improvement Suggestions (nice to have)
+  - [suggestion]
+
+  ## Screenshots
+  - [description of what was captured]
+  ```
+
+  IMPORTANT: You are evaluating, not fixing. Report findings only. Do NOT modify any code.
+")
+```
+
+3. **Process evaluation results:**
+
+| Total Score | Action |
+|-------------|--------|
+| >= 4.0      | Proceed to Phase 5 (QA) |
+| 3.5 - 3.9   | Fix critical findings only, then proceed to Phase 5 |
+| < 3.5       | Fix all critical findings + re-run evaluator (max 1 retry) |
+
+4. **Fix critical findings** from the evaluation report:
+   - Spawn a sonnet fix agent with the evaluator's findings (NOT the evaluator itself — maintain independence)
+   - Fix agent addresses each critical finding
+   - Run verify triple after fixes
+   - Commit: `fix(feature): address evaluator findings`
+
+5. **Stop dev server:** `kill $DEV_PID`
+
+6. **Write evaluation-report.md** to `.claude/ship/{feature-slug}/`
+
+7. **Update state.json** → evaluation complete
+
+#### Skip Conditions
+
+- Feature has < 3 tasks → skip (overhead exceeds benefit)
+- Feature is database/config only → skip (no interactive surface)
+- No dev server command available → skip (cannot interact)
+- `slots.qa === 'none'` → skip (user opted out of testing)
+
+#### Cost
+
+~$0.50-1.00 per evaluation (sonnet agent + Chrome DevTools interaction). The evaluator catches UX issues, broken flows, and missing edge cases that static code review cannot — worth it for any feature with a user-facing surface.
+
+#### Why a Separate Agent (Not Self-Evaluation)
+
+Anthropic's core finding: self-evaluation is systematically biased. The generator that built the feature will rate its own work 4-5/5 regardless of actual quality. An independent evaluator with no access to the generator's reasoning or conversation is calibrated toward finding problems, not confirming success. This is the same principle behind QA being a separate team from engineering.
 
 ### Agent Prompt Template
 
@@ -1017,24 +1156,81 @@ Your final message MUST start with exactly one of these status lines:
 
 ## Context Management
 
-### The 80% Rule
+### Structured Handoff (Replaces Compaction)
 
-Monitor context usage throughout execution. When approaching limits:
+When context pressure builds during a long-running `/ship` session, do a **full context reset with a structured handoff document** rather than relying on conversation compaction. Anthropic's research found that compaction preserves "context anxiety" — the model becomes increasingly cautious, produces shorter outputs, and rushes to complete tasks prematurely. A clean handoff eliminates this.
+
+**Based on:** Anthropic engineering finding that full context resets with structured handoffs outperform compacted contexts for long-running agent sessions.
+
+#### Trigger: The 80% Rule
 
 1. **At ~70%:** Finish current task, commit, update state.json
-2. **At ~80%:** Stop execution, commit everything, save full state
-3. **Tell user:** "Committed all progress through {phase}, {N}/{total} tasks complete. Run `/ship --resume` to continue from where I left off."
+2. **At ~80%:** Stop execution. Write the handoff document. Commit everything.
+3. **Tell user:** "Context pressure reached. Wrote handoff document. Run `/ship --resume` to continue with a fresh context."
+
+#### Handoff Document: `.claude/ship/{feature-slug}/handoff.md`
+
+When context pressure triggers, write this document before stopping:
+
+```markdown
+# Handoff: {Feature Name}
+# Generated: {timestamp}
+# Phase: {current phase} | Task: {current task}/{total tasks}
+
+## State Summary
+- **Current phase:** {phase name and status}
+- **Completed tasks:** {list with one-line summaries}
+- **In-progress task:** {what was being worked on when handoff triggered}
+- **Remaining tasks:** {ordered list from plan.md}
+
+## Key Decisions Made
+{Decisions made during this session that aren't captured in spec files.
+ Example: "Chose to use server actions instead of API routes for mutations
+ because the form components are all server components."}
+
+## Active Concerns
+{Any DONE_WITH_CONCERNS items, review findings not yet addressed,
+ or architectural questions that came up during implementation.}
+
+## Files Modified This Session
+{List of files created/modified with one-line description of what changed.
+ This helps the resumed session avoid re-reading unchanged files.}
+
+## Verify State
+- Typecheck: {PASS/FAIL/NOT_RUN}
+- Tests: {PASS/FAIL/NOT_RUN}
+- Build: {PASS/FAIL/NOT_RUN}
+- Last commit: {hash} {message}
+
+## Resume Instructions
+1. Read state.json for phase/task status
+2. Read {list only the spec files relevant to remaining work}
+3. Skip reading: {files that are complete and won't change}
+4. Continue from: {exact task and step to resume at}
+```
+
+#### Why Handoff > Compaction
+
+| Compaction                                         | Structured Handoff                                     |
+|----------------------------------------------------|--------------------------------------------------------|
+| Preserves conversation tone (including anxiety)    | Fresh context, clean mental state                      |
+| Lossy — important details may be dropped           | Lossless — all decisions explicitly captured            |
+| Model sees its own hesitations and workarounds     | Model sees only the objective state                    |
+| Quality degrades over long sessions                | Quality resets to baseline on resume                   |
+| No control over what's retained                    | Author controls exactly what transfers                 |
 
 ### Resume Protocol
 
 When `/ship --resume` or `/ship` finds existing state:
 
-1. Read state.json
-2. Read all artifacts (product-spec.md, tech-spec.md, plan.md)
-3. Check git status for any uncommitted work
-4. Identify next incomplete phase/task
-5. Continue from that exact point
-6. Skip re-reading files that haven't changed
+1. Read state.json for phase/task status
+2. **Check for handoff.md** — if present, read it FIRST (it's the primary context)
+3. Read spec artifacts only as needed (product-spec.md, tech-spec.md, plan.md)
+4. Check git status for any uncommitted work
+5. Identify next incomplete phase/task from handoff or state.json
+6. Continue from that exact point
+7. Skip re-reading files listed as complete in the handoff
+8. **Delete handoff.md** after successful resume (it's consumed)
 
 ---
 
@@ -1285,6 +1481,7 @@ This skill has access to several MCP servers. Use the right tool for each situat
 
 ## Version
 
+**v6.0.0** — Anthropic harness design patterns: (1) Phase 4.7 Interactive Evaluation — independent evaluator agent (sonnet) interacts with running app via Chrome DevTools/browse CLI and grades against rubric (functional completeness, design quality, error handling, performance). Closes self-evaluation bias gap. (2) Structured handoff template replaces compaction for long-running sessions — full context reset with state summary + remaining tasks + key decisions, eliminating "context anxiety" pattern.
 **v5.1.0** — Extended Superpowers patterns: (1) Section-by-section hard-gate approval on product spec (Phase 1) and tech spec (Phase 2) — each section approved independently before the next is written, with "approve all" shortcut. (2) Implementer status protocol (DONE/DONE_WITH_CONCERNS/NEEDS_CONTEXT/BLOCKED) with 3-strikes architectural escalation rule — stops blind retries, surfaces design issues to user. (3) Per-group mini spec check (haiku) in Phase 4 for early spec-drift detection before full Phase 4.5 review.
 **v5.0.0** — Three Superpowers patterns: (1) Phase 4.5 replaced with two-stage subagent review loop (spec compliance + code quality, both sonnet, run in parallel). (2) HARD-GATE on Phase 2→3 transition — tech spec requires explicit user approval before planning begins. (3) 2-5 minute task granularity in Phase 3 — every task must specify exact file paths and expected code output.
 **v4.2.0** — Fresh context per executor: each spawned agent gets a clean context with only its task prompt, project context, and filtered learnings. No conversation history forwarded. Prevents context rot in long sessions.

@@ -1161,6 +1161,78 @@ Before merging each completed feature, run a **two-stage subagent review**. This
 
 **Cost:** ~$0.50-1.00 per feature (both reviewers are sonnet). Worth it — catching a bug pre-merge is 10x cheaper than debugging it post-integration.
 
+### Phase 4.65: Interactive Evaluation (Per Feature)
+
+After the two-stage code review (Phase 4.6) and before merge (Phase 5), run an **independent evaluator agent** that interacts with the running feature and grades it against acceptance criteria. This closes the self-evaluation bias gap — the agent that built the feature cannot objectively assess its own work.
+
+**Based on:** Anthropic's planner/generator/evaluator harness pattern. Self-evaluation is systematically biased; independent evaluators tuned toward skepticism catch issues that code review alone misses.
+
+#### When to Run
+
+- Feature has UI components (`frontend`, `ui`, `general` with UI tasks) → **always run**
+- Feature is API-only (`api`, `backend`) → **run with curl/httpie testing** against dev server
+- Feature is `database`, `devops`, `testing` → **skip** (no interactive surface)
+
+#### Process
+
+For each completed feature with an interactive surface:
+
+1. **Start dev server** in the feature's worktree:
+
+   ```bash
+   cd {worktree-path} && {project.commands.dev} &
+   DEV_PID=$!
+   sleep 5
+   ```
+
+2. **Spawn evaluator agent** (sonnet, independent — no access to the feature agent's context):
+
+```
+Agent(model="sonnet", subagent_type="general-purpose", prompt="
+  You are an INDEPENDENT evaluator. You did NOT build this feature — your job is to
+  find what's wrong, not confirm what's right. Be skeptical.
+
+  ## Feature: {feature-name}
+  ## Acceptance Criteria
+  {task-list from the feature definition}
+
+  ## Evaluation Rubric
+  Grade each on a 1-5 scale:
+  1. **Functional Completeness** (40%) — Do all acceptance criteria actually work?
+  2. **Error Handling** (30%) — What happens with invalid input, empty states, edge cases?
+  3. **Visual/UX Quality** (30%) — [UI only] Is the interface coherent and responsive?
+
+  Use Chrome DevTools MCP or browse CLI to interact with the running app.
+  Navigate to relevant pages, test each acceptance criterion, try edge cases.
+
+  ## Output
+  | Criterion | Score | Weighted |
+  |-----------|-------|----------|
+  Total: X.X/5 | PASS (>=3.5) or FAIL (<3.5)
+
+  ## Critical Findings (must fix before merge)
+  - [finding with steps to reproduce]
+
+  IMPORTANT: You are evaluating, not fixing. Report only.
+")
+```
+
+3. **Process results:**
+   - Score >= 3.5 → proceed to merge
+   - Score < 3.5 → route critical findings to a sonnet fix agent (NOT the evaluator), fix, re-run verify triple, then proceed
+
+4. **Stop dev server:** `kill $DEV_PID`
+
+#### Skip Conditions
+
+- Feature has < 3 tasks → skip
+- Feature type is `database`, `devops`, `testing` → skip
+- No dev server command available → skip
+
+#### Cost
+
+~$0.50-1.00 per feature (sonnet + browser interaction). Runs only on features with UI/API surfaces, not on every feature.
+
 ### Phase 5: Progressive Merge
 
 ```bash
@@ -1284,6 +1356,86 @@ Display live progress during execution:
 ║ Merged: 1/4 │ Active: 2 │ Blocked: 1 │ Elapsed: 12m         ║
 ╚══════════════════════════════════════════════════════════════╝
 ```
+
+## Context Management: Structured Handoff
+
+When the orchestrator's context approaches limits during a long-running parallel-dev session, use a **full context reset with structured handoff** instead of relying on compaction. Anthropic's research found compaction preserves "context anxiety" — the orchestrator becomes increasingly cautious and rushes to completion prematurely.
+
+### Trigger
+
+When context usage approaches ~80%:
+
+1. Commit all current work in all active worktrees
+2. Update `.parallel-dev/active-tasks.json` with current state
+3. Write the handoff document
+4. Tell user: "Context pressure reached. Wrote handoff. Run `/parallel-dev resume` to continue."
+
+### Handoff Document: `.parallel-dev/handoff.md`
+
+```markdown
+# Handoff: Parallel-Dev Session
+
+# Generated: {timestamp}
+
+## Feature Status
+
+| Feature | Branch | Status | Tasks Done | Worktree |
+| ------- | ------ | ------ | ---------- | -------- |
+
+{for each feature: id, branch, status, completed/total tasks, worktree path}
+
+## Active Decisions
+
+{Decisions made during orchestration that aren't in the state file.
+Example: "Moved dashboard to Round 2 because auth exposed a new API shape
+that dashboard needs."}
+
+## Blocked Features
+
+{Any features with STATUS: BLOCKED or NEEDS_CONTEXT, with the error details
+and what was tried.}
+
+## CI State
+
+{Per-feature CI status, any auto-fix attempts, escalation state.}
+
+## Integration State
+
+- Integration branch: {name}
+- Features merged to integration: {list}
+- Integration tests: {PASS/FAIL/NOT_RUN}
+- Conflicts detected: {list or none}
+
+## Resume Instructions
+
+1. Read `.parallel-dev/active-tasks.json` for feature states
+2. Read `.parallel-dev-state.json` for full orchestration state
+3. Features still running: {list — check if their worktree agents completed}
+4. Next action: {what the orchestrator should do next}
+5. Skip re-reading: {features that are fully merged and done}
+```
+
+### Resume Protocol
+
+When `/parallel-dev resume` finds existing state:
+
+1. Read `.parallel-dev-state.json`
+2. **Check for `handoff.md`** — if present, read it FIRST (primary context source)
+3. Read `.parallel-dev/active-tasks.json` for feature states
+4. Check each worktree for completion markers or uncommitted work
+5. Resume orchestration from the handoff's "Next action"
+6. **Delete `handoff.md`** after successful resume
+
+### Why Handoff > Compaction
+
+| Compaction                                            | Structured Handoff                                 |
+| ----------------------------------------------------- | -------------------------------------------------- |
+| Loses track of which features are blocked and why     | Explicit blocked-feature section with error chains |
+| Orchestrator forgets dependency decisions mid-session | All decisions captured in "Active Decisions"       |
+| Quality degrades — rushes to merge prematurely        | Fresh context, clean orchestration state           |
+| No control over what context is retained              | Author controls exactly what transfers             |
+
+---
 
 ## State Persistence
 
@@ -1459,6 +1611,7 @@ if (hasCycle(graph)) {
 
 ## Version History
 
+**v3.0.0** — Anthropic harness design patterns: (1) Phase 4.65 Interactive Evaluation — independent evaluator agent per feature that interacts with running app via Chrome DevTools/browse CLI, grades against acceptance criteria with rubric scoring. Closes self-evaluation bias gap. (2) Structured handoff template replaces compaction for long-running orchestrator sessions — full context reset with feature status, active decisions, and resume instructions.
 **v2.0.0** — Added CI reaction loops (Phase 4.5), eight-slot plugin architecture, and `ao` CLI delegation. Inspired by [ComposioHQ/agent-orchestrator](https://github.com/ComposioHQ/agent-orchestrator).
 **v1.0.0** — Initial release with worktree-based parallel development, dependency graphs, and progressive merge.
 
