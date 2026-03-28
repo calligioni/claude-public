@@ -33,4 +33,4 @@
 - [tech_anthropic_harness_design.md](tech_anthropic_harness_design.md) — Planner/generator/evaluator three-agent pattern and structured handoff (no compaction) for long-running agent sessions — from Anthropic engineering post on frontend design
 
 # currentDate
-Today's date is 2026-03-26.
+Today's date is 2026-03-27.
