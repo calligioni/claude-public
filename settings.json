@@ -281,6 +281,7 @@
   "autoMemoryDirectory": "~/.claude-setup/memory/auto",
   "skipDangerousModePermissionPrompt": true,
   "autoUpdaterStatus": "enabled",
+  "remoteControlForAllSessions": true,
   "mcpSearchAutoThreshold": 15,
   "default_arguments": [
     "--dangerously-skip-permissions"
