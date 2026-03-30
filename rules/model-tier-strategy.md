@@ -90,11 +90,23 @@ Within the current Claude API ecosystem, this is already partially implemented v
 
 ### Local Model Tier (Tier 0)
 
-With [OpenClaw-RL](https://github.com/Gen-Verse/OpenClaw-RL) (Princeton, 2026), Tier 0 is now concrete. OpenClaw-RL is a fully async RL framework that turns conversations into training signals — no manual labeling. Every reply, tool output, and environment state change becomes a reward signal. A personal agent improved from score 0.17 → 0.81 after 36 conversations.
+Tier 0 is production-viable today thanks to two converging breakthroughs:
 
-**Architecture:** Four async loops — agent serving, rollout collection, PRM/judge evaluation, policy training (PPO/GRPO). Models deploy as OpenAI-compatible APIs. Supports local GPU via LoRA and serverless cloud (Tinker).
+**1. TurboQuant (Google Research, ICLR 2026)** — compresses transformer KV cache from 16-bit to ~3-bit per value. 6x memory reduction, 8x faster attention on H100, zero accuracy loss, no retraining. Two components: PolarQuant (rotation that normalizes vector distributions) and QJL (reduces residual error to a single sign bit). Approaches the Shannon limit — there is almost no room left for compression-only improvements. Community rebuilt it from paper math within 24 hours across PyTorch Triton, Apple MLX, and llama.cpp/CUDA.
 
-**Reference model: Nvidia Nemotron 3 Super** — 120B MoE (12B active params), 1M native context, DeepSeek-R1-style chain-of-thought, native tool-call support, 85.6% on PinchBench (OpenClaw agentic benchmark). Freely available via Ollama (`ollama pull nemotron-3-super`). NVIDIA and Ollama co-announced it as the reference deployment target for OpenClaw (`ollama launch openclaw --model nemotron-3-super:cloud`). Native tool-call support means Tier 0 can now handle light agentic tasks, not just pure text generation.
+**Hardware impact with TurboQuant:**
+
+| Model Size | KV Cache Before | KV Cache After | Runs On                   |
+| ---------- | --------------- | -------------- | ------------------------- |
+| 8B         | ~2 GB           | ~330 MB        | Any Mac, any GPU          |
+| 35B        | ~10 GB          | ~1.7 GB        | Mac Mini M4, RTX 3060     |
+| 70B        | ~80 GB          | ~13 GB         | RTX 4090 solo, Mac Studio |
+
+**Caveats:** 8x speedup is for attention logits specifically, not full inference. Testing validated up to ~8B; 70B+ is unproven in the wild. Naive QJL implementation (without proper bias correction) produces garbage — the math must be followed exactly.
+
+**2. OpenClaw-RL (Princeton, 2026)** — fully async RL framework that turns conversations into training signals. Every reply, tool output, and environment state change becomes a reward signal. A personal agent improved from score 0.17 → 0.81 after 36 conversations. Architecture: four async loops — agent serving, rollout collection, PRM/judge evaluation, policy training (PPO/GRPO). Models deploy as OpenAI-compatible APIs.
+
+**Reference model: Nvidia Nemotron 3 Super** — 120B MoE (12B active params), 1M native context, DeepSeek-R1-style chain-of-thought, native tool-call support, 85.6% on PinchBench. With TurboQuant, its ~35 GB KV cache drops to ~6 GB — comfortably fits on a single RTX 4090 or Mac Studio.
 
 | Tier       | Model                                 | Cost   | Use For                                                                                              |
 | ---------- | ------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------- |
@@ -103,7 +115,7 @@ With [OpenClaw-RL](https://github.com/Gen-Verse/OpenClaw-RL) (Princeton, 2026), 
 | **Tier 2** | Sonnet                                | Medium | Nuanced judgment, code review, implementation                                                        |
 | **Tier 3** | Opus                                  | High   | Architecture, security, complex reasoning                                                            |
 
-**Deployment path:** Nemotron 3 Super via Ollama (primary) + OpenClaw-RL for continuous improvement. Fallback: Qwen 3.5-4B (edge) or Qwen 3.5-8B (quality) via Ollama/LM Studio. MLX-optimized variants available for Apple Silicon.
+**Deployment path:** Nemotron 3 Super via Ollama + TurboQuant (primary) + OpenClaw-RL for continuous improvement. Fallback: Qwen 3.5-4B (edge) or Qwen 3.5-8B (quality) via Ollama/LM Studio. MLX-optimized variants available for Apple Silicon. TurboQuant MLX implementation available for all models.
 
 ### Practical Takeaway
 
