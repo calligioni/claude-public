@@ -271,7 +271,16 @@
   "enabledPlugins": {
     "swift-lsp@claude-plugins-official": true,
     "discord@claude-plugins-official": true,
-    "claude-subconscious@letta-ai-claude-subconscious": false
+    "claude-subconscious@letta-ai-claude-subconscious": false,
+    "codex@openai-codex": true
+  },
+  "extraKnownMarketplaces": {
+    "openai-codex": {
+      "source": {
+        "source": "github",
+        "repo": "openai/codex-plugin-cc"
+      }
+    }
   },
   "spinnerVerbs": {
     "mode": "append",
@@ -465,14 +474,6 @@
           "mcp"
         ],
         "description": "On-device hybrid search (BM25 + vector + LLM rerank) over indexed markdown collections: skills, agents, rules, memory"
-      }
-    }
-  },
-  "extraKnownMarketplaces": {
-    "openai-codex": {
-      "source": {
-        "source": "github",
-        "repo": "openai/codex-plugin-cc"
       }
     }
   }

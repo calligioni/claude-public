@@ -1094,8 +1094,12 @@ Your final message MUST start with exactly one of these status lines:
 4. **Commit fixes:** `fix(feature): resolve QA issues - iteration N`
 5. **Re-run QA** (Phase 5)
 6. **If still failing after 3 iterations:**
-   - Write remaining issues to `qa-remaining.md`
-   - Ask user for guidance
+   - **Codex rescue (optional):** If the `codex` plugin is installed, delegate remaining issues to Codex before giving up:
+     ```
+     /codex:rescue --background "Fix cycle failed after 3 iterations. Remaining issues: {issues from qa-report.md}. Fix and commit."
+     ```
+     If Codex resolves it, re-run QA (Phase 5) one final time.
+   - If Codex is unavailable or also fails: write remaining issues to `qa-remaining.md` and ask user for guidance
 7. **Update state.json** with iteration count
 
 ---

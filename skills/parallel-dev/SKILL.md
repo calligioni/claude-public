@@ -769,7 +769,12 @@ Teammate "{feature-id}":
   | `NEEDS_CONTEXT`      | Provide context via direct message, or escalate to user if unavailable              |
   | `BLOCKED`            | If 3+ fix attempts: flag as architectural issue, ask user. Do NOT re-spawn blindly. |
 
-- **Architectural escalation (3-strikes):** When a teammate reports BLOCKED after 3 fix attempts, present to user: "Feature {name} blocked after 3 fix attempts. This likely indicates an architectural issue. Error: {details}. [Redesign / Skip / Manual fix]"
+- **Architectural escalation (3-strikes):** When a teammate reports BLOCKED after 3 fix attempts, try the Codex rescue path first (see below). If Codex is unavailable or also fails, present to user: "Feature {name} blocked after 3 fix attempts. This likely indicates an architectural issue. Error: {details}. [Redesign / Skip / Manual fix]"
+- **Codex rescue (optional):** If the `codex` plugin is installed and the agent reports `STATUS: BLOCKED`, delegate the blocker to Codex before escalating to the user:
+  ```
+  /codex:rescue --background "Feature {name} is blocked in worktree {path}. Error: {details}. Fix the issue and commit."
+  ```
+  If Codex resolves it, update feature status to `completed`. If Codex also fails, escalate to user as normal.
 - When all features complete, begin Phase 5 (merge)
 
 **Messaging discipline:** Teammates should use direct messages only. Never broadcast for progress updates or individual findings. Only broadcast for blocking discoveries that change everyone's approach.
