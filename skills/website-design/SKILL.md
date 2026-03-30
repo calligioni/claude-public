@@ -743,6 +743,44 @@ xl:  1280px  /* Desktops */
 
 ---
 
+## Precision Text Layout (pretext)
+
+When a design requires **exact text height measurement** without DOM reflow — e.g., dynamic card heights, truncation logic, virtualized lists, or shrink-wrap containers — use [pretext](https://github.com/chenglou/pretext) instead of `getBoundingClientRect`, `offsetHeight`, or hidden DOM elements.
+
+### When to use
+
+- Variable-height list items that need pre-computed heights (virtualization)
+- Shrink-wrap containers around multi-line text
+- Server-side or build-time text layout (no DOM available)
+- Any measurement in a render loop or resize handler (avoids forced reflow)
+
+### Pattern
+
+```tsx
+import { prepare, layout } from "pretext";
+
+// One-time: measure font metrics via canvas (do once per font)
+const font = prepare(canvasContext, "16px Inter");
+
+// Pure arithmetic after this — 0.09ms for 500 texts
+const { height, lines } = layout(font, text, maxWidth);
+```
+
+### Key properties
+
+- **Zero DOM reads** after initial `prepare()` — all subsequent calls are pure math
+- **Full Unicode**: bidi, Arabic, CJK, emoji
+- `walkLineRanges()` gives per-line character ranges for custom rendering
+- 15K+ stars, by chenglou (React core team alum), March 2026
+
+### Do NOT use pretext for
+
+- Simple CSS truncation (`line-clamp`, `text-overflow: ellipsis`)
+- Fixed-height layouts where text measurement isn't needed
+- Canvas-only rendering (use `ctx.measureText` directly)
+
+---
+
 ## Accessibility Checklist
 
 - [ ] Sufficient color contrast (4.5:1 for text)
