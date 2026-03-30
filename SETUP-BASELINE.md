@@ -96,7 +96,12 @@ AGENT-TEAMS-STRATEGY.md, memory-strategy.md, model-tier-strategy.md, nuvini-sync
 | PostToolUse        | Auto-formatting, skill execution logging |
 | TeammateIdle       | Task assignment prompts                  |
 | TaskCompleted      | Auto-assignment for idle teammates       |
+| TaskCreated        | Task creation logging                    |
 | PostCompact        | State file recovery                      |
+| CwdChanged         | Git branch context refresh               |
+| StopFailure        | API error logging                        |
+| ConfigChange       | Config audit logging                     |
+| Elicitation/Result | MCP elicitation logging                  |
 
 ## Role Coverage
 
