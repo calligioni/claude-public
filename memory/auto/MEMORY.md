@@ -12,12 +12,8 @@
 
 ## Projects
 
-<<<<<<< HEAD
 - [project_claudia_router.md](project_claudia_router.md) — Claudia router replacing OpenClaw on VPS — Claude Code Agent SDK sessions with 3-tier fallback
 - [project_claudia_migration_complete.md](project_claudia_migration_complete.md) — Claudia fully replaced OpenClaw (2026-03-31) — voice, TTS, STT, proactive scheduler, media, Twilio, 5 channels
-=======
-- [project_claudia_router.md](project_claudia_router.md) — Claudia — TypeScript router replacing OpenClaw on VPS, routes multi-channel messages to Claude Code Agent SDK sessions with 3-tier fallback
->>>>>>> 561f435 (auto: sync claude-setup)
 - [project_esocial_plan.md](project_esocial_plan.md) — Contably eSocial module activation via TecnoSpeed middleware — decisions, phases, and partner strategy
 - [project_nuvini_ir_deploy.md](project_nuvini_ir_deploy.md) — nuvini-ir deploys via Cloudflare Pages wrangler upload — eleventy build to \_site, not auto-deployed from git
 
@@ -43,4 +39,5 @@
 - [tech_anthropic_harness_design.md](tech_anthropic_harness_design.md) — Planner/generator/evaluator three-agent pattern and structured handoff (no compaction) for long-running agent sessions — from Anthropic engineering post on frontend design
 
 # currentDate
+
 Today's date is 2026-03-30.
