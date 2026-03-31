@@ -13538,3 +13538,33 @@
   "cwd": "/Volumes/AI/Code/pr-impact",
   "hadError": false
 }
+{
+  "timestamp": "2026-03-31T07:36:14Z",
+  "date": "2026-03-31",
+  "skill": "deep-research",
+  "args": "Research intelligent per-agent/per-task model routing in multi-agent systems for Claudia (9-agent Discord/Telegram/Slack/WhatsApp router). Topics: 1) Model routing patterns (Martian router, Unify.ai, RouteLLM by LMSys, OpenRouter routing) and what signals they use; 2) Classifier-based routing accuracy and latency overhead; 3) Per-agent persona mapping for agents: buzz (social/content), bella (task CRUD), marco (travel/logistics), arnold (fitness advice), cris (ops/M&A analysis), julia (tech/code+tools), rex (security/deep reasoning), claudia (orchestrator), north (strategic synthesis) — which can use cheaper models?; 4) Hybrid routing patterns — local model first, escalate to Claude if confidence low or tools needed; 5) Cost analysis: all-Sonnet vs tiered Haiku/Sonnet/Opus vs hybrid local+Claude. Current baseline: ~$0.05-0.10/message, ~8s latency via Claude Sonnet. Want concrete recommendations with cost/quality tradeoffs.",
+  "sessionId": "73946bd2-c9bd-4fa8-ad6f-7fec29059ecd",
+  "project": "Unknown",
+  "cwd": "/Volumes/AI/Code/claudia",
+  "hadError": false
+}
+{
+  "timestamp": "2026-03-31T07:37:14Z",
+  "date": "2026-03-31",
+  "skill": "deep-research",
+  "args": "Research the current state of the art (as of March 2026) for running 100-1000 concurrent AI agents efficiently. Focus areas: 1) Orchestration frameworks (OpenAI Swarm, CrewAI, AutoGen, LangGraph, Claude Agent SDK teams, Semantic Kernel, newer frameworks) 2) Inference serving at scale (Ollama, vLLM, SGLang, TGI, llama.cpp server) for 100+ concurrent requests with actual throughput numbers 3) MoE models (Nemotron 3 Super 120B/12B active, DeepSeek-V3, Qwen 3.5 MoE) for cost-effective inference 4) Batching and scheduling patterns (continuous batching, speculative decoding, prefix caching) 5) Real-world examples of 100+ concurrent agents on single server or small cluster. Need specifics: tokens/second, concurrent connections, RAM/VRAM requirements, actual benchmarks.",
+  "sessionId": "73946bd2-c9bd-4fa8-ad6f-7fec29059ecd",
+  "project": "Unknown",
+  "cwd": "/Volumes/AI/Code/claudia",
+  "hadError": false
+}
+{
+  "timestamp": "2026-03-31T07:38:15Z",
+  "date": "2026-03-31",
+  "skill": "deep-research",
+  "args": "Practical limits of serving AI models to 100-1000 concurrent agent requests on CPU-only VPS (94GB RAM, 18-core AMD EPYC) and Mac Mini M4 Pro (48GB RAM, MLX GPU). Research: 1) Ollama concurrent request limits and throughput for Nemotron 3 Super 120B MoE and smaller models like Qwen 3.5-8B/35B-MoE on CPU-only; 2) vLLM CPU-only inference viability and benchmarks; 3) SGLang without GPU and RadixAttention prefix caching; 4) llama.cpp server mode concurrent request handling and batching slots; 5) mlx_lm.server concurrent connections on M4 Pro 48GB with Qwen 3.5-35B-A3B MoE; 6) Hybrid Mac Mini GPU + VPS CPU load balancer architecture; 7) TurboQuant/KV cache quantization memory savings for concurrent sessions. Need hard numbers and practical recommendations for 100+ concurrent agent sessions.",
+  "sessionId": "73946bd2-c9bd-4fa8-ad6f-7fec29059ecd",
+  "project": "Unknown",
+  "cwd": "/Volumes/AI/Code/claudia",
+  "hadError": false
+}
