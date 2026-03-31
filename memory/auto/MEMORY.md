@@ -15,6 +15,7 @@
 - [project_claudia_router.md](project_claudia_router.md) — Claudia router replacing OpenClaw on VPS — Claude Code Agent SDK sessions with 3-tier fallback
 - [project_claudia_migration_complete.md](project_claudia_migration_complete.md) — Claudia fully replaced OpenClaw (2026-03-31) — voice, TTS, STT, proactive scheduler, media, Twilio, 5 channels
 - [project_esocial_plan.md](project_esocial_plan.md) — Contably eSocial module activation via TecnoSpeed middleware — decisions, phases, and partner strategy
+- [project_woodpecker_ci.md](project_woodpecker_ci.md) — Woodpecker CI on OKE at ci.contably.ai — replaces OCI DevOps, $0/month, kaniko builds, kubectl deploy
 - [project_nuvini_ir_deploy.md](project_nuvini_ir_deploy.md) — nuvini-ir deploys via Cloudflare Pages wrangler upload — eleventy build to \_site, not auto-deployed from git
 
 ## Tech Insights
