@@ -13508,3 +13508,13 @@
   "cwd": "/Volumes/AI/Code/openclaw-vps",
   "hadError": false
 }
+{
+  "timestamp": "2026-03-31T02:56:16Z",
+  "date": "2026-03-30",
+  "skill": "deep-plan",
+  "args": "Build a \"PR Impact Optimizer\" skill for Nuvini (NVNI, Nasdaq small-cap) that maximizes positive stock price impact of press releases while staying within SEC regulations. The full scope involves 7 phases:\n\n1) **Data Collection**: Research all PR titles and first paragraphs from small-cap (<$300M market cap) Nasdaq-listed companies whose PR caused at least 50% stock price growth on announcement day AND did not drop the following day (two consecutive days of upside).\n\n2) **Ranking**: Rank those PRs by % daily volume difference vs 10-day VWAP for both days (announcement day and day after).\n\n3) **Pattern Analysis**: Identify structure, words, tone, sentiment patterns common to the top 200 performing PRs.\n\n4) **Predictive Algorithm**: Develop an algorithm that can predict the % impact of a specific format, sequence, structure, and word choices on new PRs.\n\n5) **Nuvini Backtesting**: Run the algorithm against Nuvini's press releases since Jan 2025 (from https://finance.yahoo.com/quote/NVNI/news/) and compare to the actual impact NVNI PRs had on stock price under the same criteria.\n\n6) **Nuvini Adaptation**: Adapt the algorithm to include Nuvini-specific factors (sector, market cap, historical patterns, investor base characteristics).\n\n7) **Simulation**: Run 3 simulations of a specific PR document at /Users/psm2/Downloads/Nuvini-BYSNAAcquisitionPressRelease_Improved.docx\n\nThe end goal is a reusable Claude Code skill that can: ingest a draft PR, analyze it against the trained model, score it, suggest rewrites optimized for stock impact, and ensure SEC compliance. This could involve research agents, databases (Supabase), web scraping for financial data, and NLP analysis.\n\nKey constraints:\n- Must comply with SEC regulations for public company announcements (Reg FD, anti-fraud provisions)\n- Nuvini trades as NVNI on Nasdaq\n- User is Pierre Schurmann, M&A analyst at Nuvini Group\n- Tech stack: TypeScript, pnpm, Supabase, Tailwind\n- Prefer parallel execution, swarm agents for research phases\n- This will become a Claude Code skill (SKILL.md format)",
+  "sessionId": "a33f5246-114e-46d5-ab2f-4c145739f305",
+  "project": "Unknown",
+  "cwd": "/Volumes/AI/Code/claudia",
+  "hadError": false
+}
