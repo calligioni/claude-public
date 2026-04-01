@@ -108,17 +108,19 @@ Tier 0 is production-viable today thanks to two converging breakthroughs:
 
 **Reference model: Nvidia Nemotron 3 Super** — 120B MoE (12B active params), 1M native context, DeepSeek-R1-style chain-of-thought, native tool-call support, 85.6% on PinchBench. With TurboQuant, its ~35 GB KV cache drops to ~6 GB — comfortably fits on a single RTX 4090 or Mac Studio.
 
-| Tier        | Model                                 | Cost   | Use For                                                                                              |
-| ----------- | ------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------- |
-| **Tier 0a** | Cloud (Qwen 3.6 Plus via OpenRouter)  | Free\* | 1M context, cloud-hosted — no setup, use while preview pricing lasts                                 |
-| **Tier 0b** | Local (Nemotron 3 Super, OpenClaw-RL) | Free   | Text generation, template expansion, formatting, light agentic tasks — continuously improving via RL |
-| **Tier 1**  | Haiku                                 | Low    | Deterministic execution with tool use                                                                |
-| **Tier 2**  | Sonnet                                | Medium | Nuanced judgment, code review, implementation                                                        |
-| **Tier 3**  | Opus                                  | High   | Architecture, security, complex reasoning                                                            |
+| Tier        | Model                                              | Cost   | Use For                                                                                                            |
+| ----------- | -------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------ |
+| **Tier 0a** | Cloud (Qwen 3.6 Plus via OpenRouter)               | Free\* | 1M context, cloud-hosted — no setup, use while preview pricing lasts                                               |
+| **Tier 0b** | Local (Qwen3.5-27B-Claude-Opus-Distilled, primary) | Free   | Agentic coding, tool-calling subagent loops, feature implementation — proven 9+ min autonomous runs in Claude Code |
+| **Tier 1**  | Haiku                                              | Low    | Deterministic execution with tool use                                                                              |
+| **Tier 2**  | Sonnet                                             | Medium | Nuanced judgment, code review, implementation                                                                      |
+| **Tier 3**  | Opus                                               | High   | Architecture, security, complex reasoning                                                                          |
 
 \* Qwen 3.6 Plus Preview is free on OpenRouter as of March 2026 ($0/$0 per 1M tokens, 1M context). Previous gen (Qwen 3.5) went to $0.1/$0.3 after preview ended — expect similar. Any integration should fall back to Tier 0b or Tier 1 when pricing changes.
 
-**Deployment path:** Qwen 3.6 Plus via OpenRouter (cloud, free while preview lasts) for tasks that don't require local isolation. Nemotron 3 Super via Ollama + TurboQuant (local, always free) + OpenClaw-RL for continuous improvement. Fallback: Qwen 3.5-4B (edge) or Qwen 3.5-8B (quality) via Ollama/LM Studio. MLX-optimized variants available for Apple Silicon. TurboQuant MLX implementation available for all models.
+**Primary Tier 0b model: Qwen3.5-27B-Claude-4.6-Opus-Reasoning-Distilled** (`Jackrong/Qwen3.5-27B-Claude-4.6-Opus-Reasoning-Distilled`). SFT+LoRA fine-tune on Claude 4.6 Opus reasoning traces. Q4_K_M runs at ~16.5 GB VRAM, 29–35 tok/s on RTX 3090, full 262K context. Native tool-calling, thinking mode, self-correction — validated in Claude Code agentic loops (9+ min autonomous runs, zero human intervention). 353K+ HF downloads. Variants: GGUF (llama.cpp), v2 GGUF, MLX 4-bit (`mlx-community/Qwen3.5-27B-Claude-4.6-Opus-Distilled-MLX-4bit`).
+
+**Deployment path:** Qwen 3.6 Plus via OpenRouter (cloud, free while preview lasts) for tasks that don't require local isolation. Qwen3.5-27B-Claude-Opus-Distilled via Ollama/llama.cpp (local, primary for agentic coding). Nemotron 3 Super via Ollama + TurboQuant (local, alternative for non-coding generation) + OpenClaw-RL for continuous improvement. Fallback: Qwen 3.5-4B (edge) or Qwen 3.5-8B (quality) via Ollama/LM Studio. MLX-optimized variants available for Apple Silicon.
 
 ### Practical Takeaway
 
@@ -141,4 +143,5 @@ As of v2.1.75, Opus 4.6 defaults to **1M context** for Max/Team/Enterprise. This
 **If the subagent only reads files and reports results → haiku.**
 **If the subagent writes code or makes judgment calls → sonnet.**
 **If the subagent makes architectural or security decisions → opus.**
-**If the task is pure text generation or light agentic work with tool calls → Tier 0a (Qwen 3.6 Plus via OpenRouter) or Tier 0b (Nemotron 3 Super via Ollama).**
+**If the task is agentic coding with tool calls → Tier 0b (Qwen3.5-27B-Claude-Opus-Distilled via Ollama/llama.cpp).**
+**If the task is pure text generation or formatting → Tier 0a (Qwen 3.6 Plus via OpenRouter) or Tier 0b.**
