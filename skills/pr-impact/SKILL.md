@@ -288,6 +288,47 @@ If COMPLIANCE_SCORE < 70: add prominent warning "DO NOT RELEASE WITHOUT FIXING C
 3. {specific actionable change with example rewritten text}
 ```
 
+### Step 7: Export to Word (.docx)
+
+After writing the markdown report, export it to a Word document alongside the `.md` file.
+
+Save the markdown report to a file first:
+
+```bash
+# Save markdown report
+REPORT_DIR="/Volumes/AI/Code/pr-impact/output/reports"
+mkdir -p "$REPORT_DIR"
+TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+REPORT_MD="$REPORT_DIR/pr-impact-${TIMESTAMP}.md"
+# Write the report markdown to $REPORT_MD
+```
+
+Then convert to `.docx` using pandoc:
+
+```bash
+pandoc "$REPORT_MD" \
+  -o "${REPORT_MD%.md}.docx" \
+  --from markdown \
+  --to docx \
+  --toc \
+  --toc-depth=3 \
+  --metadata title="PR Impact Analysis: {PR_TITLE}" \
+  --metadata date="$(date +%Y-%m-%d)" \
+  --metadata author="PR Impact Optimizer — Nuvini" \
+  2>&1
+```
+
+If pandoc is not installed:
+
+```bash
+which pandoc || { echo "pandoc not found — install with: brew install pandoc"; }
+```
+
+Report both file paths to the user:
+
+- Markdown: `$REPORT_MD`
+- Word: `${REPORT_MD%.md}.docx`
+
 ---
 
 ## Mode 2: SIMULATE
@@ -363,6 +404,31 @@ Run the 4-agent analysis pipeline on each variant. Present comparative results.
 {which variant scores highest and why}
 {specific elements to combine from multiple variants}
 ```
+
+### Step 5: Export to Word (.docx)
+
+Save the simulation report and export to Word, same pattern as ANALYZE mode:
+
+```bash
+REPORT_DIR="/Volumes/AI/Code/pr-impact/output/reports"
+mkdir -p "$REPORT_DIR"
+TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+REPORT_MD="$REPORT_DIR/pr-simulation-${TIMESTAMP}.md"
+# Write the simulation report markdown to $REPORT_MD
+
+pandoc "$REPORT_MD" \
+  -o "${REPORT_MD%.md}.docx" \
+  --from markdown \
+  --to docx \
+  --toc \
+  --toc-depth=3 \
+  --metadata title="PR Simulation: {TITLE} — 3 Variants" \
+  --metadata date="$(date +%Y-%m-%d)" \
+  --metadata author="PR Impact Optimizer — Nuvini" \
+  2>&1
+```
+
+Report both file paths to the user.
 
 ---
 
