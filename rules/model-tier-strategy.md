@@ -120,14 +120,14 @@ Tier 0R: OpenRouter — Qwen 3.6 Plus (cloud, free while preview lasts)
 
 #### Combined Tier Table
 
-| Tier        | Model                                   | Cost   | Where Used                      |
-| ----------- | --------------------------------------- | ------ | ------------------------------- |
-| **Tier 0a** | Qwen 3.6 Plus via OpenRouter            | Free\* | Claudia fallback                |
-| **Tier 0b** | Qwen3.5-35B-A3B-4bit via MLX (Mac Mini) | Free   | Claudia Tier 2, text generation |
-| **Tier 0c** | Nemotron 3 Super via Ollama (VPS)       | Free   | Claudia Tier 3, CEO agents      |
-| **Tier 1**  | Haiku                                   | Low    | Claude Code subagents           |
-| **Tier 2**  | Sonnet                                  | Medium | Claude Code subagents           |
-| **Tier 3**  | Opus                                    | High   | Claude Code orchestration       |
+| Tier        | Model                                                  | Cost   | Where Used                      |
+| ----------- | ------------------------------------------------------ | ------ | ------------------------------- |
+| **Tier 0a** | Qwen 3.6 Plus via OpenRouter (1M ctx, native tool use) | Free\* | Claudia fallback                |
+| **Tier 0b** | Qwen3.5-35B-A3B-4bit via MLX (Mac Mini)                | Free   | Claudia Tier 2, text generation |
+| **Tier 0c** | Nemotron 3 Super via Ollama (VPS)                      | Free   | Claudia Tier 3, CEO agents      |
+| **Tier 1**  | Haiku                                                  | Low    | Claude Code subagents           |
+| **Tier 2**  | Sonnet                                                 | Medium | Claude Code subagents           |
+| **Tier 3**  | Opus                                                   | High   | Claude Code orchestration       |
 
 \* Qwen 3.6 Plus Preview is free on OpenRouter as of March 2026. Previous gen went to $0.1/$0.3 after preview ended — expect similar.
 
