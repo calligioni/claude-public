@@ -1,6 +1,6 @@
 ---
 name: cs
-description: Sync Claude setup to all remotes — origin (private), nuvini (public filtered)
+description: Sync Claude setup to all remotes — origin (private), public + nuvini (public filtered)
 user-invocable: true
 context: fork
 model: haiku
@@ -23,10 +23,11 @@ invocation-contexts:
 
 Syncs the local Claude setup repo (`~/.claude-setup`) to all configured remotes:
 
-| Remote     | Repo                        | Branch | Type                                     |
-| ---------- | --------------------------- | ------ | ---------------------------------------- |
-| **origin** | escotilha/claude (private)  | master | Full push (all content)                  |
-| **nuvini** | Nuvinigroup/claude (public) | master | Filtered push (excluded content removed) |
+| Remote     | Repo                             | Branch | Type                                     |
+| ---------- | -------------------------------- | ------ | ---------------------------------------- |
+| **origin** | escotilha/claude (private)       | master | Full push (all content)                  |
+| **public** | escotilha/claude-public (public) | main   | Filtered push (excluded content removed) |
+| **nuvini** | Nuvinigroup/claude (public)      | master | Filtered push (excluded content removed) |
 
 ## Process
 
@@ -67,7 +68,9 @@ discord loop schedule
 **Excluded files**: `settings.json .deep-plan-state.json .gstack/ settings.json.backup* plan.md research.md memory/core-memory.json`
 
 3. Commit removals: `chore: sync nuvini-public with master`
-4. Force-push: `git push nuvini nuvini-public:master --force`
+4. Force-push to both public remotes:
+   - `git push public nuvini-public:main --force`
+   - `git push nuvini nuvini-public:master --force`
 5. Switch back to master
 
 ### Phase 4: Report
@@ -75,6 +78,7 @@ discord loop schedule
 Present results:
 
 - origin status (pushed N commits / up to date / behind)
+- public status (force-pushed / up to date)
 - nuvini status (force-pushed / up to date)
 - Any errors or warnings
 
@@ -82,6 +86,8 @@ Present results:
 
 - Always switch back to `master` at the end, even if an error occurs
 - The nuvini-public branch is ephemeral — recreated fresh each sync
-- Never push rules/, memory/, hooks/, tools/, settings.json, or project-specific skills to nuvini
+- Never push rules/, memory/, hooks/, tools/, settings.json, or project-specific skills to public repos
+- Both public and nuvini get the same filtered content from the nuvini-public branch
+- Note: public uses `main` branch, nuvini uses `master` branch
 - Use `git rm -rf --ignore-unmatch` to handle files that may not exist
 - Check the exclude list in `rules/nuvini-sync-rules.md` for the authoritative list if available
