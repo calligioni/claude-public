@@ -1,6 +1,6 @@
 ---
 name: research
-description: "Analyze any URL or image (article, GitHub repo, tweet, tool, screenshot, diagram, YouTube video, podcast) and determine how it can improve existing skills/agents, inspire new skills, or benefit active projects (Contably, SourceRank). Uses summarize CLI for AV content transcription. Triggers on: research this, analyze this link, learn from this, /research."
+description: "Analyze any URL or image (article, GitHub repo, tweet, tool, screenshot, diagram, YouTube video, podcast) and determine how it can improve existing skills/agents, inspire new skills, benefit active projects (Contably, SourceRank), or enhance Claudia (agent router). Uses summarize CLI for AV content transcription. Triggers on: research this, analyze this link, learn from this, /research."
 argument-hint: "<url or image path>"
 user-invocable: true
 context: fork
@@ -60,12 +60,34 @@ All reads and writes go to the iCloud path directly. Never use symlink paths.
 
 ## Active Projects
 
-| Project    | Path                | Stack                | Key Needs                                                         |
-| ---------- | ------------------- | -------------------- | ----------------------------------------------------------------- |
-| Contably   | ~/code/contably     | Next.js + Supabase   | Brazil accounting, tax compliance, financial data extraction      |
-| SourceRank | ~/code/sourcerankai | Next.js + GitHub API | Repository analytics, developer metrics, open source intelligence |
+| Project    | Path                | Stack                  | Key Needs                                                         |
+| ---------- | ------------------- | ---------------------- | ----------------------------------------------------------------- |
+| Contably   | ~/code/contably     | Next.js + Supabase     | Brazil accounting, tax compliance, financial data extraction      |
+| SourceRank | ~/code/sourcerankai | Next.js + GitHub API   | Repository analytics, developer metrics, open source intelligence |
+| Claudia    | ~/code/claudia      | TypeScript + Agent SDK | Agent router, multi-channel messaging, inference fallback         |
 
-## Skill Map (for matching content to existing skills)
+## Claudia Context
+
+Claudia is the agent runtime replacing OpenClaw. Routes multi-channel messages (Discord, Telegram, Slack, WhatsApp, Voice) to Claude Code Agent SDK sessions with 3-tier inference fallback (Claude Max → Mac Mini MLX → VPS Ollama).
+
+**On every run, read `~/code/claudia/claudia-config.md` for the current config snapshot.** This avoids re-scanning the project each time. If the file is missing, note it in the report and score Claudia relevance based on the summary above.
+
+### Claudia Skill Map (for matching content to Claudia)
+
+- Agent orchestration/routing → Claudia router, session management
+- MCP servers → mcp-memory-pg (pgvector knowledge graph), new MCP integrations
+- Channel adapters → Discord, Telegram, Slack, WhatsApp, Voice adapters
+- Voice/audio/STT/TTS → Claudia voice pipeline (Groq Whisper, ElevenLabs, Twilio)
+- Local/small models → 3-tier inference (MLX, Ollama, model routing)
+- Scheduling/cron/proactive → Claudia scheduler (briefings, monitoring, heartbeat)
+- Agent personas/identity → 9 agent configs (claudia, buzz, marco, cris, julia, arnold, bella, rex, swarmy)
+- Knowledge graph/memory → mcp-memory-pg (semantic search, entity/relation storage)
+- Agent security/sandboxing → channel auth, rate limiting, session isolation
+- Cost optimization → inference routing, caching, batching, model selection
+- Observability/monitoring → agent session tracking, error reporting, health checks
+- Media processing → image/audio/video handling across channels
+
+## Claude Setup Skill Map (for matching content to existing skills)
 
 - Web scraping/data → firecrawl, scrapling, mna-toolkit
 - Code quality/architecture → cto, code-review-agent
@@ -159,11 +181,12 @@ Classify content type:
 | **Product/Feature**   | Product launch, feature demo, UX pattern         |
 | **Infrastructure**    | Deployment, CI/CD, monitoring, DevOps            |
 
-Score relevance 0-10 against three targets:
+Score relevance 0-10 against four targets:
 
-1. **Existing skills** — Does it introduce a tool/pattern an existing skill could use? Use the Skill Map above to match.
+1. **Existing skills** — Does it introduce a tool/pattern an existing skill could use? Use the Claude Setup Skill Map to match.
 2. **New skill opportunity** — No existing skill covers this, it's reusable, aligns with our stack (TypeScript, Next.js, Supabase)?
 3. **Active projects** — Would Contably or SourceRank benefit directly?
+4. **Claudia** — Does it improve Claudia's router, agents, channels, MCP, inference, scheduler, voice, or observability? Use the Claudia Skill Map to match. Read `~/code/claudia/claudia-config.md` for current capabilities before scoring.
 
 ### Phase 2: Recommend + Act
 
@@ -179,12 +202,24 @@ Score relevance 0-10 against three targets:
 
 [2-3 sentences]
 
-### Recommendations
+### Claude Setup Recommendations
 
 #### 1. [Improve Existing / Create New / Benefit Project] — Score: X/10
 
 - **Target:** [skill name / "New skill: xyz" / project name]
 - **What:** [specific change]
+- **Why:** [concrete benefit]
+- **Effort:** Low / Medium / High
+- **Score:** X/10 — [one-line justification]
+
+### Claudia Recommendations
+
+[Only include this section if Claudia relevance score >= 3]
+
+#### 1. [Improve Component / New Integration / Enhance Capability] — Score: X/10
+
+- **Target:** [router / channel adapter / MCP / inference / scheduler / voice / agents]
+- **What:** [specific change to Claudia]
 - **Why:** [concrete benefit]
 - **Effort:** Low / Medium / High
 - **Score:** X/10 — [one-line justification]
