@@ -22,3 +22,8 @@ OpenRouter API key stored in:
 **Qwen3.6-Plus (April 2, 2026):** 1M context window, native chain-of-thought + tool use, agentic coding with multi-file planning + self-refinement. Free on OpenRouter during preview (`qwen/qwen3.6-plus-preview:free`). Likely MoE architecture. Open weights on phased release — benchmark on Mac Mini M4 Pro when available to evaluate as Tier 0b replacement.
 
 - Applied in: claudia-setup - 2026-04-02 - HELPFUL
+
+**Usage milestone (April 4, 2026):** Qwen3.6-Plus hit ~1.4T tokens in a single day on OpenRouter — #1 model by usage, first ever to break 1T tokens/day on the platform. This is a strong signal the free preview will end soon (precedent: Qwen 3.5 went to $0.1/$0.3 after preview). Action items:
+
+1. Add `max_cost: 0` budget header in Claudia's `openrouter.ts` so calls fail-fast to Tier 2 (Mac Mini) rather than incurring charges when pricing activates.
+2. Verify 429 retry logic falls through to Tier 2 cleanly — at 1.4T/day traffic, free tier rate limits are likely tighter than at launch.
