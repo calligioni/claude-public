@@ -13748,3 +13748,23 @@
   "cwd": "/Users/ps/code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-04T11:11:50Z",
+  "date": "2026-04-04",
+  "skill": "deploy-conta-production",
+  "args": "--skip-staging-check",
+  "sessionId": "dc17c3d4-67a9-4c27-8a40-0b4a8584245a",
+  "project": "Contably",
+  "cwd": "/Users/ps/code/contably",
+  "hadError": false
+}
+{
+  "timestamp": "2026-04-04T11:11:55Z",
+  "date": "2026-04-04",
+  "skill": "deploy-conta-full",
+  "args": "",
+  "sessionId": "dc17c3d4-67a9-4c27-8a40-0b4a8584245a",
+  "project": "Contably",
+  "cwd": "/Users/ps/code/contably",
+  "hadError": false
+}
