@@ -13658,3 +13658,43 @@
   "cwd": "/Users/ps/code/claudia",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-04T09:06:57Z",
+  "date": "2026-04-04",
+  "skill": "fulltest-skill",
+  "args": "https://contably.ai — full-spectrum testing on OCI production (staging cluster at 137.131.156.136). Test all pages: console errors, network failures, broken links, visual verification (CSS loaded, layout), and AI prompt integrity if any AI endpoints are found. Fix issues found. Sequential mode is fine.",
+  "sessionId": "18a179a5-3dba-4a37-a79b-9e85dd79b2c0",
+  "project": "Contably",
+  "cwd": "/Users/ps/code/contably",
+  "hadError": false
+}
+{
+  "timestamp": "2026-04-04T09:07:11Z",
+  "date": "2026-04-04",
+  "skill": "fulltest-skill",
+  "args": "https://contably.ai — full-spectrum testing on OCI production (staging cluster at 137.131.156.136). Test all pages: console errors, network failures, broken links, visual verification (CSS loaded, layout), and AI prompt integrity if any AI endpoints are found. Fix issues found. Sequential mode is fine.",
+  "sessionId": "18a179a5-3dba-4a37-a79b-9e85dd79b2c0",
+  "project": "Contably",
+  "cwd": "/Users/ps/code/contably",
+  "hadError": false
+}
+{
+  "timestamp": "2026-04-04T09:07:17Z",
+  "date": "2026-04-04",
+  "skill": "fulltest-skill",
+  "args": "contably on OCI",
+  "sessionId": "18a179a5-3dba-4a37-a79b-9e85dd79b2c0",
+  "project": "Contably",
+  "cwd": "/Users/ps/code/contably",
+  "hadError": false
+}
+{
+  "timestamp": "2026-04-04T09:07:26Z",
+  "date": "2026-04-04",
+  "skill": "fulltest-skill",
+  "args": "contably on OCI",
+  "sessionId": "18a179a5-3dba-4a37-a79b-9e85dd79b2c0",
+  "project": "Contably",
+  "cwd": "/Users/ps/code/contably",
+  "hadError": false
+}
