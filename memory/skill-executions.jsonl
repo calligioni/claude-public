@@ -13698,3 +13698,13 @@
   "cwd": "/Users/ps/code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-04T09:21:25Z",
+  "date": "2026-04-04",
+  "skill": "deploy-conta-staging",
+  "args": "",
+  "sessionId": "6312ef35-cf44-4567-885b-fd5380513200",
+  "project": "Contably",
+  "cwd": "/Users/ps/code/contably",
+  "hadError": false
+}
