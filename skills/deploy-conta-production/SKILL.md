@@ -137,7 +137,9 @@ oci devops deployment approve --deployment-id $DEPLOYMENT_ID --action APPROVE --
 
 ### Phase 3: Confirm and Approve
 
-1. **Present the deployment details to the user:**
+1. **If `--auto-approve` is set**, skip the confirmation prompt and go directly to step 3.
+
+2. **Otherwise, present the deployment details to the user:**
 
    ```
    Ready to promote to production.
@@ -157,7 +159,9 @@ oci devops deployment approve --deployment-id $DEPLOYMENT_ID --action APPROVE --
    Approve production deployment? (yes/no)
    ```
 
-2. **If approved**, approve the OCI DevOps manual gate:
+   If the user says no: report current state and exit. The deployment stays at the approval gate.
+
+3. **Approve the OCI DevOps manual gate:**
 
    ```bash
    oci devops deployment approve \
@@ -165,8 +169,6 @@ oci devops deployment approve --deployment-id $DEPLOYMENT_ID --action APPROVE --
      --action APPROVE \
      --reason "Staging verified via /deploy-conta-production. Image: $IMAGE_TAG"
    ```
-
-3. **If the user says no**: report current state and exit. The deployment stays at the approval gate.
 
 ### Phase 4: Monitor Production Deployment
 
@@ -248,7 +250,7 @@ Production is live at:
 
 1. **NEVER auto-fix production** — always report and ask the user
 2. **NEVER push code** — this skill only promotes existing staging deployments
-3. **ALWAYS confirm before approving** — even in agent-spawned context
+3. **ALWAYS confirm before approving** — unless `--auto-approve` is passed (used by `/deploy-conta-full` after staging verification)
 4. **If staging is unhealthy, STOP** — do not promote broken code
 5. **If OCI CLI is unauthenticated** — report and exit (cannot approve without CLI)
 6. **Log timing for each phase** — report durations in the final summary
