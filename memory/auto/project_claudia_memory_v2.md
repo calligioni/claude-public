@@ -1,67 +1,67 @@
 ---
 name: claudia-memory-v2-architecture
-description: Claudia Memory v2 — best-of-breed composite memory system, ALL 5 PHASES COMPLETE
+description: Claudia Memory v2 — 5-layer composite memory system with nudge, consolidation, and complexity-aware skill generation (ALL PHASES COMPLETE)
 type: project
 ---
 
 ## Claudia Memory v2 — Best-of-Breed Composite (COMPLETE)
 
-Design combining winning ideas from Hindsight (91.4% LongMemEval), Mem0, Zep/Graphiti, ASMR, and Hermes into a single system built on the existing mcp-memory-pg pgvector infrastructure.
+Design combining winning ideas from Hindsight (91.4% LongMemEval), Mem0, Zep/Graphiti, ASMR, Hermes, and Karpathy's compounding pattern into a 5-layer system built on mcp-memory-pg pgvector infrastructure.
 
-### Phase Status (as of 2026-04-03) — ALL COMPLETE
+### Layer Architecture (as of 2026-04-04)
 
-- **Phase 1: COMPLETE** — wired mcp-memory-pg into router pipeline
-  - `src/memory/kg-client.ts`: direct PostgreSQL client with 4-strategy retrieval
-  - `src/memory/context.ts`: 3-source parallel fan-out (files + skills + KG) with 3s timeout
-  - `src/skills/`: auto-skill generation from complex conversations (Hermes-inspired)
-  - Dashboard API: GET/DELETE /api/skills/:agent endpoints
+| Layer                    | File                | Purpose                                    | Trigger                |
+| ------------------------ | ------------------- | ------------------------------------------ | ---------------------- |
+| 1. File journals         | `files.ts`          | Raw per-agent daily logs                   | Every response         |
+| 2. Knowledge graph       | `kg-client.ts`      | 4-strategy semantic search + RRF           | Pre-inference context  |
+| 3. Fact extraction       | `fact-extractor.ts` | LLM (Mac Mini) + heuristic fact extraction | Every response (async) |
+| 4. Periodic nudge        | `nudge.ts`          | Lightweight memory curation every N turns  | Every 10th message     |
+| 5. Session consolidation | `consolidate.ts`    | Extract summary before session drop        | On session cleanup     |
 
-- **Phase 2: COMPLETE** — schema extensions
-  - Migration SQL: `mcp-memory-pg/migrations/001_memory_v2.sql`
-  - New columns: agent_id, user_id, valid_from, invalid_at, memory_type, tsv (tsvector)
-  - GIN index for BM25, composite indexes for agent-scoped temporal queries
-  - `observations.ts`: updated createObservation() with CreateObservationOptions, invalidateObservation(), searchByTsVector()
-  - MCP server: add_observations accepts agentId/userId/memoryType, new invalidate_observation tool (16 tools total)
+### Phase Status — ALL COMPLETE
 
-- **Phase 3: COMPLETE** — write pipeline
-  - `src/memory/fact-extractor.ts`: heuristic fact extraction (preference/decision/procedural/factual classification)
-  - Router calls maybeExtractAndStoreFacts() async after each response
-  - Facts stored with agent_id, user_id, memory_type, auto-embedded
+- **Phases 1-5** — original memory v2 (KG integration, schema extensions, write pipeline, 4-strategy retrieval, reflect/maintain)
+- **Phase 6: Periodic Nudge (Hermes)** — `src/memory/nudge.ts`
+  - Turn counter per session (configurable via NUDGE_INTERVAL env, default 10)
+  - Buffers recent 5 exchanges per session
+  - Mac Mini LLM evaluates "worth persisting?" → delegates to fact-extractor
+  - Falls back to always-extract if Mac Mini offline
+- **Phase 7: Session Consolidation (Hermes Sentinel)** — `src/memory/consolidate.ts`
+  - Registers exchanges in rolling window (10 per session)
+  - On session drop: generates LLM summary → stores as "session-sentinel" entity in KG
+  - Heuristic fallback (first+last exchange) if Mac Mini offline
+  - `consolidateAllSessions()` for graceful shutdown
+- **Phase 8: Session Complexity Tracker** — `src/skills/complexity-tracker.ts`
+  - Tracks: turn count, code blocks, error recovery, user corrections, step patterns
+  - Eligible agents: arnold, swarmy, claudia
+  - Triggers skill auto-generation when 2+ thresholds crossed
+  - Delegates to existing maybeGenerateSkill with synthesized session context
 
-- **Phase 4: COMPLETE** — 4-strategy retrieval + RRF
-  - kg-client.ts upgraded: semantic + keyword + BM25 tsvector + graph traversal
-  - All 4 strategies run in PARALLEL via Promise.all
-  - Reciprocal rank fusion merge
-  - Temporal filtering (invalid_at), agent-scope boost (20% for same-agent facts)
+### Integration Points (Router Steps 8-13)
 
-- **Phase 5: COMPLETE** — reflect + maintain
-  - `src/scheduler/memory-maintain.ts`: daily cron at 03:00 BRT
-  - Temporal invalidation: 90d factual, 180d procedural (preserves important keywords)
-  - Duplicate consolidation: exact-match dedup
-  - Reflect: weekly synthesis into insight observations for entities with 3+ recent facts
-  - Registered in default-tasks.ts as "memory-maintenance"
-
-### Deployment Checklist (VPS)
-
-1. `pnpm add postgres` — add PostgreSQL client dependency
-2. Add to `.env`: `OPENAI_API_KEY`, `KG_PG_HOST=127.0.0.1`, `KG_PG_PORT=5432`
-3. Run migration: `psql -U postgres -d claudia -f mcp-memory-pg/migrations/001_memory_v2.sql`
-4. Rebuild mcp-memory-pg: `cd mcp-memory-pg && pnpm build`
-5. Restart `claudia.service`
+```
+Step  8: saveConversationMemory → daily journal (Layer 1)
+Step  9: maybeGenerateSkill → per-exchange skill detection
+Step 10: maybeExtractAndStoreFacts → fact extraction (Layer 3)
+Step 11: maybeCompoundResponse → knowledge articles (Karpathy)
+Step 12: registerExchange + trackTurn → nudge + consolidation (Layers 4-5)
+Step 13: trackComplexity → session-level skill auto-generation
+```
 
 ### Ideas Borrowed From
 
-| System            | Idea                                       | Status |
-| ----------------- | ------------------------------------------ | ------ |
-| Hindsight (91.4%) | Multi-strategy retrieval + RRF + reflect() | DONE   |
-| Mem0              | agent_id/user_id scoping, actor-aware      | DONE   |
-| Zep/Graphiti      | Temporal validity windows                  | DONE   |
-| ASMR              | Parallel fan-out retrieval                 | DONE   |
-| Hermes            | Auto-skill generation                      | DONE   |
+| System            | Idea                                                         | Status |
+| ----------------- | ------------------------------------------------------------ | ------ |
+| Hindsight (91.4%) | Multi-strategy retrieval + RRF + reflect()                   | DONE   |
+| Mem0              | agent_id/user_id scoping, actor-aware                        | DONE   |
+| Zep/Graphiti      | Temporal validity windows                                    | DONE   |
+| ASMR              | Parallel fan-out retrieval                                   | DONE   |
+| Hermes            | Auto-skill generation, periodic nudge, session consolidation | DONE   |
+| Karpathy          | Response compounding (output-as-input)                       | DONE   |
 
 ### Embedding Cost Optimization (Future)
 
-Currently uses OpenAI text-embedding-3-small ($). Mac Mini has nomic-embed-text-v1.5 on LM Studio at mini:1234 (free). Switch would make memory system zero-cost for embeddings.
+Currently uses OpenAI text-embedding-3-small ($). Mac Mini has nomic-embed-text-v1.5 on LM Studio at mini:1234 (free). Switch would make memory system zero-cost.
 
 **Why:** Agents need cross-session recall with semantic relevance, not just flat file journals.
-**How to apply:** All code is deployed. Future improvements: switch to local embeddings, add LLM-powered fact extraction via Mac Mini, add cross-agent fact promotion.
+**How to apply:** All code is deployed. Future improvements: switch to local embeddings, add cross-agent fact promotion, tune nudge interval per agent.
