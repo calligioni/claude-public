@@ -208,6 +208,8 @@ browse snapshot -i | grep -i "clerk\|sign-in\|org-switch\|user-button"
 browse screenshot /tmp/stonegeo-<route>-failure.png
 ```
 
+**Headed mode escalation:** For visual/CSS/layout failures that headless screenshots can't diagnose, escalate to `/open-gstack-browser` — a steerable Chromium with Claude Code sidebar for live interactive debugging.
+
 If `browse` is unavailable, fall back to `mcp__chrome-devtools__*` tools for navigation, console inspection, and screenshots.
 
 ### Phase 4: Fix Issues

@@ -94,6 +94,10 @@ export BROWSE_STATE_FILE="/tmp/browse-state-{persona-slug}.json"
 
 All `browse` commands in the same agent process will use that state file, keeping sessions fully isolated across parallel persona agents.
 
+### Headed Mode Escalation
+
+For visual/CSS/layout failures that headless screenshots can't diagnose, escalate to `/open-gstack-browser` — a steerable Chromium with Claude Code sidebar for live interactive debugging. Use before falling back to Chrome DevTools MCP when the issue is visual, not functional.
+
 ## What It Does
 
 When you run `/virtual-user-testing`, it will:

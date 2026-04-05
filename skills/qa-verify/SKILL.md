@@ -59,6 +59,8 @@ browse js "expr"            # Evaluate JavaScript expression
 browse perf                 # Performance metrics
 ```
 
+**Headed mode escalation:** For visual/CSS/layout failures that headless screenshots can't diagnose, escalate to `/open-gstack-browser` — a steerable Chromium with Claude Code sidebar for live interactive debugging.
+
 **Chrome DevTools MCP** (`mcp__chrome-devtools__*`) remains available as a fallback when `browse` cannot handle a specific interaction.
 
 ### The snapshot -D Verification Pattern

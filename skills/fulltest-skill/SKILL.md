@@ -558,6 +558,8 @@ browse click @e5             # perform action
 browse snapshot -D           # shows only what changed — fast verification
 ```
 
+**Headed mode escalation:** For visual/CSS/layout failures that headless screenshots can't diagnose, escalate to `/open-gstack-browser` — a steerable Chromium with Claude Code sidebar for live interactive debugging. Use before falling back to MCP when the issue is visual.
+
 **Fallback when `browse` is unavailable** (binary not at `~/.local/bin/browse`):
 
 ```

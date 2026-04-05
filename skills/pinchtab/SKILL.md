@@ -317,6 +317,10 @@ curl -X POST localhost:9867/tab/unlock -d '{"tabId":"abc","owner":"agent-1"}'
 - **`cookie-import-browser`** — import cookies from Chrome/Arc/Brave/Edge via macOS Keychain decryption; enables authenticated sessions without manual login
 - **Multi-workspace isolation** — set `BROWSE_STATE_FILE` to a different path per agent for fully isolated sessions
 
+### Headed Mode Escalation
+
+For visual/CSS/layout failures that headless `browse` or PinchTab screenshots can't diagnose, escalate to `/open-gstack-browser` — a real steerable Chromium with Claude Code sidebar for live interactive debugging. This is the intermediate step between headless automation and manual inspection.
+
 ### When to Use Which
 
 **Use browse when:**

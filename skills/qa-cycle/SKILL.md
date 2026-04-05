@@ -211,6 +211,10 @@ If test credentials are unavailable, agents can import cookies from the user's b
 browse cookie-import-browser chrome   # or: arc, brave, edge
 ```
 
+### Headed Mode Escalation
+
+For visual/CSS/layout failures that headless screenshots can't diagnose, escalate to `/open-gstack-browser` — a steerable Chromium with Claude Code sidebar for live interactive debugging. Use before falling back to MCP when the issue is visual.
+
 ### Fallback
 
 If `browse` is not found, fall back to Chrome DevTools MCP:

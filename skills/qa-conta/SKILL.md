@@ -557,6 +557,7 @@ After API tests pass, verify the frontend apps render correctly.
 > **Computer Use Fallback**: If browse CLI and Chrome MCP both fail to interact with a page (anti-bot, client certificate requirements, Java applets), escalate to computer use via `Skill("computer-use")`. This is especially relevant for government portals (eSocial, Receita Federal, SPED) that require desktop-level interaction.
 
 **Primary tool:** `browse` CLI (`~/.local/bin/browse`) — zero MCP overhead, ~100ms per call.
+**Headed mode escalation:** For visual/CSS/layout failures that headless screenshots can't diagnose, escalate to `/open-gstack-browser` — a steerable Chromium with Claude Code sidebar for live interactive debugging.
 **Fallback:** Chrome DevTools MCP (`mcp__chrome-devtools__*`) if `browse` is unavailable.
 
 #### Detection

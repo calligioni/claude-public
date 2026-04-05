@@ -100,6 +100,8 @@ test -x ~/.local/bin/browse && echo "browse available" || echo "fallback to Chro
 | `browse cookie-import-browser [browser]` | Import from Chrome/Arc/Brave      |
 | `browse perf`                            | Performance metrics               |
 
+**Headed mode escalation:** For visual/CSS/layout failures that headless screenshots can't diagnose, escalate to `/open-gstack-browser` — a steerable Chromium with Claude Code sidebar for live interactive debugging.
+
 **Fallback:** If `browse` is not available, fall back to `mcp__chrome-devtools__*` tools.
 
 **Per-persona isolation:** Each persona agent MUST set a unique `BROWSE_STATE_FILE` env var so each gets its own Chromium instance, preventing session conflicts between the 4 concurrent testers:

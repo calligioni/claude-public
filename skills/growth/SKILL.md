@@ -43,7 +43,7 @@ invocation-contexts:
 
 Structured frameworks for optimizing SaaS conversion funnels, pricing, retention, and acquisition. Each mode produces an actionable report with specific code/copy changes.
 
-> **Browser tool:** `browse` CLI (`~/.local/bin/browse`) is the primary tool for all page analysis — zero MCP overhead, ~100ms per call. Chrome DevTools MCP (`mcp__chrome-devtools__*`) is the fallback when `browse` is unavailable.
+> **Browser tool:** `browse` CLI (`~/.local/bin/browse`) is the primary tool for all page analysis — zero MCP overhead, ~100ms per call. For visual/CSS/layout issues that headless screenshots can't diagnose, escalate to `/open-gstack-browser` (headed mode with Claude Code sidebar). Chrome DevTools MCP (`mcp__chrome-devtools__*`) is the fallback when `browse` is unavailable.
 
 ## Mode Selection
 

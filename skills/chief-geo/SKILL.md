@@ -678,6 +678,8 @@ BROWSE_STATE_FILE=/tmp/geo-tester-A.json browse goto "https://www.perplexity.ai"
 
 4. **Analyze SourceRank's own content** — does our website have content that would answer these queries?
 
+**Headed mode escalation:** For visual/CSS/layout failures that headless screenshots can't diagnose, escalate to `/open-gstack-browser` — a steerable Chromium with Claude Code sidebar for live interactive debugging.
+
 **Note:** Chrome DevTools MCP (`mcp__chrome-devtools__*`) is available as a secondary fallback if `browse` is unavailable.
 
 Spawn 4 parallel haiku agents, each with a unique `BROWSE_STATE_FILE`, handling 5-7 queries from a specific category:
