@@ -58,6 +58,37 @@ Before creating any new memory file, check for duplicates using `mem-search`:
 - If no match → create new file as normal
 - After writing → run `~/.claude-setup/tools/mem-search --reindex` to update the search index
 
+## Cross-Link on Write
+
+After writing a new memory file, update 3-5 **existing** memory files that the new information touches. This turns isolated memories into a connected knowledge graph at ingest time (Karpathy wiki pattern).
+
+### Process
+
+1. **Search for related memories** — run `mem-search` with 2-3 keyword queries from the new memory's content
+2. **Select 3-5 most relevant** existing files, prioritizing:
+   - Memories the new one **contradicts** (add contradiction note to both)
+   - Memories the new one **extends** (add "Related:" back-reference)
+   - Memories the new one **validates** (add confirmation note)
+   - Memories in a different type that share the same domain
+3. **Update each related file** — append a `Related:` line or update an existing one:
+   ```
+   Related: [new-memory-title](new-memory-file.md) — one-line why ({date})
+   ```
+4. **Update MEMORY.md** — if the related file's one-liner in the index should mention the new connection, update it
+5. **Reindex** — run `~/.claude-setup/tools/mem-search --reindex` after all writes
+
+### Budget
+
+- Max 5 related files updated per new memory
+- Max 2 `mem-search` calls per new memory
+- Skip cross-linking if the new memory is trivial (score < 5) or a minor update to an existing file
+
+### When to Skip Cross-Linking
+
+- Simple observation additions to existing memories (e.g., "Applied in: project - date - HELPFUL")
+- Updating a single field in an existing memory
+- When the `mem-search` returns no results with score >= 3.0
+
 ## Save vs Skip
 
 **Save when:** high generality, learned from failure, user explicitly shared, expensive to regenerate, high severity.

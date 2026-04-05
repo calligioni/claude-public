@@ -587,19 +587,27 @@ After merging similar memories, actively discover **connections between dissimil
 
 **Process:**
 
-1. Select 5–10 recent unconsolidated memories (created since last consolidation)
+1. Select 5–10 recent unconsolidated memories (created since last consolidation). **Skip memories already cross-linked at ingest time** — these have a `Cross-linked:` observation set by `/meditate` or auto-memory, meaning their neighbors were already updated when they were created.
 2. For each batch, prompt the LLM to find non-obvious connections
 3. Output: (a) relation triples to create in the MCP graph, (b) one cross-cutting insight entity
 
 ```javascript
 async function generateCrossMemoryInsights(memories, lastConsolidationDate) {
   // 1. Select recent memories that haven't been through insight generation
+  // Skip memories already cross-linked at ingest time (by /meditate or auto-memory)
   const recentMemories = memories.filter((m) => {
     const discovered = extractDiscoveredDate(m);
     const alreadyProcessed = m.observations?.some((o) =>
       o.startsWith("Insight-processed:"),
     );
-    return discovered > lastConsolidationDate && !alreadyProcessed;
+    const alreadyCrossLinked = m.observations?.some((o) =>
+      o.startsWith("Cross-linked:"),
+    );
+    return (
+      discovered > lastConsolidationDate &&
+      !alreadyProcessed &&
+      !alreadyCrossLinked
+    );
   });
 
   if (recentMemories.length < 3) {
