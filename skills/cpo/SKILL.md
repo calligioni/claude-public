@@ -16,7 +16,7 @@ allowed-tools:
   - mcp__memory__*
 model: opus
 effort: high
-disable-model-invocation: true
+disable-model-invocation: false
 memory: user
 tool-annotations:
   mcp__memory__delete_entities: { destructiveHint: true, idempotentHint: true }
