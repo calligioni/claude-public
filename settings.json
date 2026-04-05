@@ -13,7 +13,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "GIT_TERMINAL_PROMPT=0 git -C \u0022$HOME/.claude-setup\u0022 pull --ff-only --quiet 2\u003E/dev/null || true; echo \u0027=== CORE MEMORY ===\u0027 \u0026\u0026 cat \u0022$HOME/.claude-setup/memory/core-memory.json\u0022 2\u003E/dev/null || echo \u0027No core memory found\u0027"
+            "command": "GIT_TERMINAL_PROMPT=0 git -C \"$HOME/.claude-setup\" pull --ff-only --quiet 2>/dev/null || true; echo '=== CORE MEMORY ===' && cat \"$HOME/.claude-setup/memory/core-memory.json\" 2>/dev/null || echo 'No core memory found'"
           }
         ]
       }
@@ -23,7 +23,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "mkdir -p ~/.claude/logs \u0026\u0026 echo \u0022[$(date)] Stop failure: exit_reason=${EXIT_REASON:-unknown} error=${ERROR_MESSAGE:-none}\u0022 \u003E\u003E ~/.claude/logs/stop-failures.log"
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Stop failure: exit_reason=${EXIT_REASON:-unknown} error=${ERROR_MESSAGE:-none}\" >> ~/.claude/logs/stop-failures.log"
           }
         ]
       }
@@ -33,7 +33,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "mkdir -p ~/.claude/logs \u0026\u0026 echo \u0022[$(date)] Subagent started: ${SUBAGENT_ID:-unknown}\u0022 \u003E\u003E ~/.claude/logs/subagents.log"
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Subagent started: ${SUBAGENT_ID:-unknown}\" >> ~/.claude/logs/subagents.log"
           }
         ]
       }
@@ -43,11 +43,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "mkdir -p ~/.claude/logs \u0026\u0026 echo \u0022[$(date)] Subagent stopped: ${SUBAGENT_ID:-unknown}\u0022 \u003E\u003E ~/.claude/logs/subagents.log; rm -rf /tmp/claude-agent-* 2\u003E/dev/null || true"
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Subagent stopped: ${SUBAGENT_ID:-unknown}\" >> ~/.claude/logs/subagents.log; rm -rf /tmp/claude-agent-* 2>/dev/null || true"
           },
           {
             "type": "command",
-            "command": "\u0022$HOME/.claude-setup/hooks/worktree-cleanup.sh\u0022"
+            "command": "\"$HOME/.claude-setup/hooks/worktree-cleanup.sh\""
           }
         ]
       }
@@ -58,7 +58,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\u0022$HOME/.claude-setup/hooks/format-file.sh\u0022"
+            "command": "\"$HOME/.claude-setup/hooks/format-file.sh\""
           }
         ]
       },
@@ -67,7 +67,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\u0022$HOME/.claude-setup/hooks/format-file.sh\u0022"
+            "command": "\"$HOME/.claude-setup/hooks/format-file.sh\""
           }
         ]
       },
@@ -76,7 +76,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\u0022$HOME/.claude-setup/hooks/format-file.sh\u0022"
+            "command": "\"$HOME/.claude-setup/hooks/format-file.sh\""
           }
         ]
       },
@@ -85,7 +85,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\u0022$HOME/.claude-setup/hooks/skill-execution-log.sh\u0022",
+            "command": "\"$HOME/.claude-setup/hooks/skill-execution-log.sh\"",
             "timeout": 3000
           }
         ]
@@ -96,7 +96,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\u0022$HOME/.claude-setup/hooks/memory-whisper.sh\u0022",
+            "command": "\"$HOME/.claude-setup/hooks/memory-whisper.sh\"",
             "timeout": 4000
           }
         ]
@@ -108,7 +108,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo \u0027{\u0022additionalContext\u0022: \u0022Working directory: \u0027$(pwd)\u0027. Git branch: \u0027$(git branch --show-current 2\u003E/dev/null || echo none)\u0027. Project: \u0027$(basename $(git rev-parse --show-toplevel 2\u003E/dev/null) 2\u003E/dev/null || basename $(pwd))\u0027\u0022}\u0027"
+            "command": "echo '{\"additionalContext\": \"Working directory: '$(pwd)'. Git branch: '$(git branch --show-current 2>/dev/null || echo none)'. Project: '$(basename $(git rev-parse --show-toplevel 2>/dev/null) 2>/dev/null || basename $(pwd))'\"}'"
           }
         ]
       }
@@ -118,11 +118,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\u0022$HOME/.claude-setup/hooks/session-end.sh\u0022"
+            "command": "\"$HOME/.claude-setup/hooks/session-end.sh\""
           },
           {
             "type": "command",
-            "command": "\u0022$HOME/.claude-setup/hooks/worktree-cleanup.sh\u0022"
+            "command": "\"$HOME/.claude-setup/hooks/worktree-cleanup.sh\""
           }
         ]
       }
@@ -132,7 +132,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "mkdir -p ~/.claude/logs \u0026\u0026 echo \u0022[$(date)] Teammate idle - checking for pending work\u0022 \u003E\u003E ~/.claude/logs/teammates.log"
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Teammate idle - checking for pending work\" >> ~/.claude/logs/teammates.log"
           },
           {
             "type": "prompt",
@@ -146,7 +146,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "mkdir -p ~/.claude/logs \u0026\u0026 echo \u0022[$(date)] First-run setup completed\u0022 \u003E\u003E ~/.claude/logs/setup.log"
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] First-run setup completed\" >> ~/.claude/logs/setup.log"
           }
         ]
       }
@@ -156,7 +156,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "mkdir -p ~/.claude/logs \u0026\u0026 echo \u0022[$(date)] Task completed: ${TASK_ID}\u0022 \u003E\u003E ~/.claude/logs/tasks.log"
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Task completed: ${TASK_ID}\" >> ~/.claude/logs/tasks.log"
           },
           {
             "type": "prompt",
@@ -170,7 +170,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "mkdir -p ~/.claude/logs \u0026\u0026 echo \u0022[$(date)] Config changed: ${CONFIG_FILE}\u0022 \u003E\u003E ~/.claude/logs/config-changes.log"
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Config changed: ${CONFIG_FILE}\" >> ~/.claude/logs/config-changes.log"
           }
         ]
       }
@@ -180,7 +180,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\u0022$HOME/.claude-setup/hooks/worktree-create.sh\u0022"
+            "command": "\"$HOME/.claude-setup/hooks/worktree-create.sh\""
           }
         ]
       }
@@ -190,7 +190,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\u0022$HOME/.claude-setup/hooks/worktree-remove.sh\u0022"
+            "command": "\"$HOME/.claude-setup/hooks/worktree-remove.sh\""
           }
         ]
       }
@@ -200,7 +200,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "mkdir -p ~/.claude/logs \u0026\u0026 echo \u0022[$(date)] Instructions loaded: ${INSTRUCTIONS_FILE}\u0022 \u003E\u003E ~/.claude/logs/instructions.log"
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Instructions loaded: ${INSTRUCTIONS_FILE}\" >> ~/.claude/logs/instructions.log"
           }
         ]
       }
@@ -210,11 +210,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "mkdir -p ~/.claude/logs \u0026\u0026 echo \u0022[$(date)] Compaction completed in $(pwd)\u0022 \u003E\u003E ~/.claude/logs/compaction.log"
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Compaction completed in $(pwd)\" >> ~/.claude/logs/compaction.log"
           },
           {
             "type": "command",
-            "command": "found=$(ls .deep-plan-state.json qa-state.json .claude/ship/*/state.json 2\u003E/dev/null); if [ -n \u0022$found\u0022 ]; then echo \u0022Active state files found: $found\u0022; else echo \u0022NO_STATE_FILES\u0022; fi"
+            "command": "found=$(ls .deep-plan-state.json qa-state.json .claude/ship/*/state.json 2>/dev/null); if [ -n \"$found\" ]; then echo \"Active state files found: $found\"; else echo \"NO_STATE_FILES\"; fi"
           },
           {
             "type": "prompt",
@@ -228,7 +228,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "mkdir -p ~/.claude/logs \u0026\u0026 echo \u0022[$(date)] MCP elicitation requested: ${ELICITATION_SERVER:-unknown} request_id=${ELICITATION_ID:-unknown}\u0022 \u003E\u003E ~/.claude/logs/elicitations.log"
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] MCP elicitation requested: ${ELICITATION_SERVER:-unknown} request_id=${ELICITATION_ID:-unknown}\" >> ~/.claude/logs/elicitations.log"
           }
         ]
       }
@@ -238,7 +238,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "mkdir -p ~/.claude/logs \u0026\u0026 echo \u0022[$(date)] MCP elicitation result: ${ELICITATION_SERVER:-unknown} request_id=${ELICITATION_ID:-unknown} accepted=${ELICITATION_ACCEPTED:-unknown}\u0022 \u003E\u003E ~/.claude/logs/elicitations.log"
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] MCP elicitation result: ${ELICITATION_SERVER:-unknown} request_id=${ELICITATION_ID:-unknown} accepted=${ELICITATION_ACCEPTED:-unknown}\" >> ~/.claude/logs/elicitations.log"
           }
         ]
       }
@@ -248,7 +248,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "mkdir -p ~/.claude/logs \u0026\u0026 echo \u0022[$(date)] Task created: ${TASK_ID:-unknown} title=${TASK_TITLE:-unknown}\u0022 \u003E\u003E ~/.claude/logs/tasks.log"
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Task created: ${TASK_ID:-unknown} title=${TASK_TITLE:-unknown}\" >> ~/.claude/logs/tasks.log"
           }
         ]
       }
@@ -258,7 +258,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "GIT_TERMINAL_PROMPT=0 git branch --show-current 2\u003E/dev/null | xargs -I{} echo \u0027{\u0022additionalContext\u0022: \u0022Now in directory: \u0027\u0022$(pwd)\u0022\u0027. Git branch: {}\u0022}\u0027 2\u003E/dev/null || true"
+            "command": "GIT_TERMINAL_PROMPT=0 git branch --show-current 2>/dev/null | xargs -I{} echo '{\"additionalContext\": \"Now in directory: '\"$(pwd)\"'. Git branch: {}\"}' 2>/dev/null || true"
           }
         ]
       }
@@ -272,7 +272,8 @@
     "swift-lsp@claude-plugins-official": true,
     "discord@claude-plugins-official": true,
     "claude-subconscious@letta-ai-claude-subconscious": false,
-    "codex@openai-codex": true
+    "codex@openai-codex": true,
+    "frontend-design@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "openai-codex": {
@@ -297,7 +298,7 @@
   "spinnerTipsOverride": {
     "excludeDefault": false,
     "tips": [
-      "Use /mna triage to score M\u0026A deals 0-10",
+      "Use /mna triage to score M&A deals 0-10",
       "Use /ship for end-to-end feature delivery",
       "Use /optimize-setup to sync with Claude updates",
       "Use /research to analyze any URL or image",
@@ -365,7 +366,7 @@
         "env": {
           "BRAVE_API_KEY": "${BRAVE_API_KEY}"
         },
-        "description": "Web search via Brave LLM Context API \u2014 use count param to control token budget"
+        "description": "Web search via Brave LLM Context API — use count param to control token budget"
       },
       "exa": {
         "command": "npx",
@@ -376,7 +377,7 @@
         "env": {
           "EXA_API_KEY": "${EXA_API_KEY}"
         },
-        "description": "Neural search with highlights mode \u2014 returns only query-relevant passages for minimal token usage"
+        "description": "Neural search with highlights mode — returns only query-relevant passages for minimal token usage"
       },
       "postgres": {
         "command": "npx",
@@ -473,7 +474,7 @@
         "args": [
           "mcp"
         ],
-        "description": "On-device hybrid search (BM25 \u002B vector \u002B LLM rerank) over indexed markdown collections: skills, agents, rules, memory"
+        "description": "On-device hybrid search (BM25 + vector + LLM rerank) over indexed markdown collections: skills, agents, rules, memory"
       }
     }
   },
