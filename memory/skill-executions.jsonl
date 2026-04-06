@@ -14168,3 +14168,23 @@
   "cwd": "/Volumes/AI/Code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-06T10:29:57Z",
+  "date": "2026-04-06",
+  "skill": "deploy-conta-staging",
+  "args": "",
+  "sessionId": "c6f092c8-e430-4e5a-a874-fb5e6f5dd141",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
+{
+  "timestamp": "2026-04-06T10:31:22Z",
+  "date": "2026-04-06",
+  "skill": "verify",
+  "args": "",
+  "sessionId": "c6f092c8-e430-4e5a-a874-fb5e6f5dd141",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
