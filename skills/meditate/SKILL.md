@@ -3,10 +3,12 @@ name: meditate
 description: "End-of-session judgment extraction. Structured capture of learnings, patterns, and mistakes after completing /ship, /cto, /parallel-dev, /deep-plan, or any substantial session. Feeds the memory pipeline with high-quality, pre-scored observations. Triggers on: meditate, reflect on session, extract learnings, /meditate."
 user-invocable: true
 context: fork
-model: haiku
-effort: low
+model: sonnet
+effort: medium
 allowed-tools:
   - Read
+  - Write
+  - Edit
   - Glob
   - Grep
   - Bash
@@ -192,7 +194,36 @@ For each candidate, calculate a quick relevance score using the criteria from me
 
 **Threshold: 5.** Only save entities scoring >= 5.
 
-## Phase 4: Save to Memory MCP
+## Phase 4: Save to Memory
+
+### Storage Backend Selection
+
+Check which storage backend is available:
+
+```
+IF mcp__memory__* tools are available (test with mcp__memory__search_nodes):
+  → Use Memory MCP (primary path below)
+ELSE:
+  → Use file-based auto-memory fallback (write to ~/.claude-setup/memory/auto/)
+```
+
+**File-based fallback:** When Memory MCP is unavailable, write each entity as a markdown file following the auto-memory format:
+
+```markdown
+---
+name: {type}_{kebab-case-identifier}
+description: {one-line description}
+type: {feedback|project|reference|user}
+---
+
+{The actual learning — specific, actionable}
+
+Discovered: {date}
+Source: session — {skill or context}
+Relevance score: {calculated score}
+```
+
+Then update `~/.claude-setup/memory/auto/MEMORY.md` index with a pointer to the new file. Use `mem-search` for dedup and `--reindex` after writes as normal.
 
 ### Deduplicate via mem-search
 
@@ -508,7 +539,7 @@ When the heuristic triggers:
 1. **Extract the procedure:** Identify the sequence of steps that solved the task
 2. **Name it:** Generate a kebab-case name from the task description (e.g., `deploy-oci-staging`)
 3. **Dedup check:** Search existing skills via `~/.claude-setup/tools/mem-search "skill:{name}"` — skip if a similar skill exists
-4. **Draft the stub** to `~/.claude/skills/{name}/SKILL.md`:
+4. **Draft the stub** to `~/.claude-setup/skills/{name}/SKILL.md`:
 
 ```yaml
 ---
