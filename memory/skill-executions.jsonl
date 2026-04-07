@@ -14618,3 +14618,23 @@
   "cwd": "/Volumes/AI/Code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-07T21:41:56Z",
+  "date": "2026-04-07",
+  "skill": "officecli",
+  "args": "Build a CTO onboarding manual for Contably. This is a comprehensive technical guide for someone starting as CTO today. \n\nSources to incorporate:\n1. Architecture doc at docs/architecture/ARCHITECTURE.md (just updated to v2)\n2. The CTO assessment from this session (security findings, performance, code quality, action items)\n3. CI/CD setup: Woodpecker CI at ci.contably.ai (NOT GitHub Actions), deploy pipeline in .woodpecker/\n4. Infrastructure: OKE (Kubernetes) on OCI, MySQL HeatWave, Redis, Celery\n5. The CPO roadmap just produced (7 strategic suggestions with quarterly phasing)\n6. Current tech debt register and prioritized fixes\n\nStructure the manual as:\n- Chapter 1: Platform Overview (what Contably does, who uses it, multi-tenant model)\n- Chapter 2: Architecture (from ARCHITECTURE.md — system diagrams, data flow, key design decisions)\n- Chapter 3: Tech Stack & Dependencies (versions, health, upgrade priorities)\n- Chapter 4: Security Posture (auth model, RLS, JWT, rate limiting, known gaps)\n- Chapter 5: Infrastructure & CI/CD (OKE cluster, Woodpecker, deploy process, monitoring)\n- Chapter 6: Codebase Guide (monorepo structure, key files, how to navigate)\n- Chapter 7: Development Workflow (local setup, testing, PR process, deploy)\n- Chapter 8: Tech Debt & Action Items (prioritized list with effort estimates)\n- Chapter 9: Product Roadmap (Q2-Q4 2026 from CPO analysis)\n- Chapter 10: Operational Runbook (health checks, incident response, common issues)\n\nOutput as Word document (.docx) using /officecli if available. Language: English (technical docs). Include Mermaid diagrams where possible.",
+  "sessionId": "c6f092c8-e430-4e5a-a874-fb5e6f5dd141",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
+{
+  "timestamp": "2026-04-07T21:42:11Z",
+  "date": "2026-04-07",
+  "skill": "manual",
+  "args": "Build a CTO onboarding manual for Contably. This is a comprehensive technical guide for someone starting as CTO today. \n\nSources to incorporate:\n1. Architecture doc at docs/architecture/ARCHITECTURE.md (just updated to v2)\n2. The CTO assessment from this session (security findings, performance, code quality, action items)\n3. CI/CD setup: Woodpecker CI at ci.contably.ai (NOT GitHub Actions), deploy pipeline in .woodpecker/\n4. Infrastructure: OKE (Kubernetes) on OCI, MySQL HeatWave, Redis, Celery\n5. The CPO roadmap just produced (7 strategic suggestions with quarterly phasing)\n6. Current tech debt register and prioritized fixes\n\nStructure the manual as:\n- Chapter 1: Platform Overview (what Contably does, who uses it, multi-tenant model)\n- Chapter 2: Architecture (from ARCHITECTURE.md — system diagrams, data flow, key design decisions)\n- Chapter 3: Tech Stack & Dependencies (versions, health, upgrade priorities)\n- Chapter 4: Security Posture (auth model, RLS, JWT, rate limiting, known gaps)\n- Chapter 5: Infrastructure & CI/CD (OKE cluster, Woodpecker, deploy process, monitoring)\n- Chapter 6: Codebase Guide (monorepo structure, key files, how to navigate)\n- Chapter 7: Development Workflow (local setup, testing, PR process, deploy)\n- Chapter 8: Tech Debt & Action Items (prioritized list with effort estimates)\n- Chapter 9: Product Roadmap (Q2-Q4 2026 from CPO analysis)\n- Chapter 10: Operational Runbook (health checks, incident response, common issues)\n\nOutput as Word document (.docx) using /officecli if available. Language: English (technical docs). Include Mermaid diagrams where possible.",
+  "sessionId": "c6f092c8-e430-4e5a-a874-fb5e6f5dd141",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
