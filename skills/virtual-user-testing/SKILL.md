@@ -3,7 +3,7 @@ name: virtual-user-testing
 description: "Swarm-enabled virtual user testing for Contably with persistent QA database. Spawns parallel persona agents (haiku) that simulate real users - accountants, business owners, client portal users - navigating the app, testing workflows, and reporting bugs to the QA database via qa_manager.py. Includes verification of previously fixed bugs and regression detection. Triggers on: virtual user test, persona test, user simulation, test as user, user feedback simulation, qa discover."
 user-invocable: true
 context: fork
-model: sonnet
+model: opus
 effort: medium
 allowed-tools:
   - Agent
@@ -22,10 +22,8 @@ allowed-tools:
   - Glob
   - Grep
   - mcp__chrome-devtools__*
-  - mcp__playwright__*
-  - mcp__browserless__*
-  - mcp__memory__*
-# browse CLI (~/.local/bin/browse) is the PRIMARY browser tool; mcp__chrome-devtools__* is fallback
+  # browse CLI (~/.local/bin/browse) is the PRIMARY browser tool
+  # mcp__chrome-devtools__* is the fallback when browse is unavailable
 memory: user
 tool-annotations:
   Bash: { destructiveHint: true, idempotentHint: false }
@@ -33,7 +31,6 @@ tool-annotations:
   Edit: { destructiveHint: false, idempotentHint: true }
   mcp__chrome-devtools__click: { destructiveHint: false, idempotentHint: false }
   mcp__chrome-devtools__fill: { destructiveHint: false, idempotentHint: false }
-  mcp__memory__delete_entities: { destructiveHint: true, idempotentHint: true }
   SendMessage: { openWorldHint: true, idempotentHint: false }
   TeamDelete: { destructiveHint: true, idempotentHint: true }
 invocation-contexts:
