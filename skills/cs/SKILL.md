@@ -1,6 +1,6 @@
 ---
 name: cs
-description: Sync Claude setup to all remotes (origin, public, nuvini) + VPS full sync via rsync
+description: Sync Claude setup to all remotes (origin, public, nuvini) + VPS sync via git pull
 user-invocable: true
 context: fork
 model: haiku
@@ -23,12 +23,12 @@ invocation-contexts:
 
 Syncs the local Claude setup repo (`~/.claude-setup`) to all configured remotes and the VPS:
 
-| Target     | Destination                      | Method | Type                                                    |
-| ---------- | -------------------------------- | ------ | ------------------------------------------------------- |
-| **origin** | escotilha/claude (private)       | git    | Full push (all content)                                 |
-| **public** | escotilha/claude-public (public) | git    | Filtered push (excluded content removed)                |
-| **nuvini** | Nuvinigroup/claude (public)      | git    | Filtered push (excluded content removed)                |
-| **VPS**    | root@vmi3065960:~/.claude/       | rsync  | Full sync (skills, agents, rules, tools, hooks, memory) |
+| Target     | Destination                      | Method | Type                                     |
+| ---------- | -------------------------------- | ------ | ---------------------------------------- |
+| **origin** | escotilha/claude (private)       | git    | Full push (all content)                  |
+| **public** | escotilha/claude-public (public) | git    | Filtered push (excluded content removed) |
+| **nuvini** | Nuvinigroup/claude (public)      | git    | Filtered push (excluded content removed) |
+| **VPS**    | root@vmi3065960:~/.claude-setup/ | git    | `git pull` (symlinked into ~/.claude/)   |
 
 ## Process
 
@@ -74,40 +74,34 @@ discord loop schedule
    - `git push nuvini nuvini-public:master --force`
 5. Switch back to master
 
-### Phase 4: Sync to VPS via rsync
+### Phase 4: Sync to VPS via git pull
 
-Sync the full local setup to the VPS (`root@vmi3065960`) so Claude Code on the VPS has all skills, agents, rules, tools, hooks, and memory.
+The VPS has a clone of `escotilha/claude` at `~/.claude-setup/`. The synced directories (`skills/`, `agents/`, `rules/`, `tools/`, `hooks/`, `memory/auto/`) are symlinked from `~/.claude/` into this git checkout.
 
-**Connection**: `ssh -o User=root vmi3065960` (Tailscale hostname)
+**Connection**: `ssh root@100.77.51.51` (Tailscale IP)
 
 **Pre-flight**: Check VPS is reachable with a quick SSH test. If unreachable, skip this phase and report "VPS offline".
 
-**Sync mapping** (local `~/.claude-setup/` → VPS `~/.claude/`):
-
-| Local directory | VPS directory  | Flags                      |
-| --------------- | -------------- | -------------------------- |
-| `skills/`       | `skills/`      | `--delete` (mirror)        |
-| `agents/`       | `agents/`      | `--delete` (mirror)        |
-| `rules/`        | `rules/`       | `--delete` (mirror)        |
-| `tools/`        | `tools/`       | `--delete` (mirror)        |
-| `hooks/`        | `hooks/`       | `--delete` (mirror)        |
-| `memory/auto/`  | `memory/auto/` | merge only (no `--delete`) |
-
-**Rsync command pattern**:
+**Sync command**:
 
 ```bash
-rsync -avz --delete ~/.claude-setup/{dir}/ root@vmi3065960:~/.claude/{dir}/
+ssh root@100.77.51.51 "cd ~/.claude-setup && git pull origin master"
 ```
 
-For `memory/auto/`, omit `--delete` to preserve any VPS-only memories:
+That's it. The symlinks mean the pulled content is immediately live in `~/.claude/`.
 
-```bash
-rsync -avz ~/.claude-setup/memory/auto/ root@vmi3065960:~/.claude/memory/auto/
-```
+**Symlink layout** (VPS `~/.claude/` → `~/.claude-setup/`):
 
-**Important**: Do NOT sync `settings.json` — the VPS has its own settings with VPS-specific MCP servers and hooks. Do NOT sync `.git/`, `backups/`, `config/`, `launchd/`, `plans/`, `guides/`, `bin/`, `commands/`, `mcp-servers/`.
+| Symlink                 | Target                        |
+| ----------------------- | ----------------------------- |
+| `~/.claude/skills`      | `~/.claude-setup/skills`      |
+| `~/.claude/agents`      | `~/.claude-setup/agents`      |
+| `~/.claude/rules`       | `~/.claude-setup/rules`       |
+| `~/.claude/tools`       | `~/.claude-setup/tools`       |
+| `~/.claude/hooks`       | `~/.claude-setup/hooks`       |
+| `~/.claude/memory/auto` | `~/.claude-setup/memory/auto` |
 
-After rsync, report the number of files transferred per directory.
+**Important**: `~/.claude/settings.json` is NOT symlinked — the VPS keeps its own settings with VPS-specific MCP servers and hooks.
 
 ### Phase 5: Report
 
@@ -116,7 +110,7 @@ Present results:
 - origin status (pushed N commits / up to date / behind)
 - public status (force-pushed / up to date)
 - nuvini status (force-pushed / up to date)
-- VPS status (synced N files / skipped — offline / error)
+- VPS status (git pull result / skipped — offline / error)
 - Any errors or warnings
 
 ## Important Notes
@@ -128,5 +122,7 @@ Present results:
 - Note: public uses `main` branch, nuvini uses `master` branch
 - Use `git rm -rf --ignore-unmatch` to handle files that may not exist
 - Check the exclude list in `rules/nuvini-sync-rules.md` for the authoritative list if available
-- VPS sync is independent of git phases — if git fails, still attempt VPS sync
-- VPS memory sync is additive (no --delete) to avoid wiping VPS-generated memories
+- VPS sync depends on Phase 2 (origin must be pushed first, since VPS pulls from origin)
+- VPS directories (skills, agents, rules, tools, hooks, memory/auto) are symlinks into ~/.claude-setup/ git checkout
+- VPS settings.json is NOT symlinked — it has VPS-specific config
+- Old rsync'd directories are backed up at ~/.claude/\*.bak-rsync on the VPS
