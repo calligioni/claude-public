@@ -19,6 +19,7 @@ allowed-tools:
   - mcp__memory__create_entities
   - mcp__memory__create_relations
   - mcp__memory__add_observations
+skills: [wiki]
 memory: user
 tool-annotations:
   mcp__memory__create_entities: { readOnlyHint: false, idempotentHint: false }
@@ -407,6 +408,82 @@ Output a concise summary:
 
 Next consolidation: run `/consolidate` when memory count > 200 or weekly.
 ```
+
+## Phase 5b: Wiki Ingest
+
+After generating the meditation report, ingest the captured learnings into the LLM Wiki so they compound beyond the Memory MCP graph.
+
+### What gets ingested
+
+Only entities that scored **>= 7** and have **cross-project applicability**. Low-scoring or project-specific findings stay in Memory MCP only — the wiki is for durable, generalizable knowledge.
+
+### How it works
+
+For each qualifying entity from Phase 4:
+
+1. **Format as wiki-ready content:**
+
+```markdown
+# {Entity Name}
+
+**Type:** {pattern | mistake | tech-insight | architecture}
+**Discovered:** {date}
+**Source:** {session context}
+
+## Summary
+
+{The actual learning — specific, actionable}
+
+## Details
+
+{Fix steps for mistakes, trigger conditions for patterns, rationale for architecture decisions}
+
+## Related
+
+{Cross-references to related wiki pages using [[link]] syntax}
+```
+
+2. **Ingest to VPS wiki** via SSH:
+
+```bash
+# Check if a page already exists for this topic
+ssh root@100.77.51.51 "ls /opt/claudia/agents/claudia/wiki/pages/{entity-slug}.md 2>/dev/null"
+
+# If exists: append new observations under a dated section
+# If new: create the page
+ssh root@100.77.51.51 "cat >> /opt/claudia/agents/claudia/wiki/pages/{entity-slug}.md << 'WIKIEOF'
+{formatted content}
+WIKIEOF"
+```
+
+3. **Update the wiki index:**
+
+```bash
+ssh root@100.77.51.51 "grep -q '{entity-slug}' /opt/claudia/agents/claudia/wiki/index.md || echo '- [{entity-name}](pages/{entity-slug}.md) — {one-line summary} [{tags}]' >> /opt/claudia/agents/claudia/wiki/index.md"
+```
+
+4. **Log the operation:**
+
+```bash
+ssh root@100.77.51.51 "echo '[{date}] meditate-ingest: {entity-name} (score: {score})' >> /opt/claudia/agents/claudia/wiki/log.md"
+```
+
+### Report addition
+
+Add a wiki section to the Phase 5 report:
+
+```markdown
+### Wiki Ingested ({N} entities)
+
+| Entity           | Score | Wiki Page    | Status   |
+| ---------------- | ----- | ------------ | -------- |
+| pattern:xyz      | 8     | pages/xyz.md | Created  |
+| tech-insight:abc | 7     | pages/abc.md | Appended |
+```
+
+### Nudge mode: Skip wiki ingest
+
+In nudge mode (Phase 0), always skip wiki ingest — it requires VPS SSH and is too heavyweight for periodic checks.
 
 ## Phase 6: Skill Auto-Generation (Hermes Pattern)
 
