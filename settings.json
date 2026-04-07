@@ -262,6 +262,26 @@
           }
         ]
       }
+    ],
+    "PermissionDenied": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date -Iseconds)] Permission denied: ${TOOL_NAME:-unknown} - ${DENIAL_REASON:-unknown}\" >> ~/.claude/logs/permission-denials.log"
+          }
+        ]
+      }
+    ],
+    "FileChanged": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=\"${FILE_PATH:-unknown}\"; if [[ \"$FILE\" == *\"settings.json\"* ]] || [[ \"$FILE\" == *\"CLAUDE.md\"* ]]; then mkdir -p ~/.claude/logs && echo \"[$(date -Iseconds)] Critical file changed: $FILE\" >> ~/.claude/logs/file-changes.log; fi"
+          }
+        ]
+      }
     ]
   },
   "statusLine": {
