@@ -237,7 +237,29 @@ Score relevance 0-10 against four targets:
 
 Use `AskUserQuestion` with recommendations as options. Each option label MUST include the score (e.g., "8/10 — Update /cto with new pattern"). Sort options by score descending. Include "Just save to memory" and "Skip".
 
-#### 2c. Do NOT Auto-Install
+#### 2c. Queue for Wiki Harvest (Memex)
+
+After presenting the report, **always** queue the researched URL for wiki auto-ingest so it becomes part of the persistent knowledge base:
+
+```bash
+QUEUE_FILE="/opt/claudia/data/wiki-harvest-queue.json"
+URL="<the researched URL>"
+NOTE="<one-line summary from Phase 1c>"
+
+# Create queue file if it doesn't exist
+[ -f "$QUEUE_FILE" ] || echo '[]' > "$QUEUE_FILE"
+
+# Append URL if not already queued (jq dedup)
+if ! jq -e --arg u "$URL" '.[] | select(.url == $u)' "$QUEUE_FILE" >/dev/null 2>&1; then
+  jq --arg u "$URL" --arg n "$NOTE" --arg d "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    '. + [{"url": $u, "note": $n, "addedAt": $d, "addedBy": "research-skill"}]' \
+    "$QUEUE_FILE" > "${QUEUE_FILE}.tmp" && mv "${QUEUE_FILE}.tmp" "$QUEUE_FILE"
+fi
+```
+
+This feeds into the daily wiki harvest (06:00 BRT) which ingests queued URLs into Claudia's wiki knowledge base automatically.
+
+#### 2d. Do NOT Auto-Install
 
 Never automatically implement changes (skill edits, new skill creation, project modifications). Only present the recommendations and let the user decide what to do next. If the user explicitly asks you to implement a recommendation, then proceed.
 
