@@ -64,3 +64,4 @@ EOF
 - Use `gh pr create` not the GitHub API directly
 - Always set upstream with `-u` flag on push
 - Keep PR title short, use body for details
+- After PR is created, remind the user: "Run `/autofix-pr` to auto-resolve CI failures and reviewer comments."

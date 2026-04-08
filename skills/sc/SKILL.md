@@ -152,3 +152,4 @@ PR:      https://github.com/org/repo/pull/42 (includes verify + review notes)
 - Always set upstream with `-u` flag on push
 - Keep PR title under 70 chars, use body for details
 - If no changes exist, say so and exit
+- After PR is created, remind the user: "Run `/autofix-pr` to auto-resolve CI failures and reviewer comments."
