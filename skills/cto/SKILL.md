@@ -509,29 +509,74 @@ Teammate "security-analyst":
     exposed debug ports, and secrets in build args.
 
   CODE ARCHAEOLOGY (Glasswing-style deep vulnerability hunting)
-  Targets code patterns that survive years of review unchanged — the class of bugs
-  Anthropic's Project Glasswing found (27-year OpenBSD flaw, 16-year FFmpeg bug).
-  - Stale code paths: use `git log --follow --diff-filter=M` on security-critical files
-    (auth, crypto, parsers, FFI bindings) — files with no meaningful changes in 2+ years
-    are prime targets. Old code predates modern security awareness.
+  Glasswing's insight: the highest-impact vulnerabilities hide in code that survived
+  years of expert review unchanged. Don't just scan for patterns — trace execution
+  paths that cross trust boundaries, especially in old code.
+
+  PHASE 1: IDENTIFY HIGH-VALUE TARGETS
+  - Run `git log --format='%H %ai %s' --diff-filter=M -- {file}` on security-critical
+    files (auth, crypto, parsers, serializers, FFI bindings, middleware, session mgmt).
+  - Files with no meaningful changes in 2+ years are prime targets — old code predates
+    modern security awareness and has ossified assumptions.
+  - Identify "load-bearing" code: functions called from many places but rarely modified.
+    These are single points of failure that developers are afraid to touch.
+  - Check `git blame` for functions where the original author is no longer active —
+    abandoned ownership = abandoned security assumptions.
+
+  PHASE 2: TRACE TRUST BOUNDARIES
+  The Glasswing pattern is not "grep for bad patterns" — it's "trace data from
+  untrusted source to trusted sink and find where validation is assumed, not enforced."
+  - For each target file, identify: What enters from outside? What exits to a
+    privileged context? Where does the code assume input is already validated?
+  - Map the "trust gradient": user input → validation → business logic → data store.
+    Vulnerabilities cluster at gradient transitions where one layer trusts another
+    to have already validated.
+  - Check functions that were secure when written but became vulnerable due to
+    callers added later that pass different input shapes (API evolution drift).
+
+  PHASE 3: PATTERN-SPECIFIC HUNTING
   - Integer overflow in length/size calculations: grep for arithmetic on buffer sizes,
     packet lengths, array indices — especially in C/C++ FFI boundaries, binary parsers,
-    and protocol implementations. Check for unchecked `parseInt`/`Number()` on user input
+    and protocol implementations. Check for unchecked parseInt/Number() on user input
     used in allocation or slice operations.
   - Use-after-free / dangling references: in codebases with manual memory management or
     native addons (N-API, Rust FFI, WASM), check that freed resources are not referenced
     after cleanup. In JS/TS, check for event listeners or callbacks holding references to
     destroyed objects (DB connections, streams, WebSocket handles).
-  - FFI/C boundary trust: any `Buffer.from()`, `ArrayBuffer`, `DataView`, or native addon
+  - FFI/C boundary trust: any Buffer.from(), ArrayBuffer, DataView, or native addon
     call that receives user-controlled sizes or offsets without bounds checking. Native
     code trusts JS-provided lengths — overflow here escapes the JS sandbox.
   - Parser edge cases: custom parsers for CSV, XML, JSON, URL, multipart, or protocol
     buffers — check boundary conditions: empty input, maximum field counts, nested depth
     limits, null bytes in strings, encoding mismatches (UTF-8 vs Latin-1).
-  - Implicit type coercion in security checks: `==` vs `===` on auth tokens, `0 == ""`
-    truthy comparisons in permission gates, `Array.includes` with type-coerced values.
-  Priority: these findings are HIGH minimum — code that survived long review periods
-  without change often contains the most impactful vulnerabilities.
+  - Implicit type coercion in security checks: == vs === on auth tokens, 0 == ""
+    truthy comparisons in permission gates, Array.includes with type-coerced values.
+  - State machine violations: auth/session code that uses multi-step flows (OAuth,
+    MFA, password reset) — check if steps can be skipped, replayed, or reordered.
+    Grep for state transitions that don't verify the previous state.
+  - Race conditions in auth: check for TOCTOU gaps between permission check and
+    resource access, especially in async code (await between authz check and DB write).
+  - Deserialization sinks: JSON.parse, yaml.load, unsafe deserializers, eval,
+    vm.runInContext receiving data that transited through a trust boundary — even
+    if it was "validated" upstream, check if the validation is structurally complete
+    (schema validation vs. key-exists check).
+
+  PHASE 4: CONTEXTUAL ANALYSIS (what Glasswing does that scanners can't)
+  - Read the COMMIT MESSAGE and PR description for security-critical changes —
+    understand the developer's INTENT, then check if the implementation matches.
+    Bugs often live in the gap between "what the dev meant" and "what the code does."
+  - Check error paths: the happy path is reviewed; the error/exception path is where
+    auth state leaks, partial writes corrupt data, and cleanup skips happen.
+  - Look for "defensive code that doesn't defend": try/catch blocks around auth that
+    return default-allow on exception, validation functions that log-and-continue,
+    middleware that calls next() in both the success and error branches.
+  - Cross-function invariant violations: Function A assumes B already validated input.
+    Function B assumes A already validated input. Neither validates. Trace the actual
+    call chain to verify someone actually checks.
+
+  Priority: CODE ARCHAEOLOGY findings are HIGH minimum. Findings involving trust
+  boundary violations in code unchanged 2+ years are CRITICAL — these are the class
+  of bugs that survive expert review and are only found by deep contextual analysis.
 
   Routing hint: For auth flows, Supabase RLS policies, and multi-hop data flow issues,
   note in your findings that these are strong candidates for Claude Code Security
