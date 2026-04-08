@@ -1689,3 +1689,7 @@ type: backend
 #
 # Progress dashboard displayed...
 ```
+
+## See Also
+
+- [Claude Managed Agents](https://platform.claude.com/docs/en/managed-agents/overview) — Hosted equivalent for non-Claude Code deployments. Managed Agents provides pre-built agent harness + cloud containers with built-in tools, MCP servers, and SSE streaming. For teams running parallel feature development as a service (e.g., CI/CD-triggered multi-agent builds without local Claude Code), Managed Agents can replace the worktree + Agent dispatch model with fully managed sessions. Multi-agent coordination is available as a research preview.

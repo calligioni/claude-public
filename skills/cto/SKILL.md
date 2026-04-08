@@ -1773,3 +1773,4 @@ This skill has access to several MCP servers and web tools. Use the right one fo
 - [autonomous-dev](../autonomous-dev/SKILL.md) - For implementing refactoring recommendations
 - [fulltest-skill](../fulltest-skill/SKILL.md) - For comprehensive testing
 - [cpo-ai-skill](../cpo-ai-skill/SKILL.md) - For product lifecycle orchestration
+- [Claude Managed Agents](https://platform.claude.com/docs/en/managed-agents/overview) - Hosted equivalent for non-Claude Code use cases. Managed Agents provides a pre-built agent harness with cloud infrastructure (containers, built-in tools, MCP servers, SSE streaming). For teams deploying CTO-style reviews as a service or integrating into CI/CD pipelines without Claude Code, Managed Agents offers the same model + tools pattern with zero self-hosted infrastructure.
