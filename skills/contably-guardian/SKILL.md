@@ -1,6 +1,6 @@
 ---
 name: contably-guardian
-description: "Pre-deploy guardian for Contably. Runs a comprehensive multi-layer analysis before any deploy to staging or production. Covers code-level review (tenant isolation, migration safety, auth coverage, secrets, DB compatibility, config consistency), infrastructure review (K8s manifests, network policies, CI/CD), runtime validation (health checks, auth enforcement, security headers), and diff-aware analysis. Uses parallel subagents for speed. Triggers on: contably guardian, pre-deploy check, guardian, contably pre-deploy."
+description: "Pre-deploy guardian for Contably. Multi-layer analysis (code, infra, runtime, diff-aware) before deploy to staging/production. Parallel subagents. Triggers on: contably guardian, pre-deploy check, guardian, contably pre-deploy."
 user-invocable: true
 context: fork
 model: opus

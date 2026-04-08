@@ -1,6 +1,6 @@
 ---
 name: website-design
-description: Create professional B2B SaaS websites, dashboards, landing pages, and web applications with modern UX/UI best practices. Use when Claude needs to design marketing websites, product dashboards, admin panels, landing pages, or any B2B-focused web interface. Covers full-stack design from hero sections to pricing pages, with emphasis on conversion optimization, data visualization, and professional aesthetics using Tailwind CSS, React, and modern web standards.
+description: "Professional B2B SaaS websites, dashboards, and landing pages with modern UX/UI. Tailwind CSS, React, conversion optimization. Triggers on: website design, landing page, dashboard design, admin panel, web interface, B2B website."
 user-invocable: true
 context: fork
 model: sonnet

@@ -1,6 +1,6 @@
 ---
 name: qa-cycle
-description: "Master QA orchestrator: project-agnostic opus-powered autonomous agent. Detects project, checks for existing /qa-{project} skill (delegates if found), or runs full discovery + QA cycle from scratch and generates the skill for next time. Manages its own task list. Only stops for destructive actions. Delivers a fully working app. Triggers on: qa cycle, full qa, run qa, continuous qa, qa pipeline."
+description: "Master QA orchestrator: project-agnostic, auto-detects project, delegates to /qa-{project} or runs full cycle from scratch. Autonomous, self-managing. Triggers on: qa cycle, full qa, run qa, continuous qa, qa pipeline."
 user-invocable: true
 context: fork
 model: opus

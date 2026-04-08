@@ -1,6 +1,6 @@
 ---
 name: chief-geo
-description: "Chief GEO (Generative Engine Optimization) Officer for SourceRank AI. Autonomous daily agent that: (1) maintains a living GEO knowledge base from latest research, (2) audits SourceRank product against GEO best practices and suggests improvements, (3) updates product feature docs/manual, (4) runs AI visibility prompt audits across ChatGPT/Perplexity/Claude/Gemini. Swarm-parallel with model-tiered specialists. Triggers on: chief geo, geo officer, geo audit, geo strategy, geo knowledge, /chief-geo."
+description: "Chief GEO Officer for SourceRank AI. Autonomous daily agent: GEO knowledge base, product audit, manual updates, AI visibility testing across ChatGPT/Perplexity/Claude/Gemini. Triggers on: chief geo, geo officer, geo audit, geo strategy, geo knowledge, /chief-geo."
 argument-hint: "<mode: full|knowledge|audit|manual|visibility|daily> [--brand NAME] [--queries FILE]"
 user-invocable: true
 context: fork

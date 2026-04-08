@@ -1,6 +1,6 @@
 ---
 name: firecrawl
-description: "Web scraping, crawling, site mapping, search, and autonomous data extraction via Firecrawl. Converts websites to LLM-ready markdown or structured data. Handles JS rendering, anti-bot protection, and proxy rotation. Use for: scraping pages, crawling sites, searching the web, mapping URLs, or autonomous multi-source research. Triggers on: scrape, crawl, web data, extract website, site map, web research, firecrawl."
+description: "Web scraping, crawling, and data extraction via Firecrawl. Converts sites to LLM-ready markdown. JS rendering, anti-bot, proxy rotation. Triggers on: scrape, crawl, web data, extract website, site map, web research, firecrawl."
 user-invocable: true
 context: fork
 model: sonnet

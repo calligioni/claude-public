@@ -1,6 +1,6 @@
 ---
 name: browserless
-description: "Headless browser automation via self-hosted Browserless. Generate PDFs, take screenshots, extract rendered content, run Lighthouse audits, bypass bot detection, execute browser-side JS, and manage WebSocket sessions. Use for: PDF generation, screenshots, page scraping with JS rendering, performance audits, anti-bot bypass, browser automation. Triggers on: browserless, headless browser, generate PDF, take screenshot, lighthouse audit, unblock site, browser automation."
+description: "Headless browser automation via self-hosted Browserless. PDFs, screenshots, Lighthouse audits, JS rendering, anti-bot bypass. Triggers on: browserless, headless browser, generate PDF, take screenshot, lighthouse audit, unblock site, browser automation."
 user-invocable: true
 context: fork
 model: sonnet

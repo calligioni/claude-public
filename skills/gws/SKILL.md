@@ -1,6 +1,6 @@
 ---
 name: gws
-description: "Google Workspace CLI automation for bulk Drive operations, Sheets data pipelines, Gmail batch processing, Calendar management, Chat space admin, and Admin reporting. Use when the task is too complex or high-volume for the google-workspace MCP (multi-step, bulk, paginated, or pipeline-style). Triggers on: gws, google workspace automation, bulk drive, sheets pipeline, gmail batch, workspace admin."
+description: "Google Workspace CLI automation for bulk/complex tasks beyond MCP scope. Drive, Sheets, Gmail, Calendar, Chat, Admin. Triggers on: gws, google workspace automation, bulk drive, sheets pipeline, gmail batch, workspace admin."
 argument-hint: "<task description>"
 user-invocable: true
 context: fork

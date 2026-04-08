@@ -1,6 +1,6 @@
 ---
 name: mini-remote
-description: Remote autonomous coding relay via SSH to Mac Mini. Use this skill whenever the user types /mini followed by a prompt, or asks to run something remotely on their Mac Mini, queue tasks for the Mini, send work to the Mini, or execute prompts while offline/traveling. Also triggers on "send to mini", "queue for mini", "run on mini", "mini execute", or any reference to running Claude Code tasks on the Mac Mini via Tailscale/SSH. Supports single prompts and multiple queued prompts executed sequentially with Slack notifications on completion.
+description: "Remote autonomous coding relay via SSH to Mac Mini. Supports single and queued prompts with Slack notifications. Triggers on: /mini, send to mini, queue for mini, run on mini, mini execute, run remotely on mac mini."
 user-invocable: true
 context: fork
 model: sonnet

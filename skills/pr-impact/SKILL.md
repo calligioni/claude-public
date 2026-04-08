@@ -1,6 +1,6 @@
 ---
 name: pr-impact
-description: "PR Impact Optimizer for Nuvini (NVNI). Analyzes, scores, and optimizes press releases for maximum positive stock price impact while ensuring SEC compliance. Modes: analyze (score a draft), backtest (compare predictions vs actuals), simulate (generate optimized variants), collect (refresh pipeline data). Triggers on: pr impact, press release, optimize pr, score pr, pr analysis, pr optimizer, /pr-impact."
+description: "PR Impact Optimizer for Nuvini (NVNI). Score, optimize, and backtest press releases for stock impact + SEC compliance. Triggers on: pr impact, press release, optimize pr, score pr, pr analysis, pr optimizer, /pr-impact."
 argument-hint: "<mode: analyze|backtest|simulate|collect> [draft text or .docx path]"
 user-invocable: true
 context: fork

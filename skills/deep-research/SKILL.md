@@ -1,6 +1,6 @@
 ---
 name: deep-research
-description: "Deep research orchestration agent. Breaks any question into sub-questions, runs parallel multi-track investigation (primary sources, literature, expert opinion, contrarian views), synthesizes with evidence hierarchy, and delivers investment-memo-grade reports with confidence %. Triggers on: deep research, investigate, deep dive into, nuclear research, thorough analysis."
+description: "Deep research orchestration. Parallel multi-track investigation with evidence hierarchy, delivers investment-memo-grade reports. Triggers on: deep research, investigate, deep dive into, nuclear research, thorough analysis."
 argument-hint: "<research question>"
 user-invocable: true
 context: fork

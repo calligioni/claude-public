@@ -1,6 +1,6 @@
 ---
 name: growth
-description: "SaaS growth engineering: landing page CRO, pricing strategy, signup flow optimization, onboarding CRO, email sequences, SEO (technical + programmatic + AI/GEO), competitor comparison pages, churn prevention, and A/B test design. Analyzes existing pages and generates actionable improvements. Triggers on: growth, cro, conversion optimization, pricing strategy, signup flow, onboarding, seo audit, churn, /growth."
+description: "SaaS growth engineering: CRO, pricing, signup, onboarding, SEO/GEO, churn prevention, A/B tests. Triggers on: growth, cro, conversion optimization, pricing strategy, signup flow, onboarding, seo audit, churn, /growth."
 argument-hint: "<url or page to optimize, or mode: cro|pricing|seo|onboarding|churn|full-audit>"
 user-invocable: true
 context: fork

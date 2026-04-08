@@ -1,6 +1,6 @@
 ---
 name: scrapling
-description: "High-performance web scraping with anti-bot bypass, TLS fingerprint impersonation, and adaptive element tracking via Scrapling MCP. Three modes: fast HTTP (Fetcher), stealth browser (StealthyFetcher), and full automation (PlayWrightFetcher). Use for: anti-bot bypass, Cloudflare sites, adaptive scraping, stealth fetching, TLS impersonation. Triggers on: scrapling, stealth scrape, bypass cloudflare, anti-bot scrape."
+description: "Web scraping with anti-bot bypass, TLS impersonation, adaptive tracking via Scrapling MCP. Three modes: HTTP, stealth browser, Playwright. Triggers on: scrapling, stealth scrape, bypass cloudflare, anti-bot scrape."
 user-invocable: true
 context: fork
 model: sonnet

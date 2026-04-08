@@ -1,6 +1,6 @@
 ---
 name: llm-eval
-description: "LLM output evaluation pipeline: audit existing evals, analyze failure modes, generate synthetic test data, build LLM-as-Judge prompts, calibrate judges against human labels, evaluate RAG pipelines, and design annotation interfaces. Use for any AI-powered feature that needs quality measurement. Triggers on: llm eval, evaluate ai, eval pipeline, judge calibration, rag eval, ai quality, /llm-eval."
+description: "LLM output evaluation pipeline: audit evals, failure analysis, synthetic data, LLM-as-Judge, RAG eval, annotation design. Triggers on: llm eval, evaluate ai, eval pipeline, judge calibration, rag eval, ai quality, /llm-eval."
 argument-hint: "<feature/endpoint to evaluate, or 'audit' to review existing evals>"
 user-invocable: true
 context: fork

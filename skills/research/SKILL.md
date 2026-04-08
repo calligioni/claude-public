@@ -1,6 +1,6 @@
 ---
 name: research
-description: "Analyze any URL or image (article, GitHub repo, tweet, tool, screenshot, diagram, YouTube video, podcast) and determine how it can improve existing skills/agents, inspire new skills, benefit active projects (Contably, SourceRank), or enhance Claudia (agent router). Uses summarize CLI for AV content transcription. Triggers on: research this, analyze this link, learn from this, /research."
+description: "Analyze any URL or image (article, repo, tweet, tool, screenshot, video, podcast) for skill/agent/project improvements. Triggers on: research this, analyze this link, learn from this, /research."
 argument-hint: "<url or image path>"
 user-invocable: true
 context: fork

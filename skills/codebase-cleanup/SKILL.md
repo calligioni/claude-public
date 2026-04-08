@@ -1,6 +1,6 @@
 ---
 name: codebase-cleanup
-description: Comprehensive codebase analysis and cleanup tool that identifies unused, unnecessary, or redundant files in a project. Use when users want to clean up their codebase, remove unused files, identify dead code, reduce project size, or maintain a cleaner repository. Triggers on requests like "clean up unused files", "find unnecessary files", "remove dead code", "analyze codebase for cleanup", or "reduce project bloat".
+description: "Identify and remove unused, redundant, or dead code files in a project. Triggers on: clean up unused files, find unnecessary files, remove dead code, codebase cleanup, reduce project bloat."
 user-invocable: true
 context: fork
 agent: Explore

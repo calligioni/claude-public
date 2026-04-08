@@ -1,6 +1,6 @@
 ---
 name: virtual-user-testing
-description: "Swarm-enabled virtual user testing for Contably with persistent QA database. Spawns parallel persona agents (haiku) that simulate real users - accountants, business owners, client portal users - navigating the app, testing workflows, and reporting bugs to the QA database via qa_manager.py. Includes verification of previously fixed bugs and regression detection. Triggers on: virtual user test, persona test, user simulation, test as user, user feedback simulation, qa discover."
+description: "Swarm-enabled virtual user testing for Contably with QA database. Spawns parallel persona agents simulating real users, reports bugs, verifies fixes, detects regressions. Triggers on: virtual user test, persona test, user simulation, test as user, qa discover."
 user-invocable: true
 context: fork
 model: opus
@@ -617,6 +617,7 @@ python apps/api/scripts/qa_manager.py session complete \
 ```
 
 **Flag behavior:**
+
 - `admin-only` → spawns only maria, carlos, pedro (admin app personas)
 - `client-only` → spawns only renata, joao (client portal personas)
 - `persona:{name}` → spawns only the named persona

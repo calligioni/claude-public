@@ -1,6 +1,6 @@
 ---
 name: computer-use
-description: "Desktop automation via Claude's native computer use capability. Controls native macOS apps, fills government portals (eSocial, Receita Federal, SPED), operates legacy software without APIs, interacts with iOS Simulator, hardware control panels, and any GUI-only tool. Requires Claude Desktop app with computer use enabled. Fallback: AppleScript/osascript for headless automation. Triggers on: computer use, desktop automation, native app, gui automation, government portal, esocial portal, receita federal, legacy software, ios simulator, /computer-use."
+description: "Desktop automation via Claude's native computer use. Controls macOS apps, GUI-only tools, government portals, iOS Simulator. Triggers on: computer use, desktop automation, native app, gui automation, government portal, esocial, receita federal, legacy software, ios simulator."
 user-invocable: true
 context: fork
 model: opus

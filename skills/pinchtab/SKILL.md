@@ -1,6 +1,6 @@
 ---
 name: pinchtab
-description: "Local browser automation via PinchTab. Navigate pages, extract accessibility trees, interact with elements via stable refs, take screenshots, generate PDFs, evaluate JS, manage profiles and multi-instance Chrome. 5-13x cheaper than screenshot-based tools. Use for: browser automation, page testing, form filling, data extraction, web scraping, accessibility tree inspection. Triggers on: pinchtab, browser control, page snapshot, element refs, accessibility tree, pinch."
+description: "Local browser automation via PinchTab. Accessibility trees, element refs, screenshots, PDFs, JS eval, multi-instance Chrome. 5-13x cheaper than screenshot tools. Triggers on: pinchtab, browser control, page snapshot, element refs, accessibility tree, pinch."
 user-invocable: true
 context: fork
 model: sonnet

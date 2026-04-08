@@ -1,6 +1,6 @@
 ---
 name: qa-sourcerank
-description: "Full QA cycle for SourceRank AI with swarm-parallel persona testing: discover bugs via 4 concurrent virtual user personas on production, generate CTO/CPO reports, fix issues via /qa-fix, verify via /qa-verify, detect regressions. True parallel execution via TeamCreate swarm. Uses psql for QA issue tracking in SourceRank Supabase DB. Triggers on: qa sourcerank, sourcerank qa, test sourcerank, qa cycle sourcerank."
+description: "Full QA cycle for SourceRank AI with swarm-parallel persona testing. Discover, fix, verify, regression detect via TeamCreate swarm + Supabase QA DB. Triggers on: qa sourcerank, sourcerank qa, test sourcerank, qa cycle sourcerank."
 user-invocable: true
 context: fork
 model: opus
