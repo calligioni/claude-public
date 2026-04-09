@@ -1,23 +1,28 @@
 ---
 name: heartbeat-followup
-description: Follow-up review of Claudia's HEARTBEAT.md system — check if it's useful after 2 weeks, decide whether to split tasks.md out
+description: RESOLVED — Heartbeat system validated and improved (2026-04-09). State tracking added, no split needed.
 type: project
+originSessionId: f190a821-92df-48a8-b2e2-9fcc886dbb6f
 ---
 
-Claudia's context-aware heartbeat was deployed on 2026-04-04. It reads `/root/.claudia/workspaces/claudia/HEARTBEAT.md` every hour (08:00-20:00 BRT) and decides whether to message #command-center or stay silent.
+Claudia's context-aware heartbeat was deployed on 2026-04-04 and reviewed on 2026-04-09.
 
-**Why:** Inspired by Ryan Carson's ClawChief pattern (externalized heartbeat context via markdown). We took the high-value piece (HEARTBEAT.md) and deferred the rest (separate tasks.md, priority-map.md, auto-resolver.md, tasks-completed.md) until we have evidence it's needed.
+**Status: RESOLVED — system working, enhanced**
 
-**How to apply:** Around 2026-04-18, review the heartbeat's behavior:
+Review findings (2026-04-09):
 
-1. Check Discord #command-center for heartbeat messages: `ssh vps "journalctl -u claudia --since '2 weeks ago' | grep heartbeat | grep -c 'Delivered'"` vs `grep -c 'suppressed'`
-2. If 100% silent → HEARTBEAT.md template needs better defaults or heartbeat isn't worth the token spend. Consider disabling or enriching the template.
-3. If noisy (>3 messages/day) → tighten silence rules in HEARTBEAT.md
-4. If Pierre is manually editing HEARTBEAT.md tasks daily → split `tasks.md` as a standalone file that agents can read/write during conversations (Carson's canonical task source pattern)
-5. If the meeting-prep cron surfaces tasks that should flow into the heartbeat → build the meeting-notes → tasks ingestion pipeline
+1. HEARTBEAT.md is clean (40 lines, structured checklist, proper silence rules)
+2. tasks.md is referenced as a linked file, not inlined — correct separation
+3. The heartbeat was posting to #claudia instead of #tech-ops — fixed
+4. No state tracking existed — every 30-min tick re-checked everything from scratch
 
-**Decision tree after review:**
+Improvements shipped (2026-04-09 OpenClaw maturity port):
 
-- Working well, no manual editing needed → keep as-is
-- Manual editing is frequent → split tasks.md out, let agents write to it
-- Not useful at all → disable heartbeat runner, revert to simple health ping or remove entirely
+- **Heartbeat state tracking** (heartbeat-state.json) — tracks lastChecks timestamps per category, skips checks done <25 min ago
+- **Forces full check** after 4 consecutive silent runs
+- **Routed to #tech-ops** instead of #claudia
+- **Governance rules** prevent filler output
+- **Response quality gate** catches errors and non-content before delivery
+- **Quiet hours** (22:30-04:30 BRT) suppress non-critical heartbeat output
+
+**Decision: Keep as-is.** No need to split tasks.md — the linked file pattern works. No need to disable — heartbeat is useful with the state tracking preventing redundant checks.

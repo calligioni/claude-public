@@ -1,21 +1,20 @@
 ---
 name: project_benchmark_loop_scaleup
-description: Benchmark optimization loop for Claudia — check ledger after 2-3 weeks and expand to other agents if gate criteria pass
+description: RESOLVED — Benchmark loop removed (2026-04-09). Too dangerous for autonomous execution.
 type: project
+originSessionId: f190a821-92df-48a8-b2e2-9fcc886dbb6f
 ---
 
-AutoAgent-style benchmark loop deployed 2026-04-04 for claudia agent only (src/benchmark/).
+AutoAgent-style benchmark loop was deployed 2026-04-04 for claudia agent only (src/benchmark/).
 
-**Why:** Closed-loop hill-climbing on persona (agents/claudia/CLAUDE.md). Runs nightly at 01:00 BRT, 3 iterations, reports to Discord #command-center.
+**Status: REMOVED (2026-04-09)**
 
-**How to apply:** After 2026-04-20, check the ledger at data/benchmark/results.tsv on VPS. If gate criteria pass, expand to other agents:
+The benchmark-loop and auto-compound tasks were permanently removed from default-tasks.ts:
 
-Gate criteria:
+- Auto-compound modified agent persona files autonomously, destabilized the VPS
+- Benchmark-loop sent `rm -rf /opt/claudia` via Agent SDK running as root — nuked the deployment twice
+- No ledger was ever generated (no benchmark-ledger.json exists)
 
-1. At least 3-5 "improved" or "kept_simpler" entries (not all "reverted")
-2. Held-out scores stable or rising
-3. No manual reverts needed by user
+**Why removed:** Autonomous self-modification without human review is too risky. The compound-review (Phase 1, observe-only) was kept — it just logs findings to data/autoimprove/review-{date}.json.
 
-Expansion order: buzz → marco → north → rest. Each needs a tasks/{agent}.ts file and agents/{agent}/CLAUDE.md persona. OpenRouter agents (all except claudia/bella) need wider verifier tolerances or multi-run averaging due to noisier responses.
-
-Check this proactively around 2026-04-20 without being asked.
+**How to apply:** Use `/meditate` at session end for human-in-the-loop self-improvement. Do not re-enable autonomous overnight loops.
