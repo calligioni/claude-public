@@ -15198,3 +15198,13 @@
   "cwd": "/Volumes/AI/Code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-09T14:06:12Z",
+  "date": "2026-04-09",
+  "skill": "deep-plan",
+  "args": "Research and plan eSocial integration for Contably. \n\n## Context\n- Contably already has an eSocial menu item and pages at https://contably.ai/admin/esocial — need to determine if there's any backend implementation\n- eSocial is Brazil's government system for unified reporting of labor, social security, and tax obligations\n- Official site: https://www.gov.br/esocial/pt-br\n- There's an existing memory about eSocial: project_esocial_plan.md — check it for prior decisions\n\n## Research Required\n1. **Current codebase state**: What exists in Contably's frontend and backend for eSocial? Is anything hooked up?\n2. **eSocial API/protocol research**: How does eSocial actually work technically? SOAP/REST APIs, XML schemas, digital certificates (A1/A3), event types, submission flow\n3. **Direct integration feasibility**: Can we build an API/MCP/service to submit payroll events directly through digital certificates? What are the technical requirements?\n4. **TecnoSpeed middleware option**: Prior plan mentioned TecnoSpeed as middleware partner — evaluate build-vs-buy\n5. **Certificate management**: How to handle A1 digital certificates (PFX files) for signing and submitting events\n6. **Event types needed**: S-1200 (payroll), S-1210 (payments), S-2200 (hiring), S-2300 (contractors), etc.\n7. **Compliance requirements**: Validation rules, deadlines, correction workflows, government environment (production vs sandbox)\n\n## Deliverable\nA comprehensive deep plan covering:\n- Current state analysis of what exists in the codebase\n- Technical architecture for eSocial integration\n- Build vs buy analysis (direct API vs TecnoSpeed vs other middleware)\n- Implementation phases with dependencies\n- Risk assessment (compliance, certificate security, government API stability)\n- DO NOT implement anything — plan only",
+  "sessionId": "9cfd10af-84f6-4826-aa30-50f6f6b0c22d",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
