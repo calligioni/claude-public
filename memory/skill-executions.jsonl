@@ -14938,3 +14938,13 @@
   "cwd": "/Users/ps/code/claudia",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-09T07:15:44Z",
+  "date": "2026-04-09",
+  "skill": "deep-plan",
+  "args": "Skip research phase — research is complete in research.md. Go directly to Plan phase.\n\nCreate a precise implementation plan for 5 action items that adopt OpenClaw architectural patterns into Claudia (a TypeScript multi-channel AI agent router). These are independent features — no cross-dependencies.\n\n## Action 1: Declarative Agent Bindings (P1, 1 day)\nMove hardcoded CHANNEL_BINDINGS from src/config.ts (lines 209-336) to data/bindings.json. Hot-reload via fs.watchFile. resolveAgent() reads from mutable variable. Export reloadBindings(). Fall back to empty array if file missing.\n\n## Action 2: Declarative Inference Config (P1, 1 day)  \nMove AGENT_SDK_AGENTS, AGENT_MODEL_TIERS, AGENT_TOOLS from src/agents/registry.ts (lines 36-90) to data/inference.json. Support tool presets (\"readonly\"/\"standard\"/\"full\") or explicit arrays. Hot-reload + clear agent cache on change. Fall back to current hardcoded defaults if missing.\n\n## Action 3: Hook System (P2, 3 days)\nNew src/hooks.ts with registerHook/removeHook/runHooks. Events: before_inference, after_inference, before_send, after_send. Priority-ordered handlers. HookContext with skip/modified fields. Wire into src/router.ts (around step 5 infer call) and src/scheduler/outbound.ts (around sendOutbound).\n\n## Action 4: Formalize Standing Orders (P2, 1 day)\nIn src/inference/agent-sdk.ts sendToAgentSDK(), inject ALL loaded AgentConfig fields into system prompt: persona (SOUL.md) + heartbeat (HEARTBEAT.md) + tasks (tasks.md) + autoResolver (auto-resolver.md) + priorityMap (priority-map.md) + memory (MEMORY.md). Only include non-empty sections with clear headers and --- separators.\n\n## Action 5: Task Flows (P3, 1 week)\nNew src/scheduler/task-flow.ts. Durable multi-step workflows. State persists to data/task-flows/{id}.json. createFlow/runFlow/getFlowStatus/listFlows/retryFlow. Steps execute sequentially, each receives accumulated state. Handlers registered in-memory, only state/status serialized.\n\n## Context:\n- TypeScript strict, ES2022, NodeNext modules\n- Codebase: src/ directory, ~80 .ts files, ~15k lines\n- Do NOT modify: memory system, channels, dashboard, wiki engine\n- Match existing code patterns (see src/config.ts, src/agents/registry.ts, src/router.ts)",
+  "sessionId": "09bc6f12-2a87-4129-a01d-7b5f32c2ea88",
+  "project": "Unknown",
+  "cwd": "/Users/ps/code/claudia",
+  "hadError": false
+}
