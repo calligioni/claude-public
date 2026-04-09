@@ -15118,3 +15118,13 @@
   "cwd": "/Volumes/AI/Code/contably",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-09T11:14:02Z",
+  "date": "2026-04-09",
+  "skill": "deep-research",
+  "args": "Research how to build a killer AI assistant for Contably — an accounting automation SaaS. The assistant should be able to: (1) Answer questions about how to use the system (\"how do I add a company?\"), (2) Query live company data (\"show me open invoices\", \"what's the reconciliation status?\"), (3) Access user-level data (\"what companies do I have access to?\"), (4) Provide actionable answers with real numbers from the database. Research: best practices for building copilot-style assistants in SaaS products (function calling, RAG, tool-use patterns), how products like Intercom Fin, Linear's AI, Notion AI, and Stripe's AI assistant work, what data indexing strategies work best (live SQL queries vs vector embeddings vs hybrid), and what the best UX patterns are for accounting-specific AI assistants. Focus on architectures that can be implemented with Claude API tool_use. Do NOT implement anything — just research and present findings.",
+  "sessionId": "525c8928-3ecf-4498-9b57-1e2ae0093022",
+  "project": "Contably",
+  "cwd": "/Volumes/AI/Code/contably",
+  "hadError": false
+}
