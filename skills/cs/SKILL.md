@@ -41,7 +41,10 @@ Syncs the local Claude setup repo (`~/.claude-setup`) to all configured remotes 
 ### Phase 2: Push to origin (private — full content)
 
 1. Compare local HEAD with `origin/master`
-2. If ahead: `git push origin master`
+2. If ahead, push using the SSH/HTTPS fallback pattern:
+   - Test SSH first: `ssh -T git@github.com 2>&1`
+   - If SSH succeeds (output contains "Hi "): `git push origin master`
+   - If SSH fails: unset `GITHUB_TOKEN` env var (known invalid token that overrides valid keyring), temporarily rewrite the `origin` remote URL from SSH to HTTPS (`https://github.com/escotilha/claude.git`), push, then restore the original SSH URL
 3. If behind: report only (manual pull recommended)
 4. If diverged: report only
 
@@ -69,9 +72,14 @@ discord loop schedule
 **Excluded files**: `settings.json .deep-plan-state.json .gstack/ settings.json.backup* plan.md research.md memory/core-memory.json`
 
 3. Commit removals: `chore: sync nuvini-public with master`
-4. Force-push to both public remotes:
-   - `git push public nuvini-public:main --force`
-   - `git push nuvini nuvini-public:master --force`
+4. Force-push to both public remotes using the SSH/HTTPS fallback pattern:
+   - Test SSH first: `ssh -T git@github.com 2>&1`
+   - If SSH succeeds: push directly
+     - `git push public nuvini-public:main --force`
+     - `git push nuvini nuvini-public:master --force`
+   - If SSH fails: unset `GITHUB_TOKEN`, temporarily rewrite each remote URL to HTTPS, push, then restore SSH URLs:
+     - `public` → `https://github.com/escotilha/claude-public.git`
+     - `nuvini` → `https://github.com/Nuvinigroup/claude.git`
 5. Switch back to master
 
 ### Phase 4: Sync to VPS via git pull
@@ -114,6 +122,33 @@ Present results:
 - nuvini status (force-pushed / up to date)
 - VPS status (git pull result / skipped — offline / error)
 - Any errors or warnings
+
+## Git Auth Fallback
+
+The remotes `public` and `nuvini` (and `origin`) use SSH URLs (`git@github.com:...`). If the local SSH key is not registered on GitHub, pushes will fail silently or with a "Permission denied" error.
+
+The `gh` CLI has a valid HTTPS keyring token (account `escotilha`), but the `GITHUB_TOKEN` env var may be set to an **invalid value** that overrides the keyring credential — causing HTTPS pushes to also fail.
+
+**Fallback procedure (applied in Phase 2 and Phase 3):**
+
+```bash
+# 1. Test SSH
+ssh_result=$(ssh -T git@github.com 2>&1)
+
+if echo "$ssh_result" | grep -q "Hi "; then
+  # SSH works — push normally
+  git push <remote> <refspec>
+else
+  # SSH broken — fall back to HTTPS with keyring token
+  unset GITHUB_TOKEN                          # remove invalid token override
+  original_url=$(git remote get-url <remote>) # save SSH URL
+  git remote set-url <remote> https://github.com/<owner>/<repo>.git
+  git push <remote> <refspec>
+  git remote set-url <remote> "$original_url" # restore SSH URL
+fi
+```
+
+This is transparent — the remote URLs on disk remain SSH after the push completes.
 
 ## Important Notes
 
