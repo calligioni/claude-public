@@ -1,7 +1,7 @@
 {
-  "pid": 71123,
-  "port": 33612,
-  "token": "b85575e3-d0ad-4dd8-aec3-1c9cdc9a4ee2",
-  "startedAt": "2026-03-14T13:50:35.066Z",
-  "serverPath": "/private/tmp/gstack-browse/browse/src/server.ts"
+  "pid": 62741,
+  "port": 11843,
+  "token": "31cc3cfe-9b45-499e-9735-bf6b4421b82e",
+  "startedAt": "2026-04-10T10:36:35.405Z",
+  "serverPath": "/Users/ps/.local/lib/browse/src/server.ts"
 }

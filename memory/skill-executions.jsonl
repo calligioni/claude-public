@@ -15358,3 +15358,23 @@
   "cwd": "/Users/ps/code/claude-setup",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-10T10:36:15Z",
+  "date": "2026-04-10",
+  "skill": "deploy-claudia",
+  "args": "",
+  "sessionId": "9a9e5be7-5727-42a4-87b4-ce88e7457231",
+  "project": "Unknown",
+  "cwd": "/Users/ps/code/claudia",
+  "hadError": false
+}
+{
+  "timestamp": "2026-04-10T10:37:06Z",
+  "date": "2026-04-10",
+  "skill": "deep-plan",
+  "args": "Resume Phase 2 (Plan) with revised scope.\n\n## Revised Scope: Mac ↔ Mac Mini Parity ONLY\n\n**Goal:** Full parity between MacBook Air and Mac Mini M4 Pro for Claude Code sessions. VPS is out of scope. GBrain is out of scope (revisit later when it has 100+ pages).\n\n## What needs to sync (from research):\n\n### 1. MCP Memory (Knowledge Graph)\n- Already uses Turso cloud DB (`libsql://claude-memory-escotilha.aws-us-east-1.turso.io`)\n- Mac has the `memory-turso` MCP server at `~/.claude-setup/mcp-servers/memory-turso/`\n- Mini shares settings.json via symlink — already has the Turso URL + auth token\n- **BLOCKER: Mini has no Node.js** — can't run the memory-turso MCP server\n- **Fix: Install Node.js on Mini, then `npm install` in memory-turso directory**\n\n### 2. Secrets / API Keys\n- settings.json env{} block is already symlinked to Mini — Claude Code gets API keys\n- macOS Keychain has 12+ `claude-code-*` generic passwords that DON'T sync via iCloud\n- The setup-keychain.sh scripts incorrectly claim iCloud sync\n- **Decision: env{} block in settings.json is sufficient. Fix the incorrect iCloud sync claims in docs. Keychain is for non-Claude-Code tools only.**\n\n### 3. Node.js + npx-based MCP Servers\n- Mini has NO Node.js — all npx-based MCP servers are broken\n- This affects: memory-turso, and any other node-based MCP servers\n- **Fix: Install Node.js via nvm on Mini**\n\n### 4. Binary Tools on Mini\n- Missing: browse CLI, qmd, possibly others\n- **Fix: Install missing tools via setup script**\n\n### 5. mem-search Index\n- Already works (bash + sqlite3, both available on Mini)\n- Index auto-rebuilds from synced markdown files\n- **Fix: Just run `mem-search --reindex` after git pull on Mini**\n\n### 6. Auto-Memory Markdown Files\n- Already synced via git\n- **Already solved**\n\n### 7. settings.json\n- Already symlinked from Mini to the same file as Mac\n- **Already solved — but verify all MCP servers in it can actually run on Mini**\n\n## What does NOT need syncing:\n- VPS (out of scope)\n- GBrain (out of scope, revisit later)\n- Project-specific repos (Mini pulls from GitHub independently)\n\n## Constraints:\n- Both machines on Tailscale\n- Mini accessible via `ssh mini` (user: psm2, Tailscale IP: 100.66.244.112)\n- Prefer minimal maintenance — one-time setup, then auto-sync via git\n- Don't break existing Mini workflows (MLX inference, mini-remote relay)",
+  "sessionId": "d0b0cea6-dc33-4601-bc8b-6d07c6e191f8",
+  "project": "Claude Setup",
+  "cwd": "/Users/ps/code/claude-setup",
+  "hadError": false
+}
