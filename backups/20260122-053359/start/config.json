@@ -1,6 +1,0 @@
-{
-  "name": "start",
-  "description": "Start all Contably application services",
-  "instructions_file": "skill.md",
-  "user_invocable": true
-}
