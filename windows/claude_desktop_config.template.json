@@ -1,0 +1,49 @@
+{
+  "mcpServers": {
+    "sqlserver": {
+      "command": "mcp-sqlserver",
+      "env": {
+        "SQLSERVER_HOST": "{{SQLSERVER_HOST}}",
+        "SQLSERVER_USER": "{{SQLSERVER_USER}}",
+        "SQLSERVER_PASSWORD": "{{SQLSERVER_PASSWORD}}",
+        "SQLSERVER_DATABASE": "{{SQLSERVER_DATABASE}}"
+      }
+    },
+    "azure-devops": {
+      "command": "npx",
+      "args": ["-y", "@azure-devops/mcp", "onclickbr"],
+      "env": {
+        "AZURE_DEVOPS_ORG_URL": "https://dev.azure.com/onclickbr",
+        "AZURE_DEVOPS_AUTH_METHOD": "azure-identity"
+      }
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    },
+    "deskmanager": {
+      "command": "node",
+      "args": ["{{INSTALL_DIR}}\\mcp-servers\\deskmanager-mcp.js"],
+      "env": {
+        "DESKMANAGER_URL": "https://api.desk.ms",
+        "DESKMANAGER_API_KEY": "{{DESKMANAGER_API_KEY}}",
+        "DESKMANAGER_PUBLIC_KEY": "{{DESKMANAGER_PUBLIC_KEY}}",
+        "DESKMANAGER_EMPRESA": "onclick"
+      }
+    },
+    "mcp-obsidian": {
+      "command": "{{UVX_PATH}}",
+      "args": ["mcp-obsidian"],
+      "env": {
+        "OBSIDIAN_API_KEY": "{{OBSIDIAN_API_KEY}}",
+        "OBSIDIAN_HOST": "localhost"
+      }
+    }
+  },
+  "preferences": {
+    "coworkWebSearchEnabled": false,
+    "coworkScheduledTasksEnabled": true,
+    "ccdScheduledTasksEnabled": true,
+    "sidebarMode": "code"
+  }
+}

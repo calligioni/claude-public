@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "last_scan": null,
+  "screens": {
+    "TFrmESTMOV_DOCMOV_P": {
+      "form_class": "TFrmESTMOV_DOCMOV_P",
+      "unit_name": "ESTMOV_DOCMOV",
+      "menu_path": ["Estoque", "Movimentação", "Documento auxiliar de movimentação de estoque"],
+      "caption": "Documento auxiliar de movimentação de estoque",
+      "module": "KEST",
+      "module_label": "Estoque",
+      "source_files": ["ESTMOV_DOCMOV_M.pas", "ESTMOV_DOCMOV_M.dfm", "ESTMOV_DOCMOV_D.pas", "ESTMOV_DOCMOV_D.dfm", "ESTMOV_DOCMOV_P.pas", "ESTMOV_DOCMOV_P.dfm"],
+      "source_dir": "Aplicacoes/BackOfficeDelphi/Estoque",
+      "doc_status": "documented",
+      "doc_path": "docs/manual-usuario/ESTMOV_DOCMOV_DocumentacaoPreventiva.md",
+      "doc_date": "2025-08-01",
+      "source_last_modified": null,
+      "needs_update": false,
+      "skip_reason": null
+    }
+  },
+  "stats": {
+    "total": 1,
+    "documented": 1,
+    "pending": 0,
+    "needs_update": 0,
+    "skipped": 0
+  }
+}
