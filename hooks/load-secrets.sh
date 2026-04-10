@@ -1,6 +1,6 @@
 #!/bin/bash
 # Load secrets from macOS Keychain
-# These secrets sync across Macs via iCloud Keychain
+# Secrets are stored locally per machine (they do NOT sync via iCloud Keychain)
 # Run this script on SessionStart to populate environment variables
 
 # Keychain service prefix for Claude Code secrets

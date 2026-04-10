@@ -1,6 +1,6 @@
 #!/bin/bash
 # Setup script to migrate secrets from .env to macOS Keychain
-# Run this ONCE on your primary Mac - secrets will sync via iCloud Keychain
+# Run this on each Mac separately - secrets are stored locally (do NOT sync via iCloud)
 
 set -e
 
@@ -65,7 +65,7 @@ prompt_secret() {
 }
 
 echo "This script will store your API keys in macOS Keychain."
-echo "Secrets stored here will sync to your other Macs via iCloud Keychain."
+echo "Secrets are stored locally in this machine's Keychain."
 echo ""
 echo "Press Ctrl+C to cancel, or Enter to continue..."
 read
@@ -128,7 +128,7 @@ echo "Setup Complete!"
 echo "======================================"
 echo ""
 echo "Your secrets are now stored in macOS Keychain."
-echo "They will sync to your other Macs via iCloud Keychain."
+echo "Run this script on each Mac separately. Keys do not sync via iCloud."
 echo ""
 
 if [ -f "$ENV_FILE" ]; then

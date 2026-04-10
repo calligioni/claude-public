@@ -9,7 +9,7 @@
 #   source ~/.claude/bin/load-keychain-secrets.sh
 #
 # Secrets are stored in Keychain with service prefix "claude-code-"
-# They sync across Macs via iCloud Keychain.
+# Stored locally per machine. For Claude Code, keys are also in settings.json env block.
 # ============================================================
 
 SERVICE_PREFIX="claude-code"
