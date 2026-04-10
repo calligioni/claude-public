@@ -15378,3 +15378,13 @@
   "cwd": "/Users/ps/code/claude-setup",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-10T10:41:36Z",
+  "date": "2026-04-10",
+  "skill": "deep-plan",
+  "args": "Continue to Phase 2 implementation steps. The approach from Phase 1 was approved by the user. \n\n## Approved Approach (recap)\n5 steps to Mac ↔ Mac Mini parity:\n1. Install nvm + Node.js on Mini (enables npx-based MCP servers)\n2. Build memory-turso MCP server on Mini (npm install so shared Turso cloud DB works)\n3. Install missing binary tools (browse CLI, qmd)\n4. Fix hardcoded `/Users/ps/` path in settings.json (Mini user is psm2, not ps)\n5. Clean up incorrect iCloud Keychain sync claims in setup scripts\n\n## Context from research\n- Mini SSH: `ssh mini` (user psm2, Tailscale IP 100.66.244.112)\n- settings.json is symlinked from Mini to the same repo file\n- memory-turso server at ~/.claude-setup/mcp-servers/memory-turso/\n- Turso cloud DB URL + auth token already in settings.json env block\n- mem-search just needs --reindex after git pull\n- browse CLI binary at ~/.local/bin/browse on Mac\n- qmd location needs to be found\n\n## What to write in plan.md\nWrite detailed implementation steps for each of the 5 tasks. Include exact SSH commands. The plan should be executable — someone should be able to follow it step by step.\n\n## Scope\nMac ↔ Mac Mini ONLY. No VPS. No GBrain.",
+  "sessionId": "d0b0cea6-dc33-4601-bc8b-6d07c6e191f8",
+  "project": "Claude Setup",
+  "cwd": "/Users/ps/code/claude-setup",
+  "hadError": false
+}

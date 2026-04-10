@@ -1,496 +1,297 @@
-# Plan: Claude Managed Agents API Integration into Claudia
+# Plan: Mac <-> Mac Mini Parity
 
-**Date:** 2026-04-08
-**Revised:** 2026-04-08 (post-codebase review — 7 commits since initial draft)
-**Status:** Draft — awaiting approval before implementation
-**Research:** [research.md](./research.md)
+**Date:** 2026-04-10
+**Based on:** research.md
+**Estimated files to change:** 7
+**Scope:** Mac Mini only. No VPS. No GBrain.
 
-## Codebase Changes Since Initial Draft
+## Approach
 
-Seven commits landed between the initial research and this revision. Key changes that affect the plan:
+Bring the Mac Mini to functional parity with the MacBook Air for Claude Code by installing missing runtimes (Node.js via nvm), building the shared memory-turso MCP server, installing missing binary tools (browse, qmd), fixing the one hardcoded `/Users/ps/` path in settings.json, and correcting the iCloud Keychain sync claims in setup scripts. All work is done via SSH to Mini (`ssh mini`, user `psm2`). After this, Claude Code on Mini will have working MCP memory (shared Turso cloud DB), working binary tools, and accurate setup documentation.
 
-1. **Declarative inference config** (`data/inference.json`) — Inference routing (SDK agents, model tiers, tools) moved from hardcoded sets to a hot-reloadable JSON file with `watchFile`. The `managedAgents` list should go here, not in a separate env var.
-2. **Channel bindings externalized** (`data/bindings.json`) — Hot-reloadable JSON. No plan impact.
-3. **Lifecycle hooks** (`src/hooks.ts`) — `before_inference`, `after_inference`, `before_send`, `after_send` with priority ordering. The Managed Agents adapter **must fire these hooks** at the same points as the existing router.
-4. **AgentConfig expanded** — New fields: `autoResolver`, `tasks`, `priorityMap`. The `agent-sdk.ts` now builds a 6-section system prompt (persona + heartbeat + tasks + autoResolver + priorityMap + memory + memory rule + dynamic context). The Managed Agents adapter must mirror this exact prompt assembly.
-5. **Standing orders pattern** — All agent context files injected as system prompt sections. The Managed Agents agent config must use the same structure at session creation.
-6. **Task Flows** (`src/scheduler/task-flow.ts`) — Durable multi-step workflows. Could run inside Managed Agents sessions later, but not in scope for this plan.
-7. **SDK upgraded** to `claude-agent-sdk@0.2.97`. Transitive `@anthropic-ai/sdk` is **0.80.0** — this version does **NOT** have `beta.agents`/`beta.sessions`/`beta.environments`. Must upgrade to ^0.86.1 as a direct dependency.
+## Trade-offs Considered
 
-## Decisions (from user input)
+| Option               | Pros                                          | Cons                                      | Verdict      |
+| -------------------- | --------------------------------------------- | ----------------------------------------- | ------------ |
+| nvm for Node.js      | Version management, no sudo, widely supported | Adds `.nvm` directory, needs shell config | **Selected** |
+| Homebrew for Node.js | Consistent with Mac primary                   | Homebrew not installed on Mini, heavier   | Rejected     |
+| Direct node tarball  | No extra tooling                              | Manual updates, no version switching      | Rejected     |
 
-| Question              | Answer                                                                                  |
-| --------------------- | --------------------------------------------------------------------------------------- |
-| Which agents?         | `claudia`, `bella`, `marco`, `swarmy`                                                   |
-| Session lifecycle?    | **Hybrid** — long-lived for active conversations, ephemeral for dispatch/one-shot tasks |
-| Custom tools?         | Yes — memory query, KG search, channel message sending                                  |
-| SDK approach?         | Upgrade `@anthropic-ai/sdk` directly                                                    |
-| MCP for KG?           | Yes — expose mcp-memory-pg over HTTPS for native MCP access                             |
-| Feature flag?         | Per-agent flag with pros/cons analysis (see below)                                      |
-| Environment strategy? | Per-agent environments                                                                  |
+| Option                              | Pros                            | Cons                             | Verdict                          |
+| ----------------------------------- | ------------------------------- | -------------------------------- | -------------------------------- |
+| Copy browse binary from Mac to Mini | Both are arm64 macOS, same arch | Binary may have dylib deps       | **Selected** (verify deps first) |
+| Build browse from source on Mini    | Guaranteed clean build          | Needs full build toolchain, slow | Fallback if copy fails           |
 
-## Feature Flag: Per-Agent `useManagedAgents`
+| Option                        | Pros                  | Cons                                   | Verdict                                       |
+| ----------------------------- | --------------------- | -------------------------------------- | --------------------------------------------- |
+| Use `$HOME` in officecli path | Portable across users | `$HOME` may not expand in all contexts | **Selected** (works in settings.json for MCP) |
+| Use `~` in officecli path     | Shorter               | `~` does NOT expand in JSON values     | Rejected                                      |
+| Detect user at runtime        | Most robust           | Overengineered for 1 path              | Rejected                                      |
 
-### Pros
+## Implementation Steps
 
-- **Gradual rollout** — enable one agent at a time, monitor cost/quality before expanding
-- **Easy rollback** — flip one flag to revert a single agent without touching others
-- **Mixed routing** — some agents stay on Agent SDK (full local tools), others go cloud
-- **A/B comparison** — run same prompt through both paths, compare latency/quality/cost
-- **Independent lifecycles** — `swarmy` (multi-agent coordination) has different needs than `claudia` (conversational)
+### Step 1: Install nvm + Node.js on Mac Mini
 
-### Cons
+**Target:** Mac Mini via `ssh mini`
+**What:** Install nvm, then install Node.js LTS (v22). This unblocks all npx-based MCP servers.
+**Why:** Mini has zero Node.js tooling. The memory-turso MCP server, and any npx-based MCP servers in settings.json, all require `node`.
 
-- **Two code paths to maintain** — Agent SDK + Managed Agents adapter, both must handle sessions, errors, timeouts
-- **Inconsistent behavior** — users may notice different capabilities between agents (local Bash vs cloud Bash)
-- **Config complexity** — registry grows: `useAgentSDK`, `useManagedAgents`, model tier, tool allowlist — many knobs
-- **Testing surface** — every agent x path combination needs testing; flag interactions are subtle
+**Commands to run via SSH:**
 
-### Recommendation
+```bash
+# SSH to Mini
+ssh mini
 
-**Do it.** The pros clearly outweigh the cons. The two-path maintenance cost is bounded (both paths share the same session manager, memory pipeline, and post-processing hooks). Start with `swarmy` (lowest risk, most benefit from cloud isolation), then `claudia`, then `bella`/`marco`.
+# Install nvm (latest from GitHub)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+
+# Source nvm immediately (it modifies .zshrc)
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
+# Install Node.js LTS (v22)
+nvm install 22
+
+# Verify
+node --version   # expect v22.x.x
+npm --version    # expect 10.x.x
+npx --version    # expect 10.x.x
+```
+
+**Verification:** `ssh mini 'source ~/.nvm/nvm.sh && node --version'` returns `v22.x.x`
 
 ---
 
-## Architecture Overview
+### Step 2: Build memory-turso MCP server on Mini
 
-```
-Channel Adapters (Discord/Telegram/Slack/WhatsApp/Voice/Video)
-    |
-Dispatcher (per-peer serial, global max 8)
-    |
-Router (handleMessage)
-    +-- resolveAgent() -> agent config (includes useManagedAgents flag)
-    +-- resolveSession() -> SQLite (now stores Agent SDK + Managed Agents session IDs)
-    |
-    +-- [useManagedAgents = true] -----------------------------------------+
-    |   |                                                                   |
-    |   +-- inferWithManagedAgents()  <- NEW                                |
-    |   |   +-- Get/create Managed Agents session (server-side, persistent) |
-    |   |   +-- Send user message as SSE event                              |
-    |   |   +-- Stream response (handle custom_tool_use for memory/KG)      |
-    |   |   +-- On idle -> return response                                  |
-    |   |   +-- Fallback: inferWithAgentSDK() or inferLocalFallback()       |
-    |   |                                                                   |
-    |   +-- Session management                                              |
-    |       +-- Hybrid lifecycle: active sessions kept alive, idle expire   |
-    |       +-- Session ID stored in SQLite (same table, new type column)   |
-    |                                                                       |
-    +-- [useAgentSDK = true, useManagedAgents = false] -- existing path     |
-    |   +-- inferWithAgentSDK() -> Opus -> Sonnet -> Mac Mini -> Ollama     |
-    |                                                                       |
-    +-- [both false] -- existing path                                       |
-    |   +-- inferWithOpenRouter() -> Mac Mini -> Ollama                     |
-    |                                                                       |
-    +-- Post-processing (unchanged, works with all paths) ------------------+
-        +-- saveConversationMemory()
-        +-- maybeExtractAndStoreFacts()
-        +-- maybeCompoundResponse()
-        +-- registerExchange() + trackTurn()
-        +-- trackComplexity() + executeAnticipations()
+**Target:** Mac Mini via `ssh mini`
+**What:** Run `npm install && npm run build` in `~/.claude-setup/mcp-servers/memory-turso/`. This builds the TypeScript MCP server that connects to the shared Turso cloud DB.
+**Why:** settings.json already has the memory-turso config with Turso URL + auth token (via symlink from git). The only blocker was missing Node.js (fixed in Step 1). After this, Claude Code on Mini will share the same knowledge graph as Mac.
+
+**Commands to run via SSH:**
+
+```bash
+ssh mini
+
+# Source nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
+# Build memory-turso
+cd ~/.claude-setup/mcp-servers/memory-turso
+npm install
+npm run build
+
+# Verify the built artifact exists
+ls -la dist/index.js
+# Expected: dist/index.js exists
+
+# Quick smoke test - server should start and exit cleanly when no stdio connected
+timeout 3 node dist/index.js 2>&1 || true
+# (It will error or hang since it expects MCP stdio protocol - that's fine,
+#  we just want to confirm it doesn't crash on missing deps)
 ```
 
-### Custom Tools Bridge
-
-Managed Agents sessions can't directly access Claudia's local systems. Custom tools bridge this:
-
-```
-Managed Agents Session (Anthropic cloud)
-    |
-    +-- Built-in tools: bash, read, write, edit, glob, grep, web_search, web_fetch
-    |
-    +-- Custom tools (client-executed by Claudia):
-    |   +-- memory_query    -> queryKnowledgeGraph() -> return formatted context
-    |   +-- memory_store    -> storeFacts() -> persist to KG
-    |   +-- channel_send    -> sendOutbound() -> send message to channel
-    |   +-- wiki_query      -> buildWikiContext() -> return wiki knowledge
-    |
-    +-- MCP servers (native, via HTTPS):
-        +-- mcp-memory-pg   -> direct pgvector access (semantic search, entity CRUD)
-```
-
-### Per-Agent Environments
-
-All 4 agents get **identical, maximum-capability environments** — no restrictions:
-
-| Agent     | Environment Config                                                                                                                                   |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `claudia` | Full packages (Node, Python, git, pip, cargo), unrestricted networking, GitHub repos mounted, all tools                                              |
-| `bella`   | Full packages (Node, Python, git, pip, cargo), unrestricted networking, GitHub repos mounted, all tools                                              |
-| `marco`   | Full packages (Node, Python, git, pip, cargo), unrestricted networking, GitHub repos mounted, all tools                                              |
-| `swarmy`  | Full packages (Node, Python, git, pip, cargo), unrestricted networking, GitHub repos mounted, all tools, multi-agent coordination (research preview) |
-
-**Rationale:** All agents need full capability to handle any task routed to them. Restricting environments creates artificial limitations that reduce usefulness without meaningful security benefit (agents are already scoped by their personas and task context).
-
-### Hybrid Session Lifecycle
-
-```
-New message arrives for agent with useManagedAgents=true
-    |
-    +-- Check SQLite for existing Managed Agents session ID
-    |   +-- Found -> check session status via API
-    |   |   +-- "idle" -> reuse session (send new event)
-    |   |   +-- "running" -> wait or queue
-    |   |   +-- "terminated" -> create new session
-    |   +-- Not found -> create new session
-    |
-    +-- Session creation:
-    |   +-- Use pre-created Agent + Environment (created at startup)
-    |   +-- Start session with system prompt + memory context
-    |
-    +-- Message handling:
-    |   +-- Send user.message event
-    |   +-- Stream SSE response
-    |   +-- Handle custom_tool_use events (memory, channel, etc.)
-    |   +-- Collect agent.message text -> return as response
-    |
-    +-- Session lifecycle:
-        +-- Active conversation: keep session alive (reuse across messages)
-        +-- 30 min idle: session auto-terminates (Anthropic manages)
-        +-- On session drop: consolidate memory (same as Agent SDK path)
-```
-
-**Cost projection (hybrid):**
-
-- Active conversation (5 messages over 10 min): ~$0.013 session-hour + tokens
-- Idle between messages: $0 (session auto-terminates after 30min inactivity)
-- vs current Agent SDK: $0 session cost (included in Max plan) + VPS resource contention
+**Verification:** `ls ~/.claude-setup/mcp-servers/memory-turso/dist/index.js` exists on Mini.
 
 ---
 
-## Implementation Phases
+### Step 3: Install missing binary tools on Mini (browse, qmd)
 
-### Phase 1: Foundation (types, config, SDK upgrade)
+**Target:** Mac Mini via `ssh mini`
+**What:** Install `browse` CLI and `qmd` CLI on Mini.
+**Why:** Multiple skills depend on these binaries. Mini currently has neither.
 
-**Files to modify:**
+#### 3a: Install browse CLI
 
-- `package.json` — add `@anthropic-ai/sdk` ^0.86.1 as **direct** dependency (current transitive 0.80.0 lacks Managed Agents API)
-- `src/agents/types.ts` — add `useManagedAgents`, `managedAgentId`, `managedEnvironmentId`
-- `src/config.ts` — add `ANTHROPIC_API_KEY`, `MANAGED_AGENTS_ENABLED`
-- `data/inference.json` — add `"managedAgents": ["swarmy", "claudia", "bella", "marco"]` (follows existing `sdkAgents` pattern, hot-reloadable)
-- `src/agents/registry.ts` — read `managedAgents` from `inferenceConfig`, populate flag in `getAgent()`
+The `browse` binary on Mac is a Mach-O arm64 executable at `~/.local/lib/browse/dist/browse`, symlinked from `~/.local/bin/browse`. Since Mini is also arm64 macOS, we can try copying the binary. If it has dynamic library dependencies that are missing on Mini, we fall back to building from source.
 
-**Types changes:**
+```bash
+# From Mac (local), copy the browse directory to Mini
+scp -r ~/.local/lib/browse mini:~/.local/lib/browse
 
-```typescript
-// src/agents/types.ts — current fields for reference:
-// name, persona, memory, heartbeat, autoResolver, tasks, priorityMap,
-// model, workspaceDir, allowedTools, useAgentSDK
+# SSH to Mini and set up the symlink
+ssh mini 'mkdir -p ~/.local/bin && ln -sf ~/.local/lib/browse/dist/browse ~/.local/bin/browse'
 
-export interface AgentConfig {
-  // ... all existing fields ...
-  useManagedAgents: boolean; // NEW
-  managedAgentId?: string; // NEW: Anthropic-side agent resource ID
-  managedEnvironmentId?: string; // NEW: Anthropic-side environment resource ID
-}
+# Verify it runs
+ssh mini '~/.local/bin/browse --version 2>&1 || ~/.local/bin/browse --help 2>&1 | head -3'
 
-export interface InferenceResult {
-  response: string;
-  sessionId?: string;
-  tier: "agent-sdk" | "openrouter" | "mac-mini" | "ollama" | "managed-agents"; // NEW tier
-}
+# If it fails with dylib errors, build from source instead:
+# ssh mini 'cd ~/.local/lib/browse && npm install && npm run build'
 ```
 
-**inference.json changes:**
+**Verification:** `ssh mini '~/.local/bin/browse --help'` produces output (not "command not found" or dylib error).
+
+#### 3b: Install qmd CLI
+
+On Mac, `qmd` is installed via npm globally at `/opt/homebrew/bin/qmd` -> `/opt/homebrew/lib/node_modules/@tobilu/qmd/bin/qmd`. Now that Mini has Node.js (Step 1), we can install it via npm.
+
+```bash
+ssh mini
+
+# Source nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
+# Install qmd globally
+npm install -g @tobilu/qmd
+
+# Verify
+qmd --version 2>&1 || qmd --help 2>&1 | head -3
+```
+
+**Verification:** `ssh mini 'source ~/.nvm/nvm.sh && qmd --help'` produces output.
+
+---
+
+### Step 4: Fix hardcoded `/Users/ps/` path in settings.json
+
+**File:** `/Users/ps/code/claude-setup/settings.json`
+**What:** Replace the hardcoded `/Users/ps/.local/bin/officecli` with `$HOME/.local/bin/officecli` in the `mcpServers.officecli.command` field.
+**Why:** Mini's user is `psm2`, not `ps`. The path `/Users/ps/.local/bin/officecli` does not exist on Mini. Since settings.json is symlinked to the same file on both machines, the path must be portable. Claude Code expands `$HOME` in settings.json command fields (confirmed by the memory-turso config which already uses `$HOME`).
+
+**Current (line 465):**
 
 ```json
-{
-  "sdkAgents": ["claudia", "bella", "marco", ...],
-  "managedAgents": ["swarmy", "claudia", "bella", "marco"],
-  ...
-}
+"command": "/Users/ps/.local/bin/officecli",
 ```
 
-**Registry changes** (in `getAgent()`):
-
-```typescript
-useManagedAgents: inferenceConfig.managedAgents?.includes(name) ?? false,
-```
-
-### Phase 2: Managed Agents Adapter
-
-**New file: `src/inference/managed-agents.ts`**
-
-Core functions:
-
-1. `ensureManagedAgent(agent)` — create or retrieve Anthropic agent resource
-2. `ensureManagedEnvironment(agent)` — create or retrieve environment
-3. `buildManagedSystemPrompt(agent, message)` — assemble system prompt **identically to `agent-sdk.ts`** (6 sections: persona + heartbeat + tasks + autoResolver + priorityMap + memory + memory rule + dynamic KG/wiki/skills context)
-4. `createManagedSession(agent, env, systemPrompt)` — start a new session
-5. `sendMessage(sessionId, message)` — send user message, stream SSE response
-6. `handleCustomToolUse(event)` — bridge memory_query, memory_store, channel_send, wiki_query
-7. `getManagedSessionStatus(sessionId)` — check if idle/running/terminated
-8. `terminateManagedSession(sessionId)` — explicit termination
-
-**Critical: System prompt parity with Agent SDK.** The `agent-sdk.ts` currently builds the system prompt as:
-
-```
-## Identity & Persona     → agent.persona (SOUL.md)
-## Standing Orders         → agent.heartbeat (HEARTBEAT.md)
-## Task List               → agent.tasks (tasks.md)
-## Auto-Resolution Policy  → agent.autoResolver (auto-resolver.md)
-## Email Priority Map      → agent.priorityMap (priority-map.md)
-## Long-Term Memory        → agent.memory (MEMORY.md)
-## Memory Rule             → hardcoded instruction
---- (dynamic) ---
-{memoryContext}            → KG search + file memory + skills + wiki
-```
-
-The Managed Agents adapter must use this exact same structure. Extract a shared `buildSystemPrompt(agent, message)` function that both `agent-sdk.ts` and `managed-agents.ts` call, to prevent drift.
-
-**Custom tool definitions (declared in agent config):**
-
-```typescript
-const CUSTOM_TOOLS = [
-  {
-    type: "custom",
-    name: "memory_query",
-    description: "Search Claudia's long-term knowledge graph memory.",
-    input_schema: {
-      type: "object",
-      properties: {
-        query: { type: "string", description: "Search query for memory" },
-        limit: { type: "number", description: "Max results (default 8)" },
-      },
-      required: ["query"],
-    },
-  },
-  {
-    type: "custom",
-    name: "memory_store",
-    description: "Store a new fact or observation in the knowledge graph.",
-    input_schema: {
-      type: "object",
-      properties: {
-        content: { type: "string", description: "The fact to store" },
-        memory_type: {
-          type: "string",
-          enum: ["factual", "procedural", "preference", "decision"],
-        },
-        entity_name: {
-          type: "string",
-          description: "Entity this fact relates to",
-        },
-      },
-      required: ["content", "memory_type"],
-    },
-  },
-  {
-    type: "custom",
-    name: "channel_send",
-    description:
-      "Send a message to a Discord, Telegram, Slack, or WhatsApp channel.",
-    input_schema: {
-      type: "object",
-      properties: {
-        channel_type: {
-          type: "string",
-          enum: ["discord", "telegram", "slack", "whatsapp"],
-        },
-        channel_id: { type: "string", description: "Channel/chat ID" },
-        message: { type: "string", description: "Message content" },
-      },
-      required: ["channel_type", "channel_id", "message"],
-    },
-  },
-  {
-    type: "custom",
-    name: "wiki_query",
-    description:
-      "Search the wiki knowledge base for persistent, curated knowledge.",
-    input_schema: {
-      type: "object",
-      properties: {
-        query: { type: "string", description: "Search query" },
-      },
-      required: ["query"],
-    },
-  },
-];
-```
-
-### Phase 3: Inference Cascade Integration
-
-**Files to modify:**
-
-- `src/inference/fallback.ts` — add `inferWithManagedAgents()` path
-
-**New cascade for Managed Agents agents:**
-
-```
-claudia/bella/marco/swarmy (useManagedAgents=true):
-  1. Managed Agents API (cloud, persistent sessions)   <- NEW
-  2. Agent SDK (Opus/Sonnet, local fallback)            <- existing
-  3. Mac Mini MLX                                       <- existing
-  4. VPS Ollama                                         <- existing
-```
-
-Key change in `fallback.ts`:
-
-```typescript
-export async function infer(agent, message, sessionId?, peerId?) {
-  // NEW: Managed Agents path (takes priority when enabled)
-  if (agent.useManagedAgents && MANAGED_AGENTS_ENABLED) {
-    try {
-      return await inferWithManagedAgents(agent, message, sessionId, peerId);
-    } catch (err) {
-      log.warn(
-        `[fallback] Managed Agents failed for ${agent.name}, falling back`,
-      );
-    }
-  }
-
-  // Existing paths unchanged
-  if (agent.useAgentSDK) {
-    return inferWithAgentSDK(agent, message, sessionId);
-  }
-  return inferWithOpenRouter(agent, message, peerId);
-}
-```
-
-**Hooks integration:** The router already calls `runHooks("before_inference", ctx)` and `runHooks("after_inference", ctx)` around the `infer()` call. Since the Managed Agents path is inside `infer()`, hooks fire automatically — no additional work needed. However, the `inferWithManagedAgents()` function must respect `hookCtx.skip` and `hookCtx.modified` the same way the router does (these are handled at the router level, not inside `infer()`, so this is already correct).
-
-### Phase 4: Session Management
-
-**Files to modify:**
-
-- `src/sessions/db.ts` — add `session_type` column
-- `src/sessions/manager.ts` — handle Managed Agents session lifecycle
-
-**Schema change:**
-
-```sql
-ALTER TABLE sessions ADD COLUMN session_type TEXT DEFAULT 'agent-sdk';
--- session_type: 'agent-sdk' | 'managed-agents'
-```
-
-**Manager additions:**
-
-- `resolveSession()` — check Managed Agents session status via API before returning
-- `saveSession()` — store with `session_type = 'managed-agents'`
-- `dropSession()` — terminate Managed Agents session via API, then consolidate
-
-### Phase 5: MCP Server for Knowledge Graph
-
-Expose mcp-memory-pg over HTTPS so Managed Agents sessions get direct KG access.
-
-**Options (pick one):**
-
-- A) Add Express route at `/mcp/memory` on Claudia's port 3001 (simplest, reuses existing server)
-- B) Deploy mcp-memory-pg as standalone HTTPS service on VPS (more isolated)
-
-**Auth:** Bearer token (shared secret stored in Managed Agents vault + Claudia .env)
-
-**Managed Agents agent config:**
+**New:**
 
 ```json
-{
-  "mcp_servers": [
-    { "name": "memory", "url": "https://claudia.xurman.com/mcp/memory" }
-  ]
-}
+"command": "$HOME/.local/bin/officecli",
 ```
 
-Custom tools (`memory_query`, `memory_store`) remain as a simpler interface; MCP gives full entity CRUD.
-
-### Phase 6: Dispatch Queue Migration
-
-**Files to modify:**
-
-- `src/scheduler/dispatch.ts` — option to execute via Managed Agents instead of `claude -p`
-
-When `MANAGED_AGENTS_ENABLED` is true, dispatch creates ephemeral Managed Agents sessions:
-
-- Cloud execution — no VPS resource contention
-- GitHub repo mounting — no local clone needed
-- Session persistence — long tasks survive VPS restarts
-- Better isolation — each task in its own container
-
-Existing `claude -p` path remains as fallback.
-
-### Phase 7: Agent Startup Provisioning
-
-**Files to modify:**
-
-- `src/index.ts` — at startup, create/verify agents and environments
-
-**Startup sequence:**
-
-1. For each agent with `useManagedAgents=true`:
-   - Create or retrieve Agent resource (model + system prompt + tools + MCP)
-   - Create or retrieve Environment resource (packages, networking)
-   - Store IDs in registry (`managedAgentId`, `managedEnvironmentId`)
-2. Log: `[managed-agents] Provisioned 4 agents: claudia, bella, marco, swarmy`
-
-Agents and environments are reusable — created once, referenced by all sessions. Auto-versioned on update.
+**Verification:** After edit, grep settings.json for `/Users/ps/` should return zero results. The memory-turso entry already uses `$HOME` successfully, confirming this pattern works.
 
 ---
 
-## Rollout Order
+### Step 5: Fix iCloud Keychain sync claims in setup scripts
 
-| Step | Agent     | Rationale                                                                       | Risk   |
-| ---- | --------- | ------------------------------------------------------------------------------- | ------ |
-| 1    | `swarmy`  | Multi-agent coordination natural fit; lowest traffic; research preview features | Low    |
-| 2    | `marco`   | Research agent benefits from cloud web_search and isolation                     | Low    |
-| 3    | `bella`   | Creative agent benefits from cloud isolation for long tasks                     | Medium |
-| 4    | `claudia` | Primary orchestrator; most complex, highest traffic                             | High   |
+**Files to edit:**
 
-Each step: enable flag -> monitor 1 week -> check cost/latency/quality -> proceed or rollback.
+- `setup-new-machine.sh` (11 iCloud references)
+- `setup-mac.sh` (7 iCloud references)
+- `setup-claude.sh` (6 iCloud references)
+- `hooks/load-secrets.sh` (1 iCloud reference)
+- `hooks/setup-keychain.sh` (2 iCloud references)
+- `install.sh` (2 iCloud references)
+
+**What:** Replace all incorrect claims that secrets/configs "sync via iCloud" or "sync via iCloud Keychain" with accurate descriptions. The reality is:
+
+1. Config syncs via **git** (GitHub repo + LaunchAgent auto-pull), not iCloud
+2. macOS Keychain generic passwords do **NOT** sync via iCloud Keychain (only Safari passwords and passkeys sync)
+3. API keys are actually provided via `settings.json` env block (hardcoded in the git-synced file), not Keychain
+
+**Changes per file:**
+
+#### `setup-new-machine.sh`
+
+- Header comment: "iCloud-synced configs" -> "git-synced configs"
+- "iCloud Keychain" prereqs -> remove, replace with "git repo must be cloned"
+- "iCloud claude-setup folder" -> "claude-setup git repo"
+- "Creating symlinks to iCloud configs" -> "Creating symlinks to git-synced configs"
+- "Secrets sync automatically via iCloud Keychain" -> "Secrets are provided via settings.json env block"
+- "iCloud Keychain is enabled" -> remove iCloud claim, note that Keychain is local-only
+- "synced via iCloud" final message -> "synced via git"
+- "Secrets via iCloud Keychain" -> "Secrets (via settings.json env block)"
+
+#### `setup-mac.sh`
+
+- Title: "iCloud Setup" -> "Git-Synced Setup"
+- "iCloud folder" check -> "git repo" check
+- "Found iCloud setup" -> "Found claude-setup repo"
+- "synced via iCloud" -> "synced via git"
+- "iCloud Drive is enabled" -> "git repo is cloned"
+- "Copying settings.json from iCloud" -> "Copying settings.json from repo"
+
+#### `setup-claude.sh`
+
+- Title: "iCloud Setup" -> "Git-Synced Setup"
+- "macOS only (requires iCloud)" -> "macOS setup"
+- "iCloud claude-setup directory" -> "claude-setup git repo"
+- "iCloud Drive is enabled and synced" -> "git repo is cloned at ~/.claude-setup"
+- "synced via iCloud" -> "synced via git"
+
+#### `hooks/load-secrets.sh`
+
+- Comment line 3: "sync across Macs via iCloud Keychain" -> "stored locally per machine (do NOT sync via iCloud)"
+
+#### `hooks/setup-keychain.sh`
+
+- Comment line 3: "secrets will sync via iCloud Keychain" -> "secrets are stored locally in this machine's Keychain (they do NOT sync via iCloud)"
+- Line 68: "sync to your other Macs via iCloud Keychain" -> "stored securely in this machine's Keychain"
+- Line 131: "sync to your other Macs via iCloud Keychain" -> "stored in this machine's Keychain only"
+
+#### `install.sh`
+
+- Line 167: "syncs via iCloud Keychain" -> "stored locally in macOS Keychain"
+- Line 203: "Secrets sync to other Macs via iCloud Keychain automatically." -> "Secrets are stored locally. For other machines, add keys to settings.json env block or run setup-keychain.sh on each machine."
+
+**Verification:** `grep -ri "icloud" setup-new-machine.sh setup-mac.sh setup-claude.sh hooks/load-secrets.sh hooks/setup-keychain.sh install.sh` returns zero results after all edits.
 
 ---
 
-## Cost Estimate
+### Step 6: Rebuild mem-search index on Mini
 
-| Agent     | Sessions/day | Avg duration | Daily session-hour cost | Monthly      |
-| --------- | ------------ | ------------ | ----------------------- | ------------ |
-| `swarmy`  | 2            | 10 min       | $0.03                   | $0.90        |
-| `marco`   | 5            | 5 min        | $0.03                   | $0.90        |
-| `bella`   | 10           | 3 min        | $0.04                   | $1.20        |
-| `claudia` | 30           | 5 min        | $0.20                   | $6.00        |
-| **Total** |              |              |                         | **$9.00/mo** |
+**Target:** Mac Mini via `ssh mini`
+**What:** Run `mem-search --reindex` to rebuild the FTS5 search index from current `.md` files.
+**Why:** Mini's index is slightly stale (217,088 bytes vs Mac's 229,376 bytes). After git pull brings the latest `.md` files, reindexing ensures parity.
 
-Plus standard API token costs (same as current). Session-hour overhead is marginal.
+```bash
+ssh mini '~/.claude-setup/tools/mem-search --reindex'
+```
 
----
-
-## Files Summary
-
-| File                              | Action                                                       | Phase |
-| --------------------------------- | ------------------------------------------------------------ | ----- |
-| `package.json`                    | Add `@anthropic-ai/sdk` ^0.86.1 as direct dependency         | 1     |
-| `src/agents/types.ts`             | Add `useManagedAgents`, `managedAgentId`, `managedEnvId`     | 1     |
-| `src/config.ts`                   | Add `ANTHROPIC_API_KEY`, `MANAGED_AGENTS_ENABLED`            | 1     |
-| `data/inference.json`             | Add `"managedAgents"` array (hot-reloadable, like sdkAgents) | 1     |
-| `src/agents/registry.ts`          | Read `managedAgents` from inferenceConfig, set flag          | 1     |
-| `src/inference/managed-agents.ts` | **NEW** — full adapter (SSE, custom tools, session mgmt)     | 2     |
-| `src/inference/system-prompt.ts`  | **NEW** — extract shared prompt builder from agent-sdk.ts    | 2     |
-| `src/inference/agent-sdk.ts`      | Refactor to use shared prompt builder                        | 2     |
-| `src/inference/fallback.ts`       | Add `inferWithManagedAgents()` path                          | 3     |
-| `src/sessions/db.ts`              | Add `session_type` column                                    | 4     |
-| `src/sessions/manager.ts`         | Managed Agents session lifecycle (status check, terminate)   | 4     |
-| `src/mcp/memory-endpoint.ts`      | **NEW** — HTTPS MCP endpoint for KG                          | 5     |
-| `src/scheduler/dispatch.ts`       | Optional Managed Agents execution path                       | 6     |
-| `src/index.ts`                    | Startup provisioning (create agents + environments)          | 7     |
-| `.env`                            | Add `ANTHROPIC_API_KEY`, `MANAGED_AGENTS_ENABLED=true`       | 7     |
+**Verification:** `ssh mini 'ls -la ~/.claude-setup/tools/mem-search.db'` shows updated timestamp and size closer to Mac's.
 
 ---
 
-## Open Risks
+## Files to Create
 
-1. **Latency** — Container spin-up may add 2-5s to first message. Mitigation: hybrid lifecycle keeps active sessions warm.
-2. **Cost creep** — Unterminated idle sessions accumulate cost. Mitigation: 30min auto-termination + cleanup cron.
-3. **Custom tool latency** — Each custom tool call is a cloud-VPS-cloud round-trip. Mitigation: MCP server provides direct access.
-4. **Beta stability** — API may change. Mitigation: adapter pattern isolates changes to one file.
-5. **Dual session types** — SQLite stores two types with different semantics. Mitigation: `session_type` column + type-aware cleanup.
+| File   | Purpose                           |
+| ------ | --------------------------------- |
+| (none) | All changes are to existing files |
 
----
+## Files to Modify
 
-## Success Criteria
+| File                      | Change                                                  | Lines |
+| ------------------------- | ------------------------------------------------------- | ----- |
+| `settings.json`           | Replace `/Users/ps/` with `$HOME/` in officecli command | ~1    |
+| `setup-new-machine.sh`    | Replace iCloud references with git-based descriptions   | ~15   |
+| `setup-mac.sh`            | Replace iCloud references with git-based descriptions   | ~8    |
+| `setup-claude.sh`         | Replace iCloud references with git-based descriptions   | ~7    |
+| `hooks/load-secrets.sh`   | Fix iCloud Keychain claim in comment                    | ~1    |
+| `hooks/setup-keychain.sh` | Fix iCloud Keychain claims                              | ~3    |
+| `install.sh`              | Fix iCloud Keychain claims                              | ~2    |
 
-- [ ] `swarmy` runs on Managed Agents for 1 week without errors
-- [ ] Session reuse works (conversation continues across messages)
-- [ ] Custom tools (memory_query, channel_send) work within sessions
-- [ ] Fallback to Agent SDK works when Managed Agents is unavailable
-- [ ] Cost stays under $15/month for all 4 agents
-- [ ] No response latency increase >3s for `claudia`
-- [ ] Memory pipeline (fact extraction, consolidation, nudge) works unchanged
+## Files to Delete
+
+| File            | Reason |
+| --------------- | ------ |
+| (none expected) |        |
+
+## Testing Strategy
+
+- [ ] `ssh mini 'source ~/.nvm/nvm.sh && node --version'` returns v22.x.x
+- [ ] `ssh mini 'ls ~/.claude-setup/mcp-servers/memory-turso/dist/index.js'` exists
+- [ ] `ssh mini '~/.local/bin/browse --help 2>&1 | head -1'` produces output
+- [ ] `ssh mini 'source ~/.nvm/nvm.sh && qmd --help 2>&1 | head -1'` produces output
+- [ ] `grep '/Users/ps/' settings.json` returns nothing
+- [ ] `grep -ri 'icloud' setup-new-machine.sh setup-mac.sh setup-claude.sh hooks/load-secrets.sh hooks/setup-keychain.sh install.sh` returns nothing
+- [ ] `ssh mini '~/.claude-setup/tools/mem-search "test query"'` returns results
+
+## Rollback Plan
+
+1. **nvm + Node.js:** `ssh mini 'rm -rf ~/.nvm'` and remove nvm lines from `~/.zshrc`
+2. **memory-turso build:** `ssh mini 'cd ~/.claude-setup/mcp-servers/memory-turso && npm run clean'` (removes dist/)
+3. **browse binary:** `ssh mini 'rm -rf ~/.local/lib/browse ~/.local/bin/browse'`
+4. **qmd:** `ssh mini 'source ~/.nvm/nvm.sh && npm uninstall -g @tobilu/qmd'`
+5. **settings.json path fix:** `git checkout settings.json`
+6. **iCloud script fixes:** `git checkout setup-new-machine.sh setup-mac.sh setup-claude.sh hooks/load-secrets.sh hooks/setup-keychain.sh install.sh`
+
+## Anti-Patterns to Avoid
+
+- Do not install Homebrew on Mini (adds maintenance burden, Mini is an inference server)
+- Do not modify settings.json with machine-specific conditionals (keep it portable)
+- Do not add new secrets to git-committed files
+- Do not touch VPS configuration (out of scope)

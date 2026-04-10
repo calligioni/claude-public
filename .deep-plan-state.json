@@ -26,8 +26,8 @@
     "artifactWritten": true
   },
   "plan": {
-    "status": "pending",
-    "artifactWritten": false,
+    "status": "in_progress",
+    "artifactWritten": true,
     "annotationCycles": 0,
     "approvedAt": null
   },
