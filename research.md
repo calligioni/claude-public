@@ -1,205 +1,247 @@
-# Research: Claude Managed Agents API Integration into Claudia
+# Research: Shared Memory & Secrets Parity Across Machines
 
-**Date:** 2026-04-08
-**Scope:** Evaluate and plan integration of Claude Managed Agents API into Claudia's inference and dispatch layers
+**Date:** 2026-04-10
+**Scope:** Achieve full parity of memory, secrets, and knowledge systems across MacBook Air (primary), Mac Mini M4 Pro (Tailscale SSH), and Contabo VPS (Tailscale SSH).
 
 ## Prior Context (from memory)
 
-- **project:claudia-router** — Full architecture documented: 10 agents, 6 channels, 4-tier inference, 5-layer memory, 20+ scheduled tasks. VPS at /opt/claudia, systemd service.
-- **tech:claude-managed-agents** — Evaluated on 2026-04-08. Verdict: best as **complement** for specific agents/tasks (swarmy, code dispatch), not a full replacement. Concerns about pricing ($0.08/session-hour), latency for real-time channels, event-driven vs request-response mismatch, and loss of local model fallback.
-- **model-tier-strategy.md** — Established tiering: Opus for orchestration, Sonnet for judgment, Haiku for mechanical tasks. Claudia uses Opus for `claudia` agent, Sonnet/Haiku for others.
+- `reference_vps_connection.md` — VPS at 100.77.51.51, SSH as root
+- `reference_search_api_keys.md` — Brave + Exa keys in macOS Keychain (claims iCloud sync — incorrect for generic passwords)
+- `reference_openrouter_api.md` — Notes "Mac Mini: not in keychain (SSH blocks interactive auth)"
+- `reference_cloudflare.md` — Cloudflare token stored in Keychain + `~/.config/cloudflare/.env` on Mini + VPS
 
 ## Current Architecture
 
-### Inference Layer (`src/inference/`)
+### Machine Inventory
 
-Claudia has a **4-tier fallback cascade** split by agent type:
+| Machine         | Hostname            | SSH                     | User | OS    | Tailscale IP   |
+| --------------- | ------------------- | ----------------------- | ---- | ----- | -------------- |
+| MacBook Air     | pierres-macbook-air | local                   | ps   | macOS | 100.65.26.31   |
+| Mac Mini M4 Pro | mac-mini-2          | `ssh mini`              | psm2 | macOS | 100.66.244.112 |
+| Contabo VPS     | vmi3065960          | `ssh root@100.77.51.51` | root | Linux | 100.77.51.51   |
 
-**Claudia agent (useAgentSDK=true):**
-1. Claude Opus via Agent SDK (Max plan) — `sendToAgentSDK()` in `agent-sdk.ts`
-2. Claude Sonnet via Agent SDK (cheaper fallback) — same function with model override
-3. Mac Mini MLX (Qwen3.5-35B-A3B) — `queryMacMini()` in `mac-mini.ts`
-4. VPS Ollama (qwen3:8b) — `queryOllama()` in `ollama.ts`
+### What's Shared Today (via git + symlinks)
 
-**All other agents (useAgentSDK=false):**
-1. OpenRouter (Qwen 3.6 Plus Preview, free) — `queryOpenRouter()` in `openrouter.ts`
-2. Mac Mini MLX
-3. VPS Ollama
+All three machines have `~/.claude-setup/` as a git clone, with symlinks from `~/.claude/` to it:
 
-### Agent SDK Integration (`src/inference/agent-sdk.ts`)
+| Item               | Mac (primary)                      | Mac Mini            | VPS                                      |
+| ------------------ | ---------------------------------- | ------------------- | ---------------------------------------- |
+| `skills/`          | symlink to repo                    | symlink to repo     | symlink to repo                          |
+| `agents/`          | symlink to repo                    | symlink to repo     | symlink to repo                          |
+| `hooks/`           | symlink to repo                    | symlink to repo     | symlink to repo                          |
+| `rules/`           | symlink to repo                    | symlink to repo     | symlink to repo                          |
+| `commands/`        | symlink to repo (missing from Mac) | symlink to repo     | in `~/.claude/commands/` (not symlinked) |
+| `settings.json`    | **symlink** to repo                | **symlink** to repo | **own copy** (diverged)                  |
+| `tools/`           | in repo                            | in repo (via git)   | symlink to repo                          |
+| `memory/auto/*.md` | in repo                            | in repo (via git)   | in repo (via git)                        |
 
-Uses `@anthropic-ai/claude-agent-sdk` v0.2.88 (depends on `@anthropic-ai/sdk` v0.74.0):
-- Spawns Claude Code CLI sessions via `query()` function
-- Passes: systemPrompt (persona + memory + memory context), allowed tools, cwd, maxTurns, model
-- Returns session IDs for resume capability
-- 5-minute timeout per session
-- Session resumption via `resume` option
+**Git sync:** LaunchAgent `com.claude.setup-sync.plist` pulls every 3 minutes on Mac + Mini. VPS has a SessionStart hook that pulls. The `/cs` skill pushes.
 
-### Session Management (`src/sessions/`)
+### What's NOT Shared (the gaps)
 
-- **SQLite-backed** (better-sqlite3) with WAL mode
-- Sessions keyed by `(agent_name, channel_type, peer_id)`
-- 7-day TTL, stale cleanup every hour
-- All sessions cleared on restart (Agent SDK sessions can't survive process restart)
-- Session drop triggers memory consolidation
+#### 1. MCP Memory (Knowledge Graph) — PARTIALLY SHARED
 
-### Dispatch System (`src/scheduler/dispatch.ts`)
+| Machine  | Backend                                                                                                              | Status   |
+| -------- | -------------------------------------------------------------------------------------------------------------------- | -------- |
+| Mac      | Turso cloud (`libsql://claude-memory-escotilha.aws-us-east-1.turso.io`) via custom `memory-turso` MCP server         | Working  |
+| Mac Mini | **Same settings.json** (symlinked) but `memory-turso` MCP server requires `node` — **node is NOT installed on Mini** | BROKEN   |
+| VPS      | Uses `@modelcontextprotocol/server-memory` (file-based, local) — **completely separate graph**                       | ISOLATED |
 
-- Detects coding tasks in messages via regex patterns
-- Queues tasks to JSON file (`data/dispatch-queue.json`)
-- Executes via `claude -p` CLI subprocess on VPS
-- One task at a time (MAX_CONCURRENT=1)
-- Pre-flight checks: CLI binary, project dir, skills synced
-- Results delivered back to originating channel
+The Turso auth token is hardcoded in `settings.json` (lines 351-353), so it's already on Mini via the symlink. The blocker is that **Mini has no Node.js** installed (no npm, no npx, no pnpm).
 
-### Memory Context (`src/memory/context.ts`)
+The VPS has Node.js v22.22.0 and npm but uses the stock `server-memory` (file-based JSON) instead of `memory-turso`. Its `settings.json` is its own copy and does NOT reference Turso.
 
-Before each inference, builds context from 4 parallel sources:
-1. File-based memory (agent's memory/ directory)
-2. Auto-learned skills (keyword-matched)
-3. Knowledge graph (pgvector semantic search, 3s timeout)
-4. Wiki knowledge base
+#### 2. Secrets (API Keys) — MAJOR GAP
 
-### Dispatcher (`src/dispatcher.ts`)
+**Mac (primary) — macOS Keychain:**
 
-Wraps the router with concurrency control:
-- Global queue: max 8 parallel sessions
-- Per-peer queues: serial within same peer (session ordering)
-- Dashboard state tracking
+| Service                    | Status                    |
+| -------------------------- | ------------------------- |
+| `BRAVE_API_KEY`            | In Keychain               |
+| `EXA_API_KEY`              | In Keychain               |
+| `OPENROUTER_API_KEY`       | In Keychain               |
+| `RESEND_API_KEY`           | In Keychain               |
+| `cloudflare-dns-api-token` | In Keychain               |
+| `clerk-secret-key`         | In Keychain               |
+| `telnyx-api-key`           | In Keychain               |
+| `gh:github.com`            | In Keychain (gh CLI auth) |
+| `Claude Code-credentials`  | In Keychain (Claude auth) |
+| `Claude Safe Storage`      | In Keychain               |
+
+**Mac Mini — macOS Keychain:**
+
+| Service                          | Status      |
+| -------------------------------- | ----------- |
+| `claude-code-github-token`       | **MISSING** |
+| `claude-code-brave-api-key`      | **MISSING** |
+| `claude-code-resend-api-key`     | **MISSING** |
+| `claude-code-digitalocean-token` | **MISSING** |
+| All others                       | **MISSING** |
+
+The Mini has **ZERO** claude-code-prefixed keychain entries. The `load-secrets.sh` hook looks for `claude-code-*` prefixed entries, but the main Mac stores them as `BRAVE_API_KEY` (no prefix). This is a naming mismatch.
+
+However, for Claude Code specifically: **settings.json has API keys hardcoded in the `env` block** (lines 7-9: RESEND_API_KEY, BRAVE_API_KEY, EXA_API_KEY). Since Mini symlinks to this file, these keys are already available to Claude Code on Mini via env vars. The Keychain approach (`load-secrets.sh`) is a secondary/unused mechanism.
+
+**VPS — No Keychain (Linux):**
+
+The VPS stores secrets in `/opt/claudia/.env` (14 key-value pairs). Claude Code on VPS gets keys via its own `settings.json` env block — but VPS has its own copy of settings.json that does NOT include the env block with BRAVE_API_KEY, EXA_API_KEY, RESEND_API_KEY. These are available as shell env vars only if sourced.
+
+#### 3. GBrain (Knowledge Brain) — MAC-ONLY GAP
+
+| Machine  | Status                                                                                                                                                                                                        |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Mac      | Connected via `postgres` MCP server → SSH tunnel `127.0.0.1:5433` (maps to VPS postgres)                                                                                                                      |
+| Mac Mini | **No postgres MCP server configured** (settings.json has it but Mini has no node)                                                                                                                             |
+| VPS      | `gbrain` binary installed at `/usr/local/bin/gbrain` but **broken** (`bun: No such file or directory`). PostgreSQL is local with `gbrain` database (10 tables). Direct psql access works via `su - postgres`. |
+
+The `postgres` MCP server in settings.json connects to `postgresql://postgres:postgres@127.0.0.1:5433/claudia` — this is a tunnel to the VPS claudia database, NOT the gbrain database.
+
+GBrain PostgreSQL credentials on VPS: `claudia_app` / `067b68c578fc3a6d24b05725d53c9edfac08a8a3fc61ba33` (from Claudia's .env, but this is for the `claudia` database).
+
+#### 4. mem-search Index — PARTIALLY SHARED
+
+| Machine  | Status                                                     |
+| -------- | ---------------------------------------------------------- |
+| Mac      | `mem-search.db` = 229,376 bytes, working                   |
+| Mac Mini | `mem-search.db` = 217,088 bytes (slightly older, from git) |
+| VPS      | `mem-search.db` = 217,088 bytes (slightly older, from git) |
+
+The `.db` file is committed to git. Mini and VPS have slightly older versions. Running `mem-search --reindex` on each would rebuild from the `.md` files. The `mem-search` script uses bash + sqlite3, which is available everywhere.
+
+#### 5. settings.json — DIVERGED
+
+The Mac and Mini share the same file (symlink). The VPS has its own copy with significant differences:
+
+**VPS has but Mac doesn't:**
+
+- `google-workspace` MCP
+- `computer-use-linux` MCP
+- `context7` MCP
+- `desktop-commander` MCP
+- `sec-edgar` MCP
+- `financial-datasets` MCP (HTTP)
+- `tavily` MCP
+- `mem0` MCP (self-hosted with Qdrant + Gemini)
+- `hermes` MCP
+- `sentry` (HTTP), `vercel` (HTTP), `stripe` (HTTP)
+- Agent definitions (claudia, bella, julia, rex, buzz, cris, marco, arnold)
+- `systemPrompt`: "Always reply to Pierre in English..."
+
+**Mac has but VPS doesn't:**
+
+- `exa` MCP (on Mac, missing from VPS)
+- `chrome-devtools` MCP
+- `ScraplingServer` MCP
+- `context-mode` MCP
+- `qmd` MCP
+- `officecli` MCP (in mcpServers block)
+- All hooks except SessionStart, SubagentStop, PreToolUse, TaskCompleted
+- Plugins (discord, codex, frontend-design, etc.)
+- `env` block with hardcoded keys
+- `autoMemoryDirectory`, `plansDirectory`, etc.
+
+**VPS `memory` MCP uses file-based `@modelcontextprotocol/server-memory`** — not Turso-backed.
+
+#### 6. Binary Tools — MAJOR GAP ON MINI
+
+| Tool                   | Mac          | Mini                           | VPS                      |
+| ---------------------- | ------------ | ------------------------------ | ------------------------ |
+| `node` / `npm` / `npx` | Yes          | **NO**                         | Yes (v22.22.0)           |
+| `brew`                 | Yes          | **NO**                         | N/A                      |
+| `pnpm`                 | Yes          | **NO**                         | No                       |
+| `qmd`                  | Yes          | **NO**                         | No                       |
+| `browse`               | Yes          | **NO**                         | Yes                      |
+| `scrapling`            | Yes          | **NO**                         | No                       |
+| `officecli`            | Yes          | Yes (`~/.local/bin/officecli`) | No                       |
+| `gbrain`               | No (via MCP) | No                             | Yes (broken — needs bun) |
+| `sqlite3`              | Yes          | Yes                            | Yes                      |
+| `claude`               | Yes          | Yes                            | Yes                      |
+
+Mini is missing Node.js entirely, which breaks all `npx`-based MCP servers.
 
 ## Data Flow
 
+### Git-based sync (working):
+
 ```
-Channel Adapter (Discord/Telegram/Slack/WhatsApp/Voice/Video)
-    |
-Dispatcher (per-peer serial, global max 8 concurrent)
-    |
-Router (handleMessage)
-    +-- resolveAgent() -> agent name from channel binding
-    +-- Dispatch intercept -> coding tasks queue for CLI execution
-    +-- resolveSession() -> existing session ID from SQLite
-    +-- trackInbound() -> follow-up detection
-    +-- infer() -> 4-tier cascade
-    |   +-- Agent SDK (Opus -> Sonnet)  [claudia + all SDK agents]
-    |   +-- OpenRouter -> Mac Mini -> Ollama  [non-SDK agents]
-    +-- saveSession() -> persist session ID
-    +-- saveConversationMemory() -> file journals
-    +-- Post-processing (parallel, non-blocking):
-        +-- maybeGenerateSkill()
-        +-- maybeExtractAndStoreFacts()
-        +-- maybeCompoundResponse()
-        +-- registerExchange() (consolidation)
-        +-- trackTurn() / executeNudge()
-        +-- trackComplexity() / generateSessionSkill()
-        +-- executeAnticipations()
+Mac (push via /cs) → GitHub → Mini/VPS (pull via launchd/hook)
 ```
 
-## Claude Managed Agents API Surface
+Skills, agents, hooks, rules, commands, memory .md files, tools scripts all flow this way.
 
-### Core Resources
+### Settings.json:
 
-| Resource | Endpoint | Purpose |
-|----------|----------|---------|
-| **Agent** | `POST /v1/agents` | Reusable config: model + system prompt + tools + MCP servers + skills |
-| **Environment** | `POST /v1/environments` | Container template: packages, networking rules |
-| **Session** | `POST /v1/sessions` | Running instance of agent in environment |
-| **Events** | `POST /v1/sessions/{id}/events` | Send user messages, tool results, interrupts |
-| **Stream** | `GET /v1/sessions/{id}/stream` | SSE stream of agent/session events |
+```
+Mac → symlink → ~/.claude-setup/settings.json (in git)
+Mini → symlink → same file (via git pull)
+VPS → own copy at ~/.claude/settings.json (manually maintained, diverged)
+```
 
-### Key Technical Details
+### MCP Memory:
 
-- **Beta header required:** `anthropic-beta: managed-agents-2026-04-01`
-- **SDK support:** `@anthropic-ai/sdk` (TypeScript) has `client.beta.agents.*`, `client.beta.sessions.*`, `client.beta.environments.*`
-- **Session states:** `rescheduling` -> `running` -> `idle` -> `terminated`
-- **SSE events:** `agent.message`, `agent.tool_use`, `agent.tool_result`, `agent.mcp_tool_use`, `agent.custom_tool_use`, `session.status_idle`, `session.status_running`, `session.requires_action`
-- **Tool types:** `agent_toolset_20260401` (bash, read, write, edit, glob, grep, web_fetch, web_search), `custom` (client-executed), `mcp_toolset` (URL-based MCP servers)
-- **Custom tools:** Define in agent config, handle via `agent.custom_tool_use` events, respond with `user.custom_tool_result`
-- **MCP servers:** Declared on agent with name+URL, auth via vaults at session creation
-- **Environment:** Supports packages (pip, npm, apt, cargo, gem, go), networking (unrestricted/limited), GitHub repo mounting
-- **Pricing:** Standard API token cost + $0.08/session-hour + $10/1000 web searches
-- **Rate limits:** 60 creates/min, 600 reads/min per org
-- **Session persistence:** Server-side event history, reconnectable SSE streams
-- **Multi-turn:** Send additional `user.message` events to ongoing sessions
-- **Interrupt:** Send `user.interrupt` to stop mid-execution
-- **Agent versioning:** Auto-incremented on update, sessions can pin to specific version
-- **Research preview features:** Outcomes (self-evaluation), multi-agent coordination, persistent memory
+```
+Mac → memory-turso MCP → Turso cloud DB (us-east-1)
+Mini → same settings but no node → BROKEN
+VPS → server-memory MCP → local JSON file → ISOLATED
+```
 
-### vs Current Agent SDK
+### Secrets:
 
-| Aspect | Current Agent SDK | Managed Agents API |
-|--------|------------------|-------------------|
-| **Runtime** | Local CLI process on VPS | Cloud container managed by Anthropic |
-| **Session lifecycle** | Process-bound, dies on restart | Server-side, survives disconnects |
-| **Tools** | Claude Code full toolset (70+ skills) | 8 built-in + custom + MCP |
-| **Local models** | Mac Mini MLX, VPS Ollama fallback | Anthropic models only |
-| **Memory** | 5-layer composite (file, KG, nudge, consolidation, skills) | Research preview only |
-| **Cost** | Max subscription + VPS ($15/mo) | Per-token + $0.08/session-hour |
-| **Concurrency** | Limited by local resources (8 max) | Limited by rate limits (60 creates/min) |
-| **Latency** | Local to VPS, fast | Cloud container spin-up, potentially slower |
-| **MCP** | Custom adapter wiring | Native first-class support |
-| **Customization** | Full control over agent loop | Config-driven, less control |
+```
+Mac → hardcoded in settings.json env{} + macOS Keychain
+Mini → inherits settings.json env{} (symlink) → API keys WORK for Claude Code
+Mini → macOS Keychain → EMPTY (no claude-code-* entries)
+VPS → /opt/claudia/.env + own settings.json env{} → INCOMPLETE
+```
 
 ## Existing Patterns
 
-### Pattern 1: Inference Tier Selection
-Agents route to different inference backends based on `useAgentSDK` flag. A new Managed Agents tier would be a third routing path alongside Agent SDK and OpenRouter.
-
-### Pattern 2: Session State Management
-Sessions are tracked in SQLite by (agent, channel, peer). Managed Agents sessions have their own server-side state but Claudia still needs to map channel conversations to session IDs.
-
-### Pattern 3: Dispatch Queue
-Coding tasks are already queued and executed asynchronously via `claude -p`. Managed Agents could replace this with cloud-based execution, gaining persistence and avoiding VPS resource contention.
-
-### Pattern 4: Custom Tool Pattern
-Managed Agents supports custom tools where the client executes the tool and returns results. This could bridge Claudia's memory/KG queries, channel message sending, and other Claudia-specific capabilities into Managed Agents sessions.
+1. **Git repo + symlinks** — The primary sync mechanism. Works well for static files.
+2. **LaunchAgent auto-pull** — Every 3 minutes, `git pull --ff-only`. Good for eventual consistency.
+3. **SessionStart hook** — Runs `git pull` at session start on all machines. Ensures fresh state.
+4. **Hardcoded keys in settings.json env{}** — Currently the actual mechanism Claude Code uses for API keys. The Keychain system (`load-secrets.sh`) is a parallel path that's mostly unused.
+5. **setup-symlinks.sh** — Comprehensive symlink setup for new machines.
 
 ## Dependencies
 
-| Dependency | Current Version | Needed |
-|------------|----------------|--------|
-| `@anthropic-ai/sdk` | 0.74.0 (via claude-agent-sdk) | >= 0.80+ (beta.agents/sessions support) |
-| `@anthropic-ai/claude-agent-sdk` | 0.2.88 | Keep for existing Agent SDK path |
-| Anthropic API key | Required | Required (same key works) |
+- **Tailscale** — Private encrypted network connecting all machines. Already working.
+- **Turso** — Cloud-hosted libSQL. Account: escotilha. DB URL and auth token already in settings.json.
+- **PostgreSQL on VPS** — Running, has `gbrain` and `claudia` databases.
+- **Git + GitHub** — Repo at `escotilha/claude` (private). All machines can pull.
 
 ## Constraints
 
-1. **Cannot remove Agent SDK path** — it is the primary inference for 9 agents. Managed Agents is additive.
-2. **Cannot lose local model fallback** — Managed Agents is Anthropic-only; Mac Mini/Ollama must remain for cost control.
-3. **Cannot break session ordering** — per-peer serial execution must be preserved.
-4. **Cannot break memory pipeline** — fact extraction, nudge, consolidation, skill generation must still work.
-5. **Event-driven architecture** — Claudia receives messages from 6 channels and responds synchronously. Managed Agents is async (SSE). Must bridge async to sync.
-6. **VPS resource constraints** — Claudia runs on a single Contabo VPS. Cloud-offloading to Managed Agents reduces VPS load.
-7. **Pricing sensitivity** — $0.08/session-hour adds up. A 5-minute session costs $0.007; but an always-on session costs $1.92/day.
+1. **VPS has no macOS Keychain** — Secrets must use env vars or files
+2. **Mac Mini has no Node.js** — All npx-based MCP servers are broken
+3. **settings.json can't be fully shared** — VPS needs Linux-specific servers (computer-use-linux), Mac needs macOS-specific ones (chrome-devtools, ScraplingServer)
+4. **iCloud Keychain does NOT sync generic passwords** — The setup scripts incorrectly claim this
+5. **The `load-secrets.sh` uses `claude-code-*` prefix** but main Mac stores keys without that prefix — naming mismatch
+6. **GBrain on VPS needs `bun` runtime** — Currently broken
+7. **No plaintext secrets in git** — API keys in settings.json env{} are already in git (this is a security concern, but it's the current pattern)
 
 ## Key Files
 
-| File | Purpose | Relevance |
-|------|---------|-----------|
-| `src/inference/fallback.ts` | Inference cascade logic | Where new Managed Agents tier gets added |
-| `src/inference/agent-sdk.ts` | Current Agent SDK integration | Reference pattern for Managed Agents adapter |
-| `src/agents/types.ts` | AgentConfig and InferenceResult types | Must extend for managed agents support |
-| `src/agents/registry.ts` | Agent loading and tool assignment | Must add useManagedAgents flag |
-| `src/config.ts` | All env vars and bindings | Must add ANTHROPIC_API_KEY, managed agents config |
-| `src/sessions/manager.ts` | Session CRUD | Must handle Managed Agents session IDs |
-| `src/sessions/db.ts` | SQLite session storage | Must store Managed Agents session IDs |
-| `src/scheduler/dispatch.ts` | Code dispatch queue | Primary candidate for Managed Agents replacement |
-| `src/dispatcher.ts` | Concurrency control | Must handle async SSE bridging |
-| `src/memory/context.ts` | Memory context builder | Must bridge to custom tools for Managed Agents |
-| `src/router.ts` | Main message handler | Post-processing hooks must work with Managed Agents responses |
-| `package.json` | Dependencies | Must upgrade @anthropic-ai/sdk |
+| File                                  | Purpose                                                         | Relevance                                            |
+| ------------------------------------- | --------------------------------------------------------------- | ---------------------------------------------------- |
+| `settings.json`                       | Main Claude Code config — MCP servers, hooks, env vars, plugins | Central config that diverges across machines         |
+| `hooks/load-secrets.sh`               | Load API keys from macOS Keychain                               | Unused in practice (keys are in settings.json env{}) |
+| `hooks/setup-keychain.sh`             | Interactive script to add keys to Keychain                      | Only useful on macOS, never run on Mini              |
+| `setup-symlinks.sh`                   | Create symlinks from ~/.claude to repo                          | Primary setup mechanism                              |
+| `setup-new-machine.sh`                | Full new-machine setup (symlinks + keychain check)              | Outdated assumptions about iCloud Keychain sync      |
+| `setup-mcp-servers.sh`                | Build memory-turso MCP server                                   | Needs node/npm — won't work on Mini                  |
+| `mcp-servers/memory-turso/`           | Custom Turso-backed MCP memory server                           | The key to shared knowledge graph                    |
+| `tools/mem-search`                    | Bash + sqlite3 FTS5 search over memory .md files                | Works everywhere (bash + sqlite3)                    |
+| `memory/core-memory.json`             | Core memory (user profile, preferences, paths)                  | Uses `~` paths — portable                            |
+| `launchd/com.claude.setup-sync.plist` | Auto-pull git every 3 minutes                                   | macOS only — needs equivalent on VPS                 |
 
 ## Open Questions
 
-1. **Which agents should use Managed Agents?** The memory evaluation suggested `swarmy` and dispatch queue. Should `claudia` (primary) also get a Managed Agents path, or is the Agent SDK (with local tools and full skill access) still better?
+1. **Should we install Node.js on Mac Mini?** Mini is used for MLX inference — adding Node.js is straightforward (homebrew or nvm) but adds maintenance. Without it, no npx-based MCP servers work.
 
-2. **Session lifecycle strategy:** Should Managed Agents sessions be long-lived (one per agent+peer, reused across messages) or ephemeral (new session per message)? Long-lived saves container spin-up but costs $0.08/hr idle. Ephemeral is cheaper but loses in-session context.
+2. **Should VPS settings.json be merged with Mac's or kept separate?** VPS has many unique MCP servers (hermes, mem0, computer-use-linux, financial tools). Options: (a) shared base + machine-specific overlays, (b) keep separate but sync specific blocks.
 
-3. **Custom tools scope:** Which Claudia capabilities should be exposed as custom tools to Managed Agents sessions? Candidates: memory query, channel message sending, dispatch queuing, knowledge graph search.
+3. **The API keys in settings.json env{} are committed to a private git repo.** Is this acceptable security posture, or should they move to a proper secrets mechanism?
 
-4. **SDK upgrade path:** The current `@anthropic-ai/sdk` is 0.74.0 (via claude-agent-sdk dependency). The latest is 0.86.1. Need to verify the beta.agents API is available and stable in the SDK. Should this be a direct dependency or continue relying on claude-agent-sdk's transitive dependency?
+4. **GBrain on VPS needs `bun` — should we fix gbrain or use the `postgres` MCP server directly for gbrain access from Mac/Mini?**
 
-5. **Environment reuse:** Should there be one shared environment or per-agent environments? Per-agent allows different package/networking configs but adds management overhead.
-
-6. **MCP integration:** Should mcp-memory-pg (the knowledge graph) be connected as an MCP server to Managed Agents sessions? This would give the agent direct KG access without custom tool bridging, but requires exposing the MCP endpoint over HTTPS (currently local only).
-
-7. **Feature flag strategy:** Should Managed Agents be enabled globally or per-agent? A per-agent flag (`useManagedAgents: true`) in the registry would allow gradual rollout.
+5. **Should the `load-secrets.sh` / Keychain approach be abandoned in favor of the env{} block in settings.json?** The Keychain approach is more secure but broken (naming mismatch, iCloud doesn't sync generic passwords, Mini has no entries).

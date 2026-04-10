@@ -15348,3 +15348,13 @@
   "cwd": "/Volumes/AI/Code/agentwave",
   "hadError": false
 }
+{
+  "timestamp": "2026-04-10T09:06:40Z",
+  "date": "2026-04-10",
+  "skill": "deep-plan",
+  "args": "Shared Memory & Secrets Parity Across Machines (Mac, Mac Mini, VPS)\n\n## Goal\nAchieve full parity of memory, secrets, and knowledge systems across Pierre's three machines: MacBook Air (primary), Mac Mini M4 Pro (via Tailscale SSH), and Contabo VPS (via Tailscale SSH).\n\n## Research Findings (already gathered)\n\n### MCP Memory (Knowledge Graph)\n- Backend: Turso cloud DB at `libsql://claude-memory-escotilha.aws-us-east-1.turso.io`\n- Local replica: `~/.claude-setup/memory/turso-replica.db` (SQLite)\n- Server: custom `memory-turso` at `~/.claude-setup/mcp-servers/memory-turso/`\n- Schema: 3 tables (entities, observations, relations)\n- **Parity solution: Point Mini + VPS settings.json at same Turso URL + auth token → instant shared graph**\n\n### GBrain (Knowledge Brain)\n- Backend: PostgreSQL `gbrain` database on VPS (`127.0.0.1:5432`)\n- 30+ MCP tools via `gbrain serve` (stdio)\n- Claudia queries it directly via `gbrain-client.ts`\n- **Parity solution: Mac + Mini connect to VPS postgres via Tailscale tunnel (already on same network)**\n\n### Keychain Secrets\n- 12+ API keys stored as generic passwords with `claude-code-` prefix in macOS Keychain\n- iCloud Keychain does NOT sync generic passwords (only Safari passwords)\n- Setup scripts incorrectly claim iCloud sync works\n- Mac Mini has NONE of these keys\n- **Parity solution: Secure export/import mechanism or shared secrets store**\n\n### mem-search Index\n- SQLite FTS5 at `~/.claude-setup/tools/mem-search.db` (224 KB)\n- Auto-rebuilds from memory .md files via `--reindex`\n- **Parity solution: Already syncs via git (memory files). Just run `--reindex` on Mini/VPS after pull**\n\n### Auto-Memory Markdown Files\n- Already in git, synced via `/cs` to all remotes\n- Mini and VPS can `git pull` to get latest\n- **Already solved**\n\n### settings.json\n- Machine-specific (different MCP servers, env vars, paths)\n- Cannot be fully shared — needs per-machine overrides\n- **Parity solution: Shared base config + machine-specific overlays**\n\n## Constraints\n- All machines are on Tailscale (private network, encrypted)\n- VPS: Contabo, runs Claudia + GBrain PostgreSQL\n- Mac Mini: M4 Pro 48GB, runs MLX inference + Claude Code\n- Main Mac: MacBook Air, primary development machine\n- No plaintext secrets in git\n- Prefer reusing existing infrastructure (Turso, Tailscale, VPS postgres)",
+  "sessionId": "d0b0cea6-dc33-4601-bc8b-6d07c6e191f8",
+  "project": "Claude Setup",
+  "cwd": "/Users/ps/code/claude-setup",
+  "hadError": false
+}
