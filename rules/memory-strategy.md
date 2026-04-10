@@ -15,9 +15,39 @@
 
 Use lowercase with hyphens. Include project name when project-specific.
 
-## Required Observations
+## Page Format: Compiled Truth + Timeline
 
-Every entity must include these observations:
+Every memory entity follows the **compiled truth + timeline** pattern (adapted from GBrain):
+
+```markdown
+---
+name: { entity-name }
+description: { one-line — used for relevance scoring }
+type: { user, feedback, project, reference }
+---
+
+{Compiled truth — your CURRENT BEST UNDERSTANDING of this entity.
+Rewrite this section when evidence changes. This is NOT append-only.
+Keep it concise: 3-10 lines covering the actionable state.}
+
+---
+
+## Timeline
+
+- **{YYYY-MM-DD}** — [{source-type}] {what happened} (Source: {detail})
+- **{YYYY-MM-DD}** — [{source-type}] {what happened} (Source: {detail})
+```
+
+**Key rules:**
+
+- Compiled truth gets **rewritten** (not appended) when the current understanding changes
+- Timeline is **append-only** and reverse-chronological — the evidence trail never gets edited
+- Compiled truth answers "what do we currently know?" — timeline answers "how did we get here?"
+- When compiled truth and timeline contradict, flag the contradiction explicitly
+
+## Required Observations (Timeline Entries)
+
+Every entity's timeline must include entries with:
 
 - `"Discovered: {date}"`
 - `"Source: {type} — {detail}"` (see Source Types below)
