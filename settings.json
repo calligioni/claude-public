@@ -462,7 +462,7 @@
   },
   "mcpServers": {
     "officecli": {
-      "command": "/Users/ps/.local/bin/officecli",
+      "command": "$HOME/.local/bin/officecli",
       "args": ["mcp"]
     }
   }
