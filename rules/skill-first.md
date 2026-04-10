@@ -40,6 +40,9 @@ When you identify a matching skill, tell the user which skill you're invoking an
 | Search memory                 | `mem-search "<query>"`  | Find past decisions, patterns, learnings (CLI tool)      |
 | Advisory board deliberation   | `/vibc`                 | Complex decision needing diverse perspectives            |
 | Office docs (.docx/xlsx/pptx) | `/officecli`            | Create, edit, inspect Word/Excel/PowerPoint documents    |
+| Tech stack audit              | `/tech-audit`           | Compare versions, find EOL libs, recommend upgrades      |
+| Knowledge base / wiki         | `/wiki`                 | Ingest sources, query knowledge, persistent KB           |
+| Local inference gateway       | `/local-inference`      | Set up LiteLLM multi-model gateway, local models         |
 
 ### QA & Testing
 
@@ -57,15 +60,16 @@ When you identify a matching skill, tell the user which skill you're invoking an
 
 ### Research & Analysis
 
-| Task                         | Skill            | When                                            |
-| ---------------------------- | ---------------- | ----------------------------------------------- |
-| Semantic search over notes   | `/qmd`           | Find skills, patterns, decisions, past research |
-| Deep multi-track research    | `/deep-research` | Any research question                           |
-| Analyze URL/image/tool       | `/research`      | Evaluate a specific resource                    |
-| Web scraping                 | `/firecrawl`     | Extract data from websites                      |
-| Anti-bot / Cloudflare scrape | `/scrapling`     | Stealth scraping, TLS impersonation, anti-bot   |
-| Headless browser automation  | `/browserless`   | PDFs, screenshots, Lighthouse                   |
-| Local browser automation     | `/pinchtab`      | Token-efficient a11y tree, element refs, local  |
+| Task                         | Skill            | When                                              |
+| ---------------------------- | ---------------- | ------------------------------------------------- |
+| Semantic search over notes   | `/qmd`           | Find skills, patterns, decisions, past research   |
+| Deep multi-track research    | `/deep-research` | Any research question                             |
+| Social + web research (30d)  | `/last30days`    | Reddit/X/YouTube/HN/TikTok trends in last 30 days |
+| Analyze URL/image/tool       | `/research`      | Evaluate a specific resource                      |
+| Web scraping                 | `/firecrawl`     | Extract data from websites                        |
+| Anti-bot / Cloudflare scrape | `/scrapling`     | Stealth scraping, TLS impersonation, anti-bot     |
+| Headless browser automation  | `/browserless`   | PDFs, screenshots, Lighthouse                     |
+| Local browser automation     | `/pinchtab`      | Token-efficient a11y tree, element refs, local    |
 
 ### AI Quality & Growth
 
