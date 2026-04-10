@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Claude Code Setup Script
-# Run this on any Mac to set up Claude Code with iCloud-synced skills, agents, and commands.
+# Run this on any Mac to set up Claude Code with git-synced skills, agents, and commands.
 #
 # Usage:
 #   curl -sL "file://$HOME/.claude-setup/setup-mac.sh" | bash
@@ -11,25 +11,23 @@
 
 set -e
 
-ICLOUD_BASE="$HOME/.claude-setup"
+SETUP_DIR="$HOME/.claude-setup"
 CLAUDE_DIR="$HOME/.claude"
 
-echo "=== Claude Code iCloud Setup ==="
+echo "=== Claude Code Git-Synced Setup ==="
 echo ""
 
-# Check if iCloud folder exists
-if [ ! -d "$ICLOUD_BASE" ]; then
-    echo "ERROR: iCloud claude-setup folder not found at:"
-    echo "  $ICLOUD_BASE"
+# Check if git repo exists
+if [ ! -d "$SETUP_DIR" ]; then
+    echo "ERROR: claude-setup repo not found at:"
+    echo "  $SETUP_DIR"
     echo ""
-    echo "Make sure:"
-    echo "  1. You're signed into iCloud with the correct account"
-    echo "  2. iCloud Drive is enabled"
-    echo "  3. The folder has finished syncing"
+    echo "Clone it first:"
+    echo "  git clone https://github.com/escotilha/claude.git ~/.claude-setup"
     exit 1
 fi
 
-echo "Found iCloud setup at: $ICLOUD_BASE"
+echo "Found claude-setup repo at: $SETUP_DIR"
 echo ""
 
 # Create ~/.claude if it doesn't exist
@@ -67,17 +65,17 @@ create_symlink() {
 echo "Setting up symlinks..."
 echo ""
 
-# Core symlinks - all synced via iCloud
-create_symlink "$ICLOUD_BASE/skills" "$CLAUDE_DIR/skills" "skills"
-create_symlink "$ICLOUD_BASE/agents" "$CLAUDE_DIR/agents" "agents"
-create_symlink "$ICLOUD_BASE/commands" "$CLAUDE_DIR/commands" "commands"
-create_symlink "$ICLOUD_BASE/hooks" "$CLAUDE_DIR/hooks" "hooks"
+# Core symlinks - all synced via git
+create_symlink "$SETUP_DIR/skills" "$CLAUDE_DIR/skills" "skills"
+create_symlink "$SETUP_DIR/agents" "$CLAUDE_DIR/agents" "agents"
+create_symlink "$SETUP_DIR/commands" "$CLAUDE_DIR/commands" "commands"
+create_symlink "$SETUP_DIR/hooks" "$CLAUDE_DIR/hooks" "hooks"
 
 # Copy settings.json (not symlinked - may have machine-specific paths)
-if [ -f "$ICLOUD_BASE/settings.json" ]; then
+if [ -f "$SETUP_DIR/settings.json" ]; then
     if [ ! -f "$CLAUDE_DIR/settings.json" ]; then
-        echo "Copying settings.json from iCloud..."
-        cp "$ICLOUD_BASE/settings.json" "$CLAUDE_DIR/settings.json"
+        echo "Copying settings.json from repo..."
+        cp "$SETUP_DIR/settings.json" "$CLAUDE_DIR/settings.json"
         echo "✓ Settings copied"
     else
         echo "✓ settings.json already exists (not overwritten)"
@@ -93,7 +91,7 @@ echo "  Agents:   $(ls -1 "$CLAUDE_DIR/agents" 2>/dev/null | wc -l | tr -d ' ') 
 echo "  Commands: $(ls -1 "$CLAUDE_DIR/commands" 2>/dev/null | wc -l | tr -d ' ') items"
 echo "  Hooks:    $(ls -1 "$CLAUDE_DIR/hooks" 2>/dev/null | wc -l | tr -d ' ') items"
 echo ""
-echo "All changes sync automatically via iCloud."
+echo "All changes sync automatically via git (run /cs or git pull)."
 echo ""
 
 # Verify Claude Code is installed

@@ -164,7 +164,7 @@ fi
 # ── 6. Keychain Secrets ──────────────────────────────────────
 echo ""
 echo -e "${YELLOW}[6/8] Checking secrets...${NC}"
-info "Secrets load from macOS Keychain (syncs via iCloud Keychain)"
+info "Secrets load from macOS Keychain (local per machine) + settings.json env block"
 
 check_secret() {
   local name="$1"
@@ -200,7 +200,7 @@ if [ $SECRETS_MISSING -eq 1 ]; then
   echo "  security add-generic-password -a \"\$USER\" -s \"claude-code-brave-api-key\" -w \"BSA...\""
   echo ""
   info "Or run: bash ~/.claude-setup/hooks/setup-keychain.sh"
-  info "Secrets sync to other Macs via iCloud Keychain automatically."
+  info "For other machines, run setup-keychain.sh or use the settings.json env block."
 fi
 
 # ── 7. Shell Profile ─────────────────────────────────────────

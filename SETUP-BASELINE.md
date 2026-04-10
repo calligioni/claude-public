@@ -1,39 +1,40 @@
 # Setup Baseline Inventory
 
-**Last verified:** 2026-04-07
+**Last verified:** 2026-04-10
 **Next review:** Biweekly (Wednesday + Sunday, 6am)
 
 ---
 
-## MCP Servers (19)
+## MCP Servers (18)
 
-| #   | Server              | Purpose                         | Status |
-| --- | ------------------- | ------------------------------- | ------ |
-| 1   | sequential-thinking | Structured problem solving      | Active |
-| 2   | memory              | Knowledge graph (Turso-backed)  | Active |
-| 3   | playwright          | Browser automation              | Active |
-| 4   | github              | GitHub API                      | Active |
-| 5   | brave-search        | Web search (LLM Context API)    | Active |
-| 6   | exa                 | Neural search with highlights   | Active |
-| 7   | postgres            | PostgreSQL (Claudia on Contabo) | Active |
-| 8   | resend              | Transactional email             | Active |
-| 9   | slack               | Slack integration               | Active |
-| 10  | notion              | Notion workspace                | Active |
-| 11  | digitalocean        | DO App Platform, DBs, Spaces    | Active |
-| 12  | chrome-devtools     | Chrome DevTools automation      | Active |
-| 13  | firecrawl           | Web scraping/crawling           | Active |
-| 14  | ScraplingServer     | Stealth scraping, anti-bot      | Active |
-| 15  | context-mode        | Context window compression      | Active |
-| 16  | qmd                 | Hybrid search over markdown     | Active |
-| 17  | google-workspace    | GWS (p@nuvini.ai)               | Active |
-| 18  | plugin:discord      | Discord bot                     | Active |
-| 19  | plugin:swift-lsp    | Swift LSP                       | Active |
+| #   | Server              | Purpose                         | Status                                      |
+| --- | ------------------- | ------------------------------- | ------------------------------------------- |
+| 1   | sequential-thinking | Structured problem solving      | Active                                      |
+| 2   | memory              | Knowledge graph (Turso-backed)  | Active                                      |
+| 3   | playwright          | Browser automation              | Active                                      |
+| 4   | github              | GitHub API                      | Active                                      |
+| 5   | brave-search        | Web search (LLM Context API)    | Active                                      |
+| 6   | exa                 | Neural search with highlights   | Active                                      |
+| 7   | postgres            | PostgreSQL (Claudia on Contabo) | Active                                      |
+| 8   | resend              | Transactional email             | Active                                      |
+| 9   | slack               | Slack integration               | Active                                      |
+| 10  | notion              | Notion workspace                | Active                                      |
+| 11  | digitalocean        | DO App Platform, DBs, Spaces    | Active                                      |
+| 12  | chrome-devtools     | Chrome DevTools automation      | Active                                      |
+| 13  | firecrawl           | Web scraping/crawling           | Active                                      |
+| 14  | ScraplingServer     | Stealth scraping, anti-bot      | Active                                      |
+| 15  | context-mode        | Context window compression      | Active                                      |
+| 16  | qmd                 | Hybrid search over markdown     | Active                                      |
+| 17  | google-workspace    | GWS (p@nuvini.ai)               | Active (uvx workspace-mcp, not in settings) |
+| 18  | officecli           | Office doc creation/editing     | Active                                      |
+
+**Note:** plugin:discord and plugin:swift-lsp moved to `enabledPlugins` system. google-workspace is active but configured outside settings.json (uvx workspace-mcp).
 
 ## Skills (130+)
 
-### Developer Workflow (21)
+### Developer Workflow (24)
 
-ship, deep-plan, cto, first-principles, verify, test-and-fix, review-changes, cpr, sc, cs, run-local, parallel-dev, codebase-cleanup, website-design, project-orchestrator, maketree, revert-track, simplify, get-api-docs, architecture, mini-remote
+ship, deep-plan, cto, first-principles, verify, test-and-fix, review-changes, cpr, sc, cs, run-local, parallel-dev, codebase-cleanup, website-design, project-orchestrator, maketree, revert-track, simplify, get-api-docs, architecture, mini-remote, architect, tech-audit, local-inference
 
 ### QA & Testing (9)
 
@@ -43,9 +44,9 @@ qa-cycle, qa-conta, qa-sourcerank, qa-stonegeo, qa-fix, qa-verify, fulltest-skil
 
 deploy-conta-staging, deploy-conta-production, deploy-sourcerank, contably-guardian, sourcerank-guardian, oci-health
 
-### Research & Scraping (7)
+### Research & Scraping (9)
 
-deep-research, research, firecrawl, scrapling, browserless, pinchtab, qmd
+deep-research, research, firecrawl, scrapling, browserless, pinchtab, qmd, last30days, wiki
 
 ### AI & Growth (3)
 
@@ -83,29 +84,45 @@ vibc
 
 finance-dcf, finance-comps, finance-lbo, finance-model, finance-memo, finance-pitch, finance-cim, finance-dataroom, finance-ic, finance-nda, finance-loi, finance-spa, mna-pipeline, mna-diligence, mna-synergies, mna-integration, ir-deck, ir-earnings, ir-model, compliance-kyc, compliance-aml, compliance-reporting, legal-review, legal-redline, analyze-deal, committee-presenter, aimpact, generate-deck, portfolio-monitor, portfolio-report, portfolio-valuation, financial-model
 
-## Agents (8)
+## Agents (9)
 
-backend-agent, database-agent, devops-agent, frontend-agent, oncall-guide, performance-agent, project-orchestrator, review/ (multi-perspective)
+backend-agent, database-agent, devops-agent, frontend-agent, oncall-guide, performance-agent, project-orchestrator, security-agent, review/ (multi-perspective)
 
-## Rules (6)
+## Plugins (7)
+
+discord, codex (OpenAI), frontend-design, typescript-lsp, security-guidance, hookify, pyright-lsp
+
+**Note:** swift-lsp was replaced by typescript-lsp + pyright-lsp. codex (OpenAI) added via external marketplace.
+
+## Rules (8)
 
 AGENT-TEAMS-STRATEGY.md, memory-strategy.md, model-tier-strategy.md, nuvini-sync-rules.md, parallel-first.md, skill-first.md, tool-annotations.md, web-search-efficiency.md
 
 ## Hooks (Active)
 
-| Event              | Purpose                                  |
-| ------------------ | ---------------------------------------- |
-| SessionStart       | git pull + core memory load              |
-| SubagentStart/Stop | Logging                                  |
-| PostToolUse        | Auto-formatting, skill execution logging |
-| TeammateIdle       | Task assignment prompts                  |
-| TaskCompleted      | Auto-assignment for idle teammates       |
-| TaskCreated        | Task creation logging                    |
-| PostCompact        | State file recovery                      |
-| CwdChanged         | Git branch context refresh               |
-| StopFailure        | API error logging                        |
-| ConfigChange       | Config audit logging                     |
-| Elicitation/Result | MCP elicitation logging                  |
+| Event                 | Purpose                                  |
+| --------------------- | ---------------------------------------- |
+| SessionStart          | git pull + core memory load              |
+| SessionEnd            | Session teardown                         |
+| SubagentStart/Stop    | Logging                                  |
+| PostToolUse           | Auto-formatting, skill execution logging |
+| PreToolUse            | Security checks                          |
+| UserPromptSubmit      | Prompt pre-processing                    |
+| TeammateIdle          | Task assignment prompts                  |
+| TaskCompleted         | Auto-assignment for idle teammates       |
+| TaskCreated           | Task creation logging                    |
+| PostCompact           | State file recovery                      |
+| CwdChanged            | Git branch context refresh               |
+| StopFailure           | API error logging                        |
+| ConfigChange          | Config audit logging                     |
+| Elicitation/Result    | MCP elicitation logging                  |
+| InstructionsLoaded    | Rules file load event                    |
+| WorktreeCreate/Remove | Worktree lifecycle management            |
+| FileChanged           | File change detection                    |
+| PermissionDenied      | Permission denial logging                |
+| Setup                 | Repo setup/maintenance                   |
+
+**Missing hook:** `PermissionRequest` — not yet configured (auto-approve/deny tool permissions)
 
 ## Role Coverage
 

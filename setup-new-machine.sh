@@ -3,13 +3,12 @@
 # Claude Code - New Machine Setup Script
 # ============================================================
 # This script sets up Claude Code configuration on a new Mac.
-# It creates symlinks to iCloud-synced configs and loads
-# secrets from macOS Keychain (which syncs via iCloud Keychain).
+# It creates symlinks to git-synced configs and loads
+# secrets from macOS Keychain (local per machine).
 #
 # Prerequisites:
-# 1. iCloud must be enabled and synced
-# 2. iCloud Keychain must be enabled (for secrets)
-# 3. Claude Code must be installed
+# 1. claude-setup git repo must be cloned to ~/.claude-setup
+# 2. Claude Code must be installed
 #
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/.../setup-new-machine.sh | bash
@@ -27,7 +26,7 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 # Paths
-ICLOUD_CLAUDE="$HOME/.claude-setup"
+SETUP_DIR="$HOME/.claude-setup"
 CLAUDE_DIR="$HOME/.claude"
 
 echo -e "${BLUE}"
@@ -39,18 +38,16 @@ echo -e "${NC}"
 # Check prerequisites
 echo -e "${YELLOW}Checking prerequisites...${NC}"
 
-# Check iCloud sync
-if [ ! -d "$ICLOUD_CLAUDE" ]; then
-    echo -e "${RED}✗ iCloud claude-setup folder not found!${NC}"
-    echo "  Expected: $ICLOUD_CLAUDE"
+# Check git repo
+if [ ! -d "$SETUP_DIR" ]; then
+    echo -e "${RED}✗ claude-setup repo not found!${NC}"
+    echo "  Expected: $SETUP_DIR"
     echo ""
-    echo "  Please ensure:"
-    echo "  1. iCloud Drive is enabled in System Settings"
-    echo "  2. iCloud has finished syncing"
-    echo "  3. The claude-setup folder exists in iCloud Drive"
+    echo "  Please clone the repo first:"
+    echo "  git clone https://github.com/escotilha/claude.git ~/.claude-setup"
     exit 1
 fi
-echo -e "${GREEN}✓ iCloud claude-setup folder found${NC}"
+echo -e "${GREEN}✓ claude-setup repo found${NC}"
 
 # Check Claude directory exists
 if [ ! -d "$CLAUDE_DIR" ]; then
@@ -59,12 +56,11 @@ if [ ! -d "$CLAUDE_DIR" ]; then
 fi
 echo -e "${GREEN}✓ ~/.claude directory exists${NC}"
 
-# Check iCloud Keychain (just informational)
 echo -e "${GREEN}✓ Prerequisites check complete${NC}"
 echo ""
 
 # Create symlinks
-echo -e "${YELLOW}Creating symlinks to iCloud configs...${NC}"
+echo -e "${YELLOW}Creating symlinks to git-synced configs...${NC}"
 
 create_symlink() {
     local source="$1"
@@ -92,18 +88,18 @@ create_symlink() {
 }
 
 # Create all symlinks
-create_symlink "$ICLOUD_CLAUDE/settings.json" "$CLAUDE_DIR/settings.json" "settings.json"
-create_symlink "$ICLOUD_CLAUDE/agents" "$CLAUDE_DIR/agents" "agents"
-create_symlink "$ICLOUD_CLAUDE/commands" "$CLAUDE_DIR/commands" "commands"
-create_symlink "$ICLOUD_CLAUDE/hooks" "$CLAUDE_DIR/hooks" "hooks"
-create_symlink "$ICLOUD_CLAUDE/skills" "$CLAUDE_DIR/skills" "skills"
-create_symlink "$ICLOUD_CLAUDE/rules" "$CLAUDE_DIR/rules" "rules"
+create_symlink "$SETUP_DIR/settings.json" "$CLAUDE_DIR/settings.json" "settings.json"
+create_symlink "$SETUP_DIR/agents" "$CLAUDE_DIR/agents" "agents"
+create_symlink "$SETUP_DIR/commands" "$CLAUDE_DIR/commands" "commands"
+create_symlink "$SETUP_DIR/hooks" "$CLAUDE_DIR/hooks" "hooks"
+create_symlink "$SETUP_DIR/skills" "$CLAUDE_DIR/skills" "skills"
+create_symlink "$SETUP_DIR/rules" "$CLAUDE_DIR/rules" "rules"
 
 echo ""
 
 # Verify Keychain secrets
 echo -e "${YELLOW}Checking Keychain secrets...${NC}"
-echo "(Secrets sync automatically via iCloud Keychain)"
+echo "(Secrets are stored locally per machine. For Claude Code, also in settings.json env block.)"
 echo ""
 
 check_secret() {
@@ -141,8 +137,8 @@ if [ $MISSING_REQUIRED -eq 1 ]; then
     echo "If this is your primary Mac, run the setup script:"
     echo "  ~/.claude/hooks/setup-keychain.sh"
     echo ""
-    echo "If this is a secondary Mac, ensure iCloud Keychain is enabled"
-    echo "and fully synced. Secrets should appear automatically."
+    echo "On a secondary Mac, run setup-keychain.sh to add keys to this machine's Keychain."
+    echo "Claude Code also reads keys from the settings.json env block (synced via git)."
     echo ""
 fi
 
@@ -181,7 +177,7 @@ echo "║                    Setup Complete!                         ║"
 echo "╚════════════════════════════════════════════════════════════╝"
 echo -e "${NC}"
 
-echo "Your Claude Code configuration is now synced via iCloud."
+echo "Your Claude Code configuration is now synced via git."
 echo ""
 echo "What's synced:"
 echo "  • settings.json - MCP servers, hooks, permissions"
@@ -191,9 +187,9 @@ echo "  • hooks/        - Session hooks and scripts"
 echo "  • skills/       - Custom skills"
 echo "  • rules/        - Coding standards and conventions"
 echo ""
-echo "Secrets (via iCloud Keychain):"
-echo "  • API keys stored securely in macOS Keychain"
-echo "  • Automatically sync to all your Macs"
+echo "Secrets:"
+echo "  • API keys in macOS Keychain (local per machine)"
+echo "  • Also available via settings.json env block (synced via git)"
 echo ""
 echo "Next steps:"
 echo "  1. Restart your terminal (or run: source ~/.zshrc)"
