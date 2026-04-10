@@ -17,14 +17,14 @@
 ## Projects
 
 - [project_agentwave_deploy.md](project_agentwave_deploy.md) — AgentWave deploys to Contabo VPS via SSH, not Railway
-- [project_benchmark_loop_scaleup.md](project_benchmark_loop_scaleup.md) — Benchmark optimization loop for Claudia — check ledger after 2-3 weeks and expand to other agents if gate criteria pass
+- [project_benchmark_loop_scaleup.md](project_benchmark_loop_scaleup.md) — RESOLVED: Benchmark loop removed (2026-04-09) — too dangerous for autonomous execution (sent rm -rf /opt/claudia twice); compound-review (observe-only) kept
 - [project_claudia_memory_v2.md](project_claudia_memory_v2.md) — Claudia Memory v2 — 5-layer composite memory system with nudge, consolidation, and complexity-aware skill generation (ALL PHASES COMPLETE)
 - [project_claudia_migration_complete.md](project_claudia_migration_complete.md) — Claudia fully replaced OpenClaw — all features migrated including voice, TTS, STT, proactive scheduler, media support
 - [project_claudia_router.md](project_claudia_router.md) — Claudia — TypeScript multi-channel AI agent router on VPS, 10 agents, 6 channels, 4-tier inference, 5-layer memory, 20+ scheduled tasks, dashboard, dispatch queue
 - [project_claudia_voice_pipecat.md](project_claudia_voice_pipecat.md) — Claudia voice pipeline migrated from Twilio to Pipecat + Telnyx + Deepgram + Cartesia — real-time streaming voice
 - [project_contably_ops.md](project_contably_ops.md) — Contably-ops repo and deal data structure for accounting firm acquisitions — skills, directories, workflow
 - [project_esocial_plan.md](project_esocial_plan.md) — Contably eSocial module activation via TecnoSpeed middleware — decisions, phases, and partner strategy
-- [project_heartbeat_followup.md](project_heartbeat_followup.md) — Follow-up review of Claudia's HEARTBEAT.md system — check if it's useful after 2 weeks, decide whether to split tasks.md out
+- [project_heartbeat_followup.md](project_heartbeat_followup.md) — RESOLVED: Heartbeat validated and improved (2026-04-09) — state tracking added (heartbeat-state.json), routed to #tech-ops, quiet hours 22:30-04:30 BRT, no split needed
 - [project_nuvini_ir_deploy.md](project_nuvini_ir_deploy.md) — nuvini-ir deploys via Cloudflare Pages (wrangler) — build with eleventy, deploy \_site folder, not auto-deployed from git
 - [project_woodpecker_ci.md](project_woodpecker_ci.md) — Woodpecker CI running on OKE cluster at ci.contably.ai — replaces OCI DevOps for Contably CI/CD
 - [tech_glasswing_vuln_hunting.md](tech_glasswing_vuln_hunting.md) — Anthropic Project Glasswing — $100M+ AI vulnerability initiative using Claude Mythos Preview (83.1% CyberGym repro rate). Glasswing-style prompting added to /cto security analyst.
@@ -59,4 +59,4 @@
 
 # currentDate
 
-Today's date is 2026-04-07.
+Today's date is 2026-04-10.
