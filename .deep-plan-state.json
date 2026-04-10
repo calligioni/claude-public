@@ -1,28 +1,25 @@
 {
-  "feature": "Claude Managed Agents API integration into Claudia",
-  "startedAt": "2026-04-08T12:00:00Z",
+  "feature": "Shared Memory & Secrets Parity Across Machines (Mac, Mac Mini, VPS)",
+  "startedAt": "2026-04-10T09:00:00Z",
   "currentPhase": "research",
   "research": {
-    "status": "complete",
+    "status": "in_progress",
     "scopeIdentified": true,
     "filesRead": [
-      "src/router.ts",
-      "src/dispatcher.ts",
-      "src/index.ts",
-      "src/config.ts",
-      "src/inference/fallback.ts",
-      "src/inference/agent-sdk.ts",
-      "src/inference/openrouter.ts",
-      "src/agents/types.ts",
-      "src/agents/registry.ts",
-      "src/sessions/manager.ts",
-      "src/sessions/db.ts",
-      "src/memory/context.ts",
-      "src/scheduler/dispatch.ts",
-      "CLAUDE.md",
-      "package.json"
+      "settings.json",
+      "setup-new-machine.sh",
+      "setup-claude.sh",
+      "setup-symlinks.sh",
+      "setup-mac.sh",
+      "setup-mcp-servers.sh",
+      "hooks/load-secrets.sh",
+      "hooks/setup-keychain.sh",
+      "mcp-servers/memory-turso/package.json",
+      "memory/core-memory.json",
+      "tools/mem-search",
+      "launchd/com.claude.setup-sync.plist"
     ],
-    "artifactWritten": true
+    "artifactWritten": false
   },
   "plan": {
     "status": "pending",
