@@ -283,7 +283,30 @@ mcp__chrome-devtools__take_screenshot with filePath to save for debugging
 - Prioritize by severity (visual issues = critical)
 - **Spawn parallel fixers with `isolation: "worktree"`** to prevent concurrent file edit conflicts
 - Apply fixes for known patterns
-- Re-test affected pages
+- **Monitor fixer completion** — after spawning fixers, use `Monitor` to watch for build/test signals instead of waiting synchronously:
+  ```bash
+  Monitor(
+    description: "fulltest fixer completion watcher",
+    timeout_ms: 300000,
+    persistent: false,
+    command: '''
+      # Watch for fixer worktree completion markers
+      while true; do
+        for f in .testing/fixers/*.status; do
+          [ -f "$f" ] && cat "$f" && rm "$f"
+        done
+        # Check if build passes after fixes
+        if [ -f .testing/fixers-done ]; then
+          echo "ALL_FIXERS_COMPLETE"
+          exit 0
+        fi
+        sleep 1
+      done
+    '''
+  )
+  ```
+  Each fixer agent writes its status to `.testing/fixers/{category}.status` on completion. The Monitor streams these as notifications, allowing the orchestrator to track progress and trigger re-tests incrementally as each category finishes — rather than waiting for all fixers to complete before re-testing any pages.
+- Re-test affected pages (incrementally as fixers complete, not batched at end)
 
 ### Phase 6: Report Generation
 

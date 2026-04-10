@@ -305,10 +305,12 @@ Rules for all teammates:
 
 ```
 Spawn agents via Task tool with run_in_background: true
-→ Poll for completion every 30 seconds
-→ Check .feature-complete marker files
+→ Monitor tool watches task registry for completion signals (event-driven, ~2s latency)
+→ Fallback: CronCreate (1-min schedule) or inline polling (30s sleep)
 → No communication between feature agents
 ```
+
+> **Note (2026-04-10):** The Monitor tool now covers the polling elimination use case that was a primary motivation for migrating parallel-dev to Agent Teams. Monitor provides event-driven notifications without requiring Agent Teams infrastructure. The remaining unique value of Agent Teams for parallel-dev is **cross-feature messaging** — teammates coordinating APIs/interfaces directly (e.g., "I'm exposing `/api/users`, use that endpoint"). If your features are truly independent (no shared APIs), Monitor + Task mode is sufficient. Migrate to Agent Teams only when cross-feature coordination is a real need.
 
 **Agent Teams approach:**
 
@@ -369,10 +371,12 @@ Lead instructions:
 
 **What this fixes over the current approach:**
 
-1. No polling loop (idle notifications replace it)
-2. Feature agents can coordinate APIs/interfaces directly ("I'm exposing `/api/users`, use that endpoint")
-3. Blocker detection is immediate, not on a 30-second poll cycle
-4. The lead stays responsive instead of sleeping in a loop
+1. ~~No polling loop (idle notifications replace it)~~ — **Now solved by Monitor tool without Agent Teams**
+2. Feature agents can coordinate APIs/interfaces directly ("I'm exposing `/api/users`, use that endpoint") — **Unique to Agent Teams**
+3. ~~Blocker detection is immediate, not on a 30-second poll cycle~~ — **Now solved by Monitor (~2s latency)**
+4. ~~The lead stays responsive instead of sleeping in a loop~~ — **Now solved by Monitor (non-blocking)**
+
+**Revised justification:** Agent Teams migration for parallel-dev is justified only when features have cross-dependencies requiring real-time coordination (point 2). For independent features, Monitor + Task mode delivers equivalent responsiveness.
 
 ### 4.3 Fulltest Skill: Stay with Subagents (Optimized)
 
