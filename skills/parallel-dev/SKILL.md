@@ -857,12 +857,49 @@ The polling loop is unnecessary — the lead receives idle notifications and dir
 
 No sleep loops, no marker files. The Agent Teams messaging infrastructure handles coordination.
 
-#### Task Mode (Fallback)
+#### Task Mode (Preferred Fallback) — Monitor-Based
 
-Use `CronCreate` to schedule periodic checks instead of a blocking sleep loop. This keeps the orchestrator responsive between checks:
+Use `Monitor` to watch for completion signals from background agents. This is event-driven — no polling, no cron, no sleep loops. The orchestrator stays fully responsive while Monitor streams notifications as they arrive.
+
+**Setup:** After spawning background agents (Phase 3), start a Monitor that watches the task registry for state changes:
+
+```bash
+Monitor(
+  description: "parallel-dev feature completion watcher",
+  persistent: true,
+  command: '''
+    prev=""
+    while true; do
+      curr=$(cat .parallel-dev/active-tasks.json 2>/dev/null | jq -r '.features[] | select(.status == "complete" or .status == "failed") | "\(.id): \(.status)"' 2>/dev/null || true)
+      if [ "$curr" != "$prev" ] && [ -n "$curr" ]; then
+        echo "$curr"
+        prev="$curr"
+        # Exit when all features are done
+        pending=$(cat .parallel-dev/active-tasks.json 2>/dev/null | jq '[.features[] | select(.status == "in_progress" or .status == "pending")] | length' 2>/dev/null || echo "1")
+        [ "$pending" = "0" ] && echo "ALL_FEATURES_COMPLETE" && exit 0
+      fi
+      sleep 2
+    done
+  '''
+)
+```
+
+Each stdout line becomes a notification in the conversation. When a feature completes or fails, the orchestrator is notified immediately and can:
+
+1. Update status in `active-tasks.json`
+2. Run tests on the completed feature
+3. Spawn newly-unblocked features
+4. Merge passing features to integration branch
+
+When `ALL_FEATURES_COMPLETE` fires, proceed to Phase 5.
+
+**Why Monitor over CronCreate:** Monitor is event-driven with ~2s latency. CronCreate fires on a fixed 1-minute schedule regardless of whether anything changed. Monitor also self-terminates when all features complete — no cleanup needed.
+
+#### CronCreate Fallback
+
+If `Monitor` is unavailable, use `CronCreate` to schedule periodic checks:
 
 ```
-// Schedule a monitoring cron (fires every minute between turns)
 CronCreate(
   schedule: "*/1 * * * *",
   prompt: "Read .parallel-dev/active-tasks.json. For each feature:
@@ -875,11 +912,11 @@ CronCreate(
 )
 ```
 
-The cron fires at low priority between turns — no sleep loops, no blocked session. The orchestrator can respond to user input immediately while monitoring runs in the background.
+#### Legacy Inline Polling
 
-**When to fall back to inline polling:** If `CronCreate` is unavailable (older environment), use the inline loop with `sleep(30000)` as before.
+**Last resort only** — if neither `Monitor` nor `CronCreate` is available, use the inline loop with `sleep(30000)`. This blocks the session and prevents user interaction during monitoring.
 
-**Emergency stop:** Set `CLAUDE_CODE_DISABLE_CRON=1` to immediately disable all cron jobs. Use this if a monitoring cron enters a runaway loop or keeps firing after the session should have ended.
+**Emergency stop:** Use `TaskStop` to cancel a runaway Monitor. For CronCreate, set `CLAUDE_CODE_DISABLE_CRON=1`.
 
 ### Phase 4.1: Task Registry (External Monitoring)
 

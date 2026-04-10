@@ -1,7 +1,7 @@
 #!/bin/bash
 # Claude Code Setup Script
 # ========================
-# Run this on new machines to sync Claude Code config via iCloud
+# Run this on new machines to sync Claude Code config via git
 #
 # Usage: curl -sL "path/to/this/script" | bash
 #    or: ./setup-claude.sh
@@ -22,27 +22,27 @@ print_info() { echo -e "${BLUE}ℹ $1${NC}"; }
 
 echo ""
 echo "=================================="
-echo "  Claude Code iCloud Setup"
+echo "  Claude Code Git-Synced Setup"
 echo "=================================="
 echo ""
 
 # Check if running on macOS
 if [[ "$(uname)" != "Darwin" ]]; then
-    print_error "This script is for macOS only (requires iCloud)"
+    print_error "This script is for macOS only"
     exit 1
 fi
 
 # Define paths
 CLAUDE_DIR="$HOME/.claude"
-ICLOUD_DIR="$HOME/.claude-setup"
+SETUP_DIR="$HOME/.claude-setup"
 
-# Check if iCloud directory exists
-if [[ ! -d "$ICLOUD_DIR" ]]; then
-    print_error "iCloud claude-setup directory not found: $ICLOUD_DIR"
-    print_info "Make sure iCloud Drive is enabled and synced"
+# Check if git repo exists
+if [[ ! -d "$SETUP_DIR" ]]; then
+    print_error "claude-setup repo not found: $SETUP_DIR"
+    print_info "Clone it: git clone https://github.com/escotilha/claude.git ~/.claude-setup"
     exit 1
 fi
-print_success "iCloud claude-setup directory found"
+print_success "claude-setup repo found"
 
 # Create .claude directory
 mkdir -p "$CLAUDE_DIR"
@@ -53,7 +53,7 @@ declare -a ITEMS=("settings.json" "agents" "skills" "hooks" "commands")
 
 # Create symlinks
 for item in "${ITEMS[@]}"; do
-    SOURCE="$ICLOUD_DIR/$item"
+    SOURCE="$SETUP_DIR/$item"
     TARGET="$CLAUDE_DIR/$item"
 
     if [[ ! -e "$SOURCE" ]]; then
@@ -109,7 +109,7 @@ echo "=================================="
 echo "  Setup Complete!"
 echo "=================================="
 echo ""
-print_success "Claude Code config is now synced via iCloud"
+print_success "Claude Code config is now synced via git"
 echo ""
 echo "Synced items:"
 for item in "${ITEMS[@]}"; do
