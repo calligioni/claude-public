@@ -1,0 +1,584 @@
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "ENABLE_CLAUDEAI_MCP_SERVERS": "false",
+    "CLAUDE_BASH_NO_LOGIN": "1",
+    "RESEND_API_KEY": "re_SBHeSKNj_AM1wzDrF5eJZ2LKmuyDyNvE2",
+    "BRAVE_API_KEY": "BSAYdiKG6QoqYPSm9rCGdPlwM_fnzNu",
+    "EXA_API_KEY": "81538a60-ff60-46e3-9fd4-78e954bc85d0",
+    "ENABLE_PROMPT_CACHING_1H": "1"
+  },
+  "modelOverrides": {
+    "claude-opus-4-6": "claude-opus-4-6",
+    "claude-sonnet-4-6": "claude-sonnet-4-6",
+    "claude-opus-4-7": "claude-opus-4-7",
+    "claude-sonnet-4-7": "claude-sonnet-4-7",
+    "claude-haiku-4-5-20251001": "claude-haiku-4-5-20251001"
+  },
+  "attribution": {
+    "enabled": true,
+    "footer": "🤖 Generated with Claude Code"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "GIT_TERMINAL_PROMPT=0 git -C \"$HOME/.claude-setup\" pull --ff-only --quiet 2>/dev/null || true; echo '=== CORE MEMORY ===' && cat \"$HOME/.claude-setup/memory/core-memory.json\" 2>/dev/null || echo 'No core memory found'"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.claude-setup/hooks/notify-whatsapp.sh\"",
+            "timeout": 6000
+          }
+        ]
+      }
+    ],
+    "StopFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Stop failure: exit_reason=${EXIT_REASON:-unknown} error=${ERROR_MESSAGE:-none}\" >> ~/.claude/logs/stop-failures.log"
+          },
+          {
+            "type": "command",
+            "command": "\"$HOME/.claude-setup/hooks/notify-whatsapp.sh\"",
+            "timeout": 6000
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Subagent started: ${SUBAGENT_ID:-unknown}\" >> ~/.claude/logs/subagents.log"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Subagent stopped: ${SUBAGENT_ID:-unknown}\" >> ~/.claude/logs/subagents.log; rm -rf /tmp/claude-agent-* 2>/dev/null || true"
+          },
+          {
+            "type": "command",
+            "command": "\"$HOME/.claude-setup/hooks/worktree-cleanup.sh\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // \"\"'); case \"${FILE##*.}\" in js|jsx|ts|tsx|mjs|cjs|py|go|rs|swift|sh|bash|zsh|rb|lua|tf|sql|c|cpp|cc|h|hpp|java|kt|kts|css|scss|sass|less|html|htm|vue|svelte|ex|exs|dart|zig|nix|toml|xml) \"$HOME/.claude-setup/hooks/format-file.sh\" ;; *) exit 0 ;; esac"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // \"\"'); case \"${FILE##*.}\" in js|jsx|ts|tsx|mjs|cjs|py|go|rs|swift|sh|bash|zsh|rb|lua|tf|sql|c|cpp|cc|h|hpp|java|kt|kts|css|scss|sass|less|html|htm|vue|svelte|ex|exs|dart|zig|nix|toml|xml) \"$HOME/.claude-setup/hooks/format-file.sh\" ;; *) exit 0 ;; esac"
+          }
+        ]
+      },
+      {
+        "matcher": "NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.claude-setup/hooks/format-file.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.claude-setup/hooks/skill-execution-log.sh\"",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.claude-setup/hooks/memory-whisper.sh\"",
+            "timeout": 4000
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"additionalContext\": \"Working directory: '$(pwd)'. Git branch: '$(git branch --show-current 2>/dev/null || echo none)'. Project: '$(basename $(git rev-parse --show-toplevel 2>/dev/null) 2>/dev/null || basename $(pwd))'\"}'"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.claude-setup/hooks/session-end.sh\""
+          },
+          {
+            "type": "command",
+            "command": "\"$HOME/.claude-setup/hooks/worktree-cleanup.sh\""
+          }
+        ]
+      }
+    ],
+    "TeammateIdle": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Teammate idle - checking for pending work\" >> ~/.claude/logs/teammates.log"
+          },
+          {
+            "type": "prompt",
+            "prompt": "A teammate has gone idle. Check TaskList for unassigned tasks and assign work if available. If no tasks remain, shut down this teammate to save tokens."
+          }
+        ]
+      }
+    ],
+    "Setup": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] First-run setup completed\" >> ~/.claude/logs/setup.log"
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Task completed: ${TASK_ID}\" >> ~/.claude/logs/tasks.log"
+          },
+          {
+            "type": "prompt",
+            "prompt": "Task completed. Use TaskList to check for unblocked tasks, then automatically assign the next available task to idle teammates."
+          }
+        ]
+      }
+    ],
+    "ConfigChange": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Config changed: ${CONFIG_FILE}\" >> ~/.claude/logs/config-changes.log"
+          }
+        ]
+      }
+    ],
+    "WorktreeCreate": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.claude-setup/hooks/worktree-create.sh\""
+          }
+        ]
+      }
+    ],
+    "WorktreeRemove": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.claude-setup/hooks/worktree-remove.sh\""
+          }
+        ]
+      }
+    ],
+    "InstructionsLoaded": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Instructions loaded: ${INSTRUCTIONS_FILE}\" >> ~/.claude/logs/instructions.log"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Compaction starting in $(pwd)\" >> ~/.claude/logs/compaction.log"
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.claude-setup/hooks/pre-compact.sh\""
+          },
+          {
+            "type": "command",
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Compaction completed in $(pwd)\" >> ~/.claude/logs/compaction.log"
+          },
+          {
+            "type": "command",
+            "command": "found=$(ls .deep-plan-state.json qa-state.json .claude/ship/*/state.json 2>/dev/null); if [ -n \"$found\" ]; then echo \"Active state files found: $found\"; else echo \"NO_STATE_FILES\"; fi"
+          },
+          {
+            "type": "prompt",
+            "prompt": "Context compaction just completed. If the hook output lists active state files, read them and summarize your current task phase and progress so you can continue without losing context. If it says NO_STATE_FILES, continue normally."
+          }
+        ]
+      }
+    ],
+    "Elicitation": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] MCP elicitation requested: ${ELICITATION_SERVER:-unknown} request_id=${ELICITATION_ID:-unknown}\" >> ~/.claude/logs/elicitations.log"
+          }
+        ]
+      }
+    ],
+    "ElicitationResult": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] MCP elicitation result: ${ELICITATION_SERVER:-unknown} request_id=${ELICITATION_ID:-unknown} accepted=${ELICITATION_ACCEPTED:-unknown}\" >> ~/.claude/logs/elicitations.log"
+          }
+        ]
+      }
+    ],
+    "TaskCreated": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date)] Task created: ${TASK_ID:-unknown} title=${TASK_TITLE:-unknown}\" >> ~/.claude/logs/tasks.log"
+          }
+        ]
+      }
+    ],
+    "CwdChanged": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "GIT_TERMINAL_PROMPT=0 git branch --show-current 2>/dev/null | xargs -I{} echo '{\"additionalContext\": \"Now in directory: '\"$(pwd)\"'. Git branch: {}\"}' 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date -Iseconds)] Permission requested: ${TOOL_NAME:-unknown}\" >> ~/.claude/logs/permission-requests.log"
+          }
+        ]
+      }
+    ],
+    "PermissionDenied": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p ~/.claude/logs && echo \"[$(date -Iseconds)] Permission denied: ${TOOL_NAME:-unknown} - ${DENIAL_REASON:-unknown}\" >> ~/.claude/logs/permission-denials.log"
+          }
+        ]
+      }
+    ],
+    "FileChanged": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=\"${FILE_PATH:-unknown}\"; if [[ \"$FILE\" == *\"settings.json\"* ]] || [[ \"$FILE\" == *\"CLAUDE.md\"* ]]; then mkdir -p ~/.claude/logs && echo \"[$(date -Iseconds)] Critical file changed: $FILE\" >> ~/.claude/logs/file-changes.log; fi"
+          }
+        ]
+      }
+    ]
+  },
+  "disableSkillShellExecution": false,
+  "statusLine": {
+    "type": "command",
+    "command": "$HOME/.claude-setup/hooks/statusline-command.sh",
+    "refreshInterval": 30
+  },
+  "enabledPlugins": {
+    "discord@claude-plugins-official": true,
+    "codex@openai-codex": true,
+    "frontend-design@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "security-guidance@claude-plugins-official": true,
+    "hookify@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "warp@claude-code-warp": true
+  },
+  "extraKnownMarketplaces": {
+    "openai-codex": {
+      "source": {
+        "source": "github",
+        "repo": "openai/codex-plugin-cc"
+      }
+    },
+    "claude-code-warp": {
+      "source": {
+        "source": "github",
+        "repo": "warpdotdev/claude-code-warp"
+      }
+    }
+  },
+  "spinnerVerbs": {
+    "mode": "append",
+    "verbs": [
+      "Analyzing deal",
+      "Extracting financials",
+      "Scoring deal",
+      "Reviewing codebase",
+      "Running E2E tests",
+      "Reviewing code",
+      "Orchestrating project"
+    ]
+  },
+  "spinnerTipsOverride": {
+    "excludeDefault": false,
+    "tips": [
+      "Use /mna triage to score M&A deals 0-10",
+      "Use /ship for end-to-end feature delivery",
+      "Use /optimize-setup to sync with Claude updates",
+      "Use /research to analyze any URL or image",
+      "Use /qa-cycle for full QA pass with Playwright"
+    ]
+  },
+  "alwaysThinkingEnabled": false,
+  "effortLevel": "xhigh",
+  "sandbox": {
+    "network": {
+      "deniedDomains": [
+        "169.254.169.254",
+        "metadata.google.internal",
+        "metadata.azure.com",
+        "metadata.aws.amazon.com",
+        "fd00:ec2::254",
+        "100.100.100.200"
+      ]
+    }
+  },
+  "plansDirectory": "~/.claude/plans",
+  "autoMemoryDirectory": "~/.claude-setup/memory/auto",
+  "skipDangerousModePermissionPrompt": true,
+  "autoUpdaterStatus": "enabled",
+  "remoteControlForAllSessions": true,
+  "mcpSearchAutoThreshold": 15,
+  "default_arguments": [
+    "--dangerously-skip-permissions"
+  ],
+  "mcp": {
+    "mcpServers": {
+      "sequential-thinking": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-sequential-thinking"
+        ],
+        "description": "Sequential thinking and problem solving"
+      },
+      "memory": {
+        "command": "node",
+        "args": [
+          "$HOME/.claude-setup/mcp-servers/memory-turso/dist/index.js"
+        ],
+        "env": {
+          "TURSO_DATABASE_URL": "libsql://claude-memory-escotilha.aws-us-east-1.turso.io",
+          "TURSO_AUTH_TOKEN": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3Njk2MDg3ODIsImlkIjoiZDUyM2I3OWEtZjA1My00M2U4LThhOGQtNjYwZTc1MmE0ZTY5IiwicmlkIjoiYTI3NDM2NWEtOWY3ZS00MTVlLTgxNTYtYzQxYzk2MWY4YTM0In0._TaT30NMCijZJhWyPmx_EGSzntWpyawyLoGh_JgASaHbrPkPNabsLsCfrArwLCCK1VBK9jE3NhSr9WLe_38gDg",
+          "TURSO_LOCAL_REPLICA_PATH": "$HOME/.claude-setup/memory/turso-replica.db"
+        },
+        "description": "Knowledge graph for persistent memory (Turso-backed)"
+      },
+      "playwright": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@anthropic/mcp-playwright"
+        ],
+        "description": "Browser automation with Playwright"
+      },
+      "github": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-github"
+        ],
+        "env": {
+          "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+        },
+        "description": "GitHub API integration"
+      },
+      "brave-search": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-brave-search"
+        ],
+        "env": {
+          "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+        },
+        "description": "Web search via Brave LLM Context API — use count param to control token budget"
+      },
+      "exa": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "exa-mcp-server"
+        ],
+        "env": {
+          "EXA_API_KEY": "${EXA_API_KEY}"
+        },
+        "description": "Neural search with highlights mode — returns only query-relevant passages for minimal token usage"
+      },
+      "postgres": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-postgres",
+          "postgresql://postgres:postgres@127.0.0.1:5433/claudia"
+        ],
+        "description": "Claudia PostgreSQL on Contabo (via SSH tunnel :5433) - contacts, memory, workflows"
+      },
+      "resend": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-resend"
+        ],
+        "env": {
+          "RESEND_API_KEY": "${RESEND_API_KEY}"
+        },
+        "description": "Email sending via Resend"
+      },
+      "slack": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-slack"
+        ],
+        "env": {
+          "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
+          "SLACK_TEAM_ID": "${SLACK_TEAM_ID}"
+        },
+        "description": "Slack integration"
+      },
+      "notion": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-notion"
+        ],
+        "env": {
+          "NOTION_API_KEY": "${NOTION_API_KEY}"
+        },
+        "description": "Notion integration"
+      },
+      "digitalocean": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@digitalocean/mcp",
+          "--services",
+          "apps,databases,spaces"
+        ],
+        "env": {
+          "DIGITALOCEAN_TOKEN": "${DIGITALOCEAN_TOKEN}"
+        },
+        "description": "DigitalOcean App Platform, Databases, and Spaces management"
+      },
+      "chrome-devtools": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "chrome-devtools-mcp@latest"
+        ],
+        "description": "Chrome DevTools for browser automation and testing"
+      },
+      "firecrawl": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "firecrawl-mcp"
+        ],
+        "env": {
+          "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
+        },
+        "description": "Web scraping, crawling, search, and autonomous data extraction via Firecrawl"
+      },
+      "ScraplingServer": {
+        "command": "$HOME/.local/bin/scrapling",
+        "args": [
+          "mcp"
+        ],
+        "description": "Stealth web scraping with anti-bot bypass, TLS fingerprint impersonation, and adaptive element tracking"
+      },
+      "context-mode": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "context-mode"
+        ],
+        "description": "Context window compression: batches tool calls, indexes large outputs for query-based retrieval"
+      },
+      "qmd": {
+        "command": "qmd",
+        "args": [
+          "mcp"
+        ],
+        "description": "On-device hybrid search (BM25 + vector + LLM rerank) over indexed markdown collections: skills, agents, rules, memory"
+      }
+    }
+  },
+  "mcpServers": {
+    "officecli": {
+      "command": "$HOME/.local/bin/officecli",
+      "args": [
+        "mcp"
+      ]
+    }
+  }
+}

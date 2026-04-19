@@ -1,0 +1,28 @@
+{
+  "name": "fulltest-skill",
+  "version": "2.0.0",
+  "description": "Unified full-spectrum testing for websites and applications with parallel execution, auto-fix, and comprehensive reporting",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "test": "node dist/index.js"
+  },
+  "keywords": [
+    "testing",
+    "e2e",
+    "automation",
+    "parallel-testing",
+    "auto-fix",
+    "claude-code",
+    "skill"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {}
+}

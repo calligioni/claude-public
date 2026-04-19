@@ -1,0 +1,83 @@
+{
+  "version": "1.0.0",
+  "updated": "2026-04-17",
+  "patterns": [
+    {
+      "name": "feature_build",
+      "triggers": ["implement", "add feature", "build", "create"],
+      "anti_triggers": ["research", "investigate", "deploy"],
+      "chain": [
+        { "skill": "deep-plan", "gate_hint": "hard" },
+        { "skill": "ship", "gate_hint": "none", "args_hint": "--resume-from-plan-md" },
+        { "skill": "verify", "gate_hint": "none" },
+        { "skill": "cpr", "gate_hint": "none" }
+      ]
+    },
+    {
+      "name": "release",
+      "triggers": ["ship", "release", "deploy the", "push to staging", "push to production"],
+      "chain": [
+        { "skill": "review-changes", "gate_hint": "soft" },
+        { "skill": "verify", "gate_hint": "none" },
+        { "skill": "cpr", "gate_hint": "none" },
+        { "skill": "example-project-guardian", "gate_hint": "none" },
+        { "skill": "deploy-conta-staging", "gate_hint": "hard" },
+        { "skill": "deploy-conta-production", "gate_hint": "hard" }
+      ]
+    },
+    {
+      "name": "complex_feature_with_research",
+      "triggers": ["haven't used", "new library", "research and implement", "explore and build"],
+      "chain": [
+        { "skill": "deep-research", "gate_hint": "none" },
+        { "skill": "deep-plan", "gate_hint": "hard" },
+        { "skill": "ship", "gate_hint": "none" },
+        { "skill": "verify", "gate_hint": "none" },
+        { "skill": "qa-cycle", "gate_hint": "none" },
+        { "skill": "cpr", "gate_hint": "none" }
+      ]
+    },
+    {
+      "name": "parallel_batch",
+      "triggers": ["N features", "action items from plan", "batch implement", "implement all"],
+      "chain": [
+        { "skill": "architect", "gate_hint": "hard", "args_hint": "from-plan-md" },
+        { "skill": "verify", "gate_hint": "none" },
+        { "skill": "cpr", "gate_hint": "none" }
+      ],
+      "fallback_skill": "parallel-dev",
+      "fallback_condition": "worktree isolation required OR features conflict on shared files"
+    },
+    {
+      "name": "full_product",
+      "triggers": ["build a product", "greenfield", "from scratch", "new app", "new product"],
+      "chain": [
+        { "skill": "cpo", "gate_hint": "hard" }
+      ]
+    },
+    {
+      "name": "audit",
+      "triggers": ["review the", "audit", "security check", "architecture review", "is this secure"],
+      "chain": [
+        { "skill": "cto", "gate_hint": "none", "args_hint": "swarm" }
+      ],
+      "optional_followup": [
+        { "skill": "qa-fix", "condition": "P0/P1 findings present" },
+        { "skill": "", "condition": "after qa-fix" }
+      ]
+    },
+    {
+      "name": "investigate_then_fix",
+      "triggers": ["bug", "broken", "not working", "users report", "regression"],
+      "chain": [
+        { "skill": "first-principles", "gate_hint": "none" },
+        { "skill": "fulltest-skill", "gate_hint": "none", "condition": "browser-reproducible" },
+        { "skill": "deep-plan", "gate_hint": "hard" },
+        { "skill": "ship", "gate_hint": "none" },
+        { "skill": "verify", "gate_hint": "none" },
+        { "skill": "", "gate_hint": "none" },
+        { "skill": "cpr", "gate_hint": "none" }
+      ]
+    }
+  ]
+}

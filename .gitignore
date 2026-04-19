@@ -1,0 +1,30 @@
+# Sensitive data
+.env
+*.backup
+*.bak
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+memory/sessions/
+
+# Derived memory artifacts (rebuilt by mem-compile / mem-search)
+memory/auto/.cache/
+tools/mem-search.db
+
+# Python
+__pycache__/
+*.pyc
+
+# Backups
+backups/

@@ -1,0 +1,46 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "maxIterations": 3,
+  "maxPages": 50,
+  "timeout": 180000,
+  "parallel": {
+    "batchSize": 5,
+    "maxSubagents": 20
+  },
+  "autoFix": {
+    "enabled": true,
+    "conservative": true,
+    "skipPatterns": [
+      "**/node_modules/**",
+      "**/.git/**",
+      "**/dist/**",
+      "**/*.min.js"
+    ],
+    "allowedFixTypes": [
+      "null-checks",
+      "dom-ready-wrap",
+      "broken-links",
+      "missing-ids",
+      "path-corrections",
+      "missing-alt-text"
+    ]
+  },
+  "reporting": {
+    "format": "markdown",
+    "includeScreenshots": true,
+    "outputDir": "./test-artifacts",
+    "verbose": false
+  },
+  "linkValidation": {
+    "testExternalLinks": false,
+    "followRedirects": true,
+    "timeout": 10000,
+    "retryCount": 2,
+    "ignorePatterns": [
+      "mailto:",
+      "tel:",
+      "javascript:",
+      "#"
+    ]
+  }
+}

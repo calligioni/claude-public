@@ -1,0 +1,28 @@
+{
+  "updated": "2026-04-17",
+  "currency": "USD",
+  "notes": "Per-million-token prices. effort_multiplier applied on top for thinking-mode Opus 4.7.",
+  "models": {
+    "opus-4.7": {
+      "input_per_1m": 15.00,
+      "output_per_1m": 75.00,
+      "cache_write_5m": 18.75,
+      "cache_write_1h": 30.00,
+      "cache_read": 1.50,
+      "effort_multipliers": { "low": 1.0, "high": 2.0, "xhigh": 3.0, "max": 5.0 }
+    },
+    "sonnet-4.7": {
+      "input_per_1m": 3.00,
+      "output_per_1m": 15.00,
+      "cache_write_5m": 3.75,
+      "cache_read": 0.30
+    },
+    "haiku-4.5": {
+      "input_per_1m": 0.80,
+      "output_per_1m": 4.00,
+      "cache_write_5m": 1.00,
+      "cache_read": 0.08
+    }
+  },
+  "refresh_policy": "weekly or on model release; check Anthropic pricing page"
+}

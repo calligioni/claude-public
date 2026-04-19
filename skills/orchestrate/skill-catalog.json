@@ -1,0 +1,552 @@
+{
+  "generated_at": "2026-04-17T08:58:40Z",
+  "count": 78,
+  "skills": [
+    {
+      "name": "agent-browser",
+      "description": "Browser automation via agent-browser CLI (Rust, CDP). Navigate, snapshot, click, fill, screenshot, PDF, batch mode, visual diff, network intercept, session persistence. Replaces browse CLI and PinchTab. Triggers on: agent-browser, browser automation, browse website, page snapshot, element refs, accessibility tree, take screenshot, scrape page, test web app, dogfood, visual diff.",
+      "model": "sonnet",
+      "effort": "low",
+      "argument_hint": ""
+    },
+    {
+      "name": "agent-platform",
+      "description": "(DRAFT) Build or extend an LLM multi-agent platform \u2014 COO orchestration, specialist delegation, SSE routing, dynamic agent creation \u2014 auto-generated from session on 2026-04-11",
+      "model": "sonnet",
+      "effort": "medium",
+      "argument_hint": ""
+    },
+    {
+      "name": "agentmail",
+      "description": "Email inbox management for AI agents using AgentMail API. Create inboxes, send/receive emails, reply, forward, and manage messages. Use when users want to send emails, create agent inboxes, check messages, or set up email automations.",
+      "model": "sonnet",
+      "effort": "low",
+      "argument_hint": ""
+    },
+    {
+      "name": "architect",
+      "description": "Multi-feature architecture pipeline \u2014 parallel implement \u2192 verify \u2192 review \u2192 commit. Triggers on: architect, evolve, implement plan, parallel implement, multi-feature.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": ""
+    },
+    {
+      "name": "architecture",
+      "description": "Generate/maintain architecture docs with Mermaid diagrams, backups, PDF/DOCX export. Auto-detects changes. Triggers on: architecture, architecture doc, software architecture, generate architecture, update architecture.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": "[format: md|pdf|docx] [--force]"
+    },
+    {
+      "name": "browserless",
+      "description": "Headless browser via Browserless. PDFs, screenshots, Lighthouse, JS rendering, anti-bot. Triggers on: browserless, headless browser, generate PDF, take screenshot, lighthouse audit, unblock site, browser automation.",
+      "model": "sonnet",
+      "effort": "medium",
+      "argument_hint": ""
+    },
+    {
+      "name": "chief-geo",
+      "description": "Chief GEO Officer for SourceRank AI. Knowledge base, product audit, manual updates, AI visibility testing. Triggers on: chief geo, geo officer, geo audit, geo strategy, geo knowledge, /chief-geo.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": "<mode: full|knowledge|audit|manual|visibility|daily> [--brand NAME] [--queries FILE]"
+    },
+    {
+      "name": "claude-api",
+      "description": "Build apps with the Claude API or Anthropic SDK. Covers Messages API, Managed Agents API, Agent SDK, tool use, streaming, and MCP integration. TRIGGER when: code imports `anthropic`/`@anthropic-ai/sdk`/`claude_agent_sdk`, or user asks to use Claude API, Anthropic SDKs, or Agent SDK. DO NOT TRIGGER when: code imports `openai`/other AI SDK, general coding questions.",
+      "model": "sonnet",
+      "effort": "medium",
+      "argument_hint": ""
+    },
+    {
+      "name": "claude-setup-optimizer",
+      "description": "Analyze Claude Code changelog and recommend setup improvements. Triggers on: optimize claude setup, check for claude updates, improve my agents, sync with claude changelog, /optimize-setup.",
+      "model": "sonnet",
+      "effort": "medium",
+      "argument_hint": ""
+    },
+    {
+      "name": "codebase-cleanup",
+      "description": "Identify and remove unused, redundant, or dead code files in a project. Triggers on: clean up unused files, find unnecessary files, remove dead code, codebase cleanup, reduce project bloat.",
+      "model": "sonnet",
+      "effort": "low",
+      "argument_hint": ""
+    },
+    {
+      "name": "computer-use",
+      "description": "Desktop automation via Claude computer use. macOS apps, GUI tools, government portals, iOS Simulator. Triggers on: computer use, desktop automation, native app, gui automation, government portal, esocial, receita federal, ios simulator.",
+      "model": "opus",
+      "effort": "medium",
+      "argument_hint": ""
+    },
+    {
+      "name": "example-project-guardian",
+      "description": "Pre-deploy guardian for ExampleProject. Multi-layer analysis (code, infra, runtime, diff-aware) before deploy to staging/production. Parallel subagents. Triggers on: example-project guardian, pre-deploy check, guardian, example-project pre-deploy.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": ""
+    },
+    {
+      "name": "example-project-snapshot",
+      "description": "Generate ExampleProject CODEBASE-REFERENCE.md \u2014 tech stack, product modules, API surface, infra, architecture. Triggers on: example-project snapshot, stack snapshot, codebase reference, refresh snapshot.",
+      "model": "sonnet",
+      "effort": "medium",
+      "argument_hint": ""
+    },
+    {
+      "name": "cpo-ai-skill",
+      "description": "Chief Product Officer AI \u2014 orchestrates full product lifecycles from idea to production. Triggers on: build this product, cpo mode, chief product officer, product lifecycle, idea to production, full product build, strategic planning, product roadmap.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": ""
+    },
+    {
+      "name": "cpr",
+      "description": "Commit, push, and create PR. Full git workflow in one command.",
+      "model": "haiku",
+      "effort": "low",
+      "argument_hint": "[PR title or commit message]"
+    },
+    {
+      "name": "cs",
+      "description": "Sync Claude setup to all remotes (origin, public) + VPS sync via git pull",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": ""
+    },
+    {
+      "name": "cto",
+      "description": "Swarm AI CTO advisor. Parallel reviewers (architecture, security, performance, quality) via TeammateTool. Triggers on: CTO advice, architecture review, tech stack, system design, code quality, security audit, performance review.",
+      "model": "opus # Advisor pattern: Sonnet executor + Opus advisor for sequential; full Opus for swarm",
+      "effort": "high",
+      "argument_hint": "[question or area to review \u2014 e.g. 'evaluate SLA architecture scalability', 'security audit auth module']"
+    },
+    {
+      "name": "deep-plan",
+      "description": "Three-phase research\u2192plan\u2192implement workflow with persistent markdown artifacts. Deep-reads codebase, iterates on annotations. Triggers on: deep plan, plan feature, research and plan, plan this.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": "<feature or task description>"
+    },
+    {
+      "name": "deep-research",
+      "description": "Deep research orchestration. Parallel multi-track investigation with evidence hierarchy, delivers investment-memo-grade reports. Triggers on: deep research, investigate, deep dive into, nuclear research, thorough analysis.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": "<research question>"
+    },
+    {
+      "name": "demo",
+      "description": "Create reproducible demo documents using Showboat. Produces executable narratives with captured output that can be verified and streamed remotely. Triggers on: demo, showboat, create demo, demo this, /demo.",
+      "model": "sonnet",
+      "effort": "low",
+      "argument_hint": "<what to demo \u2014 feature, tool, workflow, or script>"
+    },
+    {
+      "name": "deploy-conta-full",
+      "description": "Full ExampleProject deploy: staging \u2192 production in one command. Runs /deploy-staging, and if all green, auto-promotes to production via /deploy-production. Triggers on: deploy conta full, full deploy, staging to production, deploy all.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": "[--skip-guardian] [--skip-verify]"
+    },
+    {
+      "name": "deploy-conta-production",
+      "description": "Promote ExampleProject staging to production on OCI. Verifies, approves gate, monitors, validates. Triggers on: deploy conta production, promote to production, push to production, production deploy, go live.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": "[--skip-staging-check]"
+    },
+    {
+      "name": "deploy-conta-staging",
+      "description": "Deploy ExampleProject to OCI staging. Verify \u2192 guardian \u2192 push \u2192 CI \u2192 deploy \u2192 health check. Auto-fixes. Triggers on: deploy conta staging, deploy staging, push to staging, staging deploy.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": "[--skip-guardian] [--skip-verify]"
+    },
+    {
+      "name": "deploy-sourcerank",
+      "description": "Deploy SourceRank AI to Render. Verify \u2192 guardian \u2192 push \u2192 monitor \u2192 health check. Auto-fixes. Triggers on: deploy sourcerank, deploy source, sourcerank deploy, push sourcerank.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": "[--skip-guardian] [--skip-verify] [--skip-monitoring]"
+    },
+    {
+      "name": "firecrawl",
+      "description": "Web scraping, crawling, and data extraction via Firecrawl. Converts sites to LLM-ready markdown. JS rendering, anti-bot, proxy rotation. Triggers on: scrape, crawl, web data, extract website, site map, web research, firecrawl.",
+      "model": "sonnet",
+      "effort": "low",
+      "argument_hint": ""
+    },
+    {
+      "name": "first-principles",
+      "description": "Break down a problem to its fundamentals before implementing. Use for complex or ambiguous problems.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": "<problem description>"
+    },
+    {
+      "name": "fulltest-skill",
+      "description": "Swarm-enabled full-spectrum site testing via TeammateTool. Parallel page testers, cross-page pattern detection, auto-fix, reports. Triggers on: fulltest, full test, site test, test all pages.",
+      "model": "sonnet # Orchestration-focused; spawns haiku agents for parallel page testing",
+      "effort": "medium",
+      "argument_hint": ""
+    },
+    {
+      "name": "gbrain",
+      "description": "GBrain knowledge brain management \u2014 setup, import, query, maintain, ingest. Triggers on: gbrain, knowledge brain, brain query, brain search, brain import, brain setup, brain ingest.",
+      "model": "sonnet",
+      "effort": "medium",
+      "argument_hint": "<subcommand: setup | import | query | ingest | maintain | stats>"
+    },
+    {
+      "name": "get-api-docs",
+      "description": "Fetch current API docs for any library/SDK via chub CLI. 1,000+ APIs (Supabase, Anthropic, Clerk, Prisma, Stripe, Playwright). Triggers on: get api docs, fetch docs, chub, api documentation.",
+      "model": "haiku",
+      "effort": "low",
+      "argument_hint": "<library name or chub doc ID>"
+    },
+    {
+      "name": "growth",
+      "description": "SaaS growth engineering: CRO, pricing, signup, onboarding, SEO/GEO, churn prevention, A/B tests. Triggers on: growth, cro, conversion optimization, pricing strategy, signup flow, onboarding, seo audit, churn, /growth.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": "<url or page to optimize, or mode: cro|pricing|seo|onboarding|churn|full-audit>"
+    },
+    {
+      "name": "gws",
+      "description": "Google Workspace CLI automation for bulk/complex tasks beyond MCP scope. Drive, Sheets, Gmail, Calendar, Chat, Admin. Triggers on: gws, google workspace automation, bulk drive, sheets pipeline, gmail batch, workspace admin.",
+      "model": "sonnet",
+      "effort": "low",
+      "argument_hint": "<task description>"
+    },
+    {
+      "name": "health-report",
+      "description": "Health report for SourceRank AI: API tests, E2E, unit tests, Lighthouse in one HTML/PDF. Triggers on: health report, site health, functional report, prove it works, health-report.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": "[--skip-qa] [--skip-lighthouse] [--pdf-only] [--url URL]"
+    },
+    {
+      "name": "llm-eval",
+      "description": "LLM output evaluation pipeline: audit evals, failure analysis, synthetic data, LLM-as-Judge, RAG eval, annotation design. Triggers on: llm eval, evaluate ai, eval pipeline, judge calibration, rag eval, ai quality, /llm-eval.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": "<feature/endpoint to evaluate, or 'audit' to review existing evals>"
+    },
+    {
+      "name": "local-inference",
+      "description": "Set up a local multi-model inference gateway with LiteLLM. Routes tasks to local models (MLX, Ollama) with cloud fallback (OpenRouter, Anthropic). Use alongside Claude Max. Triggers on: local inference, setup litellm, model gateway, local models, inference gateway, multi-model setup, run local models",
+      "model": "sonnet",
+      "effort": "medium",
+      "argument_hint": ""
+    },
+    {
+      "name": "maketree",
+      "description": "Create and manage git worktrees via native Claude CLI flag or config-driven bulk setups.",
+      "model": "haiku",
+      "effort": "low",
+      "argument_hint": ""
+    },
+    {
+      "name": "manual",
+      "description": "Build project user manual (MkDocs) with optional Word export",
+      "model": "sonnet",
+      "effort": "low",
+      "argument_hint": "[format: html|word|screenshots [url]]"
+    },
+    {
+      "name": "meditate",
+      "description": "End-of-session judgment extraction. Captures learnings, patterns, mistakes for the memory pipeline. Triggers on: meditate, reflect on session, extract learnings, /meditate.",
+      "model": "sonnet",
+      "effort": "medium",
+      "argument_hint": ""
+    },
+    {
+      "name": "memory-consolidation",
+      "description": "Memory maintenance: consolidate learnings, prune unused, filter relevance, promote patterns. Triggers on: consolidate memory, memory maintenance, clean up memories, /consolidate, memory health.",
+      "model": "sonnet",
+      "effort": "medium",
+      "argument_hint": ""
+    },
+    {
+      "name": "mini-remote",
+      "description": "Remote autonomous coding relay via SSH to Mac Mini. Supports single and queued prompts with Slack notifications. Triggers on: /mini, send to mini, queue for mini, run on mini, mini execute, run remotely on mac mini.",
+      "model": "sonnet",
+      "effort": "low",
+      "argument_hint": ""
+    },
+    {
+      "name": "nanoclaw",
+      "description": "Lightweight Claude-native agent runtime with Docker Sandbox, memory, scheduling, multi-channel messaging. Triggers on: nanoclaw, nanoclaw setup, agent runtime, docker sandbox agent, nanoclaw configure.",
+      "model": "sonnet",
+      "effort": "low",
+      "argument_hint": "<setup | add-channel <telegram|gmail|discord|slack> | sandbox | schedule <task> | swarm | status | --help>"
+    },
+    {
+      "name": "oci-health",
+      "description": "Check ExampleProject OCI health: API, dashboards, K8s pods, pipelines. Generates diagnostic report if down. Triggers on: oci health, is example-project up, check staging, check production, example-project status, oci status.",
+      "model": "haiku",
+      "effort": "low",
+      "argument_hint": "[environment: staging|production|both]"
+    },
+    {
+      "name": "office-hours",
+      "description": "|",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": ""
+    },
+    {
+      "name": "officecli",
+      "description": "Create, analyze, proofread, and modify Office documents (.docx, .xlsx, .pptx) using the officecli CLI tool. Use when the user wants to create, inspect, check formatting, find issues, add charts, or modify Office documents.",
+      "model": "sonnet",
+      "effort": "medium",
+      "argument_hint": ""
+    },
+    {
+      "name": "parallel-dev",
+      "description": "Parallel feature development using git worktrees and specialized agents. Orchestrates multiple features in isolation with CI reaction loops, progress monitoring, and progressive merge. Delegates to `ao` CLI when available.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": ""
+    },
+    {
+      "name": "pinchtab",
+      "description": "Local browser automation via PinchTab. A11y trees, element refs, screenshots, PDFs, JS eval. 5-13x cheaper. Triggers on: pinchtab, browser control, page snapshot, element refs, accessibility tree, pinch.",
+      "model": "sonnet",
+      "effort": "low",
+      "argument_hint": ""
+    },
+    {
+      "name": "platform-sweep",
+      "description": "Full platform health sweep -- UX audit, code cleanup, security scan, dependency updates, performance review. Parallel agents per track, consolidated report, then autonomous fixes in worktrees. Triggers on: platform sweep, health sweep, full audit, code sweep, platform health, sweep all.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": "[--url <site-url>] [--tracks a]b,c,d,e | all] [--fix-mode auto|manual|report-only]"
+    },
+    {
+      "name": "pr-impact",
+      "description": "PR Impact Optimizer for Nuvini (NVNI). Score, optimize, and backtest press releases for stock impact + SEC compliance. Triggers on: pr impact, press release, optimize pr, score pr, pr analysis, pr optimizer, /pr-impact.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": "<mode: analyze|backtest|simulate|collect> [draft text or .docx path]"
+    },
+    {
+      "name": "primer",
+      "description": "Context recovery after compaction or session start. ~500-token summary of memories, project state, git status, pending work. Triggers on: primer, context recovery, where was I, what was i doing, resume context.",
+      "model": "haiku",
+      "effort": "low",
+      "argument_hint": ""
+    },
+    {
+      "name": "proposal-source",
+      "description": "Generate diagnostic/research proposals for SourceRank AI clients. PDF output in Portuguese. Triggers on: proposal source, proposta sourcerank, gerar proposta, create proposal, client proposal, diagnostic proposal.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": "<client name or context>"
+    },
+    {
+      "name": "qa-conta",
+      "description": "ExampleProject QA orchestrator: API tests (curl) + browser tests. Maps 395+ endpoints across 50+ route modules. Triggers on: qa conta, example-project qa, qa runner, ship qa.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": ""
+    },
+    {
+      "name": "qa-cycle",
+      "description": "Master QA orchestrator: project-agnostic, auto-detects project, delegates to /qa-{project} or runs full cycle from scratch. Autonomous, self-managing. Triggers on: qa cycle, full qa, run qa, continuous qa, qa pipeline.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": ""
+    },
+    {
+      "name": "qa-fix",
+      "description": "Fix open QA issues: reads from DB, prioritizes by severity, investigates codebase, implements fixes. Triggers on: qa fix, fix bugs, fix qa issues, fix open issues.",
+      "model": "sonnet",
+      "effort": "medium",
+      "argument_hint": ""
+    },
+    {
+      "name": "qa-sourcerank",
+      "description": "Full QA cycle for SourceRank AI with swarm-parallel persona testing. Discover, fix, verify, regression detect via TeamCreate swarm + Supabase QA DB. Triggers on: qa sourcerank, sourcerank qa, test sourcerank, qa cycle sourcerank.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": ""
+    },
+    {
+      "name": "qa-stonegeo",
+      "description": "Full QA cycle for StoneGEO platform with code analysis + browser testing. Covers all 6 dashboard pages, tRPC API, Clerk auth, multi-tenancy. Uses typecheck + build verification. Triggers on: qa stonegeo, stonegeo qa, test stonegeo, qa cycle stonegeo.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": ""
+    },
+    {
+      "name": "",
+      "description": "Verify QA fixes via browse CLI or Chrome MCP. Updates issue status in DB (VERIFIED or back to IN_PROGRESS). Triggers on: qa verify, verify fixes, verify qa issues, verify bugs, test fixes.",
+      "model": "sonnet",
+      "effort": "medium",
+      "argument_hint": ""
+    },
+    {
+      "name": "qmd",
+      "description": "Semantic search over markdown collections via QMD hybrid search (BM25 + vector + LLM rerank). Triggers on: search skills, find pattern, which skill, search notes, search memory, qmd.",
+      "model": "haiku",
+      "effort": "low",
+      "argument_hint": "<search query>"
+    },
+    {
+      "name": "research",
+      "description": "Analyze any URL or image (article, repo, tweet, tool, screenshot, video, podcast) for skill/agent/project improvements. Triggers on: research this, analyze this link, learn from this, /research.",
+      "model": "sonnet",
+      "effort": "medium",
+      "argument_hint": "<url or image path>"
+    },
+    {
+      "name": "revert-track",
+      "description": "Revert a logical unit of work (feature, phase, track) via related commits. Reads state from /parallel-dev, /deep-plan, /ship. Triggers on: revert track, revert feature, undo feature, revert phase, undo last deep-plan.",
+      "model": "sonnet",
+      "effort": "medium",
+      "argument_hint": "<feature-id | 'last' | commit-range>"
+    },
+    {
+      "name": "review-changes",
+      "description": "Review uncommitted changes for bugs, security issues, and code quality before committing.",
+      "model": "sonnet",
+      "effort": "medium",
+      "argument_hint": ""
+    },
+    {
+      "name": "rex",
+      "description": "Infra security audit across all machines (Mac, Mini, VPS). Parallel SSH checks, Glasswing-style deep hunting, AI platform attack surface, cross-machine attack chains, effort estimates. Triggers on: rex, security audit, security check, infra security, machine audit, /rex.",
+      "model": "sonnet",
+      "effort": "high",
+      "argument_hint": "[target: all|mac|mini|vps] [--fix]"
+    },
+    {
+      "name": "run-local",
+      "description": "Start local development environment with automatic dependency installation, service orchestration, and health checks. Use when developers ask to run locally, start dev server, launch the app, or spin up the development environment.",
+      "model": "haiku",
+      "effort": "low",
+      "argument_hint": ""
+    },
+    {
+      "name": "sc",
+      "description": "Ship commit: verify \u2192 review \u2192 commit \u2192 push \u2192 PR. Full pipeline from changes to PR in one command.",
+      "model": "sonnet",
+      "effort": "medium",
+      "argument_hint": "[PR title or commit message]"
+    },
+    {
+      "name": "schedule",
+      "description": "Create, update, list, or run scheduled remote agents (triggers) that execute on a cron schedule. Triggers on: schedule, scheduled agent, cron agent, recurring agent, trigger, remote trigger.",
+      "model": "sonnet",
+      "effort": "low",
+      "argument_hint": ""
+    },
+    {
+      "name": "scrapling",
+      "description": "Web scraping with anti-bot bypass, TLS impersonation, adaptive tracking via Scrapling MCP. Three modes: HTTP, stealth browser, Playwright. Triggers on: scrapling, stealth scrape, bypass cloudflare, anti-bot scrape.",
+      "model": "sonnet",
+      "effort": "low",
+      "argument_hint": ""
+    },
+    {
+      "name": "ship",
+      "description": "End-to-end feature shipping: spec \u2192 plan \u2192 swarm implement \u2192 QA \u2192 fix \u2192 docs. Resumable. Triggers on: ship, ship feature, build and ship, full cycle, end to end, /ship.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": "<feature description, sprint plan, or --resume>"
+    },
+    {
+      "name": "skill-tree",
+      "description": "Split large docs into navigable index + linked sub-files to reduce context bloat. Triggers on: skill tree, split docs, navigable index, reduce context bloat.",
+      "model": "sonnet",
+      "effort": "medium",
+      "argument_hint": "<source file or URL or topic>"
+    },
+    {
+      "name": "slack",
+      "description": "Automate Slack via browser. Send messages, read channels, search, manage threads. Triggers on: slack, send to slack, post slack, read slack, slack message, slack channel.",
+      "model": "sonnet",
+      "effort": "low",
+      "argument_hint": "<action> [target] [message]"
+    },
+    {
+      "name": "sourcerank-guardian",
+      "description": "Pre-deploy guardian for SourceRank AI. Multi-layer analysis (code, infra, runtime, diff-aware) before deploy to Render. Parallel subagents. Triggers on: sourcerank guardian, pre-deploy check, guardian sourcerank, sourcerank pre-deploy.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": ""
+    },
+    {
+      "name": "tech-audit",
+      "description": "Audit project tech stack against current market \u2014 compare versions, find EOL libs, recommend upgrades. Triggers on: tech audit, stack audit, dependency audit, upgrade check, what should we upgrade, outdated dependencies",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": ""
+    },
+    {
+      "name": "test-and-fix",
+      "description": "Run tests and auto-fix failures in a loop. Use when tests are failing and you want them fixed.",
+      "model": "sonnet",
+      "effort": "medium",
+      "argument_hint": ""
+    },
+    {
+      "name": "tweet",
+      "description": "Fetch and display any public X/Twitter post using the FixTweet API. Supports single tweets and threads. Triggers on: /tweet <url>",
+      "model": "haiku",
+      "effort": "low",
+      "argument_hint": "<tweet URL>"
+    },
+    {
+      "name": "vault-bootstrap",
+      "description": "Bootstrap a CLAUDE.md API contract for any local knowledge vault (Obsidian, plain markdown). Generates vault overview, conventions, and agent guardrails from 5 diagnostic questions. Triggers on: vault bootstrap, obsidian setup, second brain, vault claude, bootstrap vault, setup obsidian, knowledge vault.",
+      "model": "sonnet",
+      "effort": "low",
+      "argument_hint": ""
+    },
+    {
+      "name": "verify",
+      "description": "Verify project health - type-check, tests, build. Use after making changes or before committing.",
+      "model": "haiku",
+      "effort": "low",
+      "argument_hint": "[check type: types|tests|build|all]"
+    },
+    {
+      "name": "verify-conta",
+      "description": "Full ExampleProject verification suite: ruff, mypy, pytest (unit+integration), tsc, eslint, vite/next build, vitest, gitleaks. Parallel execution. Triggers on: verify conta, example-project verify, full verify, run all tests, test everything, example-project tests.",
+      "model": "sonnet",
+      "effort": "medium",
+      "argument_hint": "[layer: lint|types|tests|build|security|all] [--fix]"
+    },
+    {
+      "name": "vibc",
+      "description": "12-seat advisory board of diverse archetypes for structured decision deliberation. Blind input, debates, scored options. Triggers on: vibc, board council, advisory board, decision council, variety board.",
+      "model": "opus",
+      "effort": "high",
+      "argument_hint": "<decision or problem> [--mode full|quick] [--type binary|strategy|ethical|crisis|resource-allocation] [retro <decision-id>]"
+    },
+    {
+      "name": "virtual-user-testing",
+      "description": "Virtual user testing for ExampleProject with QA DB. Parallel persona agents, bug reports, fix verification, regression detection. Triggers on: virtual user test, persona test, user simulation, test as user, qa discover.",
+      "model": "opus",
+      "effort": "medium",
+      "argument_hint": ""
+    },
+    {
+      "name": "website-design",
+      "description": "Professional B2B SaaS websites, dashboards, and landing pages with modern UX/UI. Tailwind CSS, React, conversion optimization. Triggers on: website design, landing page, dashboard design, admin panel, web interface, B2B website.",
+      "model": "sonnet",
+      "effort": "medium",
+      "argument_hint": ""
+    },
+    {
+      "name": "wiki",
+      "description": "LLM Wiki \u2014 persistent, compounding knowledge base. Ingest sources, query knowledge, think/synthesize, auto-harvest, lint health. Karpathy + Memex pattern. Triggers on: wiki, wiki ingest, wiki query, wiki think, wiki lint, wiki stats, wiki harvest, add to wiki, knowledge base, remember this",
+      "model": "sonnet",
+      "effort": "medium",
+      "argument_hint": ""
+    }
+  ]
+}

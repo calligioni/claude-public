@@ -1,0 +1,230 @@
+[
+  {
+    "url": "https://x.com/NVIDIAAIDev/status/2043133171949264901",
+    "note": "NVIDIA announces MiniMax M2.7 open-source 230B MoE model available via GPU-accelerated endpoints (NemoClaw/OpenClaw)",
+    "addedAt": "2026-04-12T09:13:11Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/gkisokay/status/2041286075675459600",
+    "note": "LLM cheat-sheet for agent systems: 4-tier model stack (Frontier/Execution/Balanced/Local) with 12+ models, benchmarks, costs, and use cases for OpenClaw/Hermes agents",
+    "addedAt": "2026-04-12T10:11:20Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://github.com/vercel-labs/agent-browser",
+    "note": "agent-browser: native Rust browser automation CLI for AI agents — accessibility tree snapshots, CDP-based, 28k+ stars, Claude Code plugin built-in",
+    "addedAt": "2026-04-13T08:16:03Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://www.patrickdap.com/post/how-to-run-multiple-agents/",
+    "note": "dux — TUI app for running multiple Claude Code/Codex agents in parallel via git worktrees, CLI wrapper approach",
+    "addedAt": "2026-04-13T13:17:21Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/bcherny/status/2043715713551212834",
+    "note": "Boris Cherny (Claude Code @Anthropic): 1h prompt cache nuance — subagents kept at 5m, env vars coming, telemetry off disables experiment gates",
+    "addedAt": "2026-04-13T16:00:33Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/Zai_org/status/2041550153354519022",
+    "note": "GLM-5.1 launch: 754B MoE open-source model, #1 SWE-Bench Pro open-source, 8h autonomous runs, MIT license",
+    "addedAt": "2026-04-13T16:17:40Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://blog.cloudflare.com/sandbox-auth/",
+    "note": "Cloudflare Outbound Workers for Sandboxes — programmatic credential injection and zero-trust egress control for AI agent sandboxes",
+    "addedAt": "2026-04-13T16:18:51Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://github.com/NousResearch/hermes-agent/releases/tag/v2026.4.13",
+    "note": "Hermes Agent v0.9.0 - multi-platform expansion (Android/Termux, iMessage, WeChat), local web dashboard, pluggable context engine, background process monitoring, deep security hardening",
+    "addedAt": "2026-04-13T20:49:33Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://open-agents.dev",
+    "note": "Open Agents — Vercel open-source reference platform for cloud coding agents with Fluid/Workflow/Sandbox/AI Gateway infra",
+    "addedAt": "2026-04-14T07:26:19Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/mr_r0b0t/status/2043787033819172945",
+    "note": "Hermes Agent v0.9.0 'Everywhere' release — ACP protocol, 15+ channels, distributed intelligence paradigm, agentskills.io standard",
+    "addedAt": "2026-04-14T08:27:22Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/billtheinvestor/status/2043706042828394747",
+    "note": "dev-browser: AI writes real Playwright code in QuickJS sandbox for browser control — 3m53s, $0.88, 100% success rate",
+    "addedAt": "2026-04-14T08:36:40Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/JoshuaIPark/status/2043734397225157043",
+    "note": "Membase — Karpathy LLM-Wiki + GBrain as a product: persistent memory, wiki, auto-update, live agent sync, MCP support",
+    "addedAt": "2026-04-14T08:38:57Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://membase.so",
+    "note": "Membase.so — personal AI memory layer with knowledge graph, MCP support, multi-agent sync (Gmail, Calendar, Slack, Notion, GitHub), free beta",
+    "addedAt": "2026-04-14T08:39:00Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://blog.cloudflare.com/cf-cli-local-explorer/",
+    "note": "Cloudflare cf CLI — unified CLI for all 3000+ Cloudflare APIs, AI-agent-optimized with consistent syntax and Local Explorer for D1/R2/KV debugging",
+    "addedAt": "2026-04-14T08:54:15Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/RoundtableSpace/status/2043664246639063289",
+    "note": "Claude Code + Obsidian second brain: CLAUDE.md as API contract, vault-as-context pattern, skills as slash commands, MCP integration for external tools",
+    "addedAt": "2026-04-14T08:55:08Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://github.com/openclaw/openclaw/releases/tag/v2026.4.14",
+    "note": "OpenClaw 2026.4.14 release: GPT-5.4 routing, Chrome/CDP fixes, subagent stuck fix, Slack/Telegram/Discord fixes",
+    "addedAt": "2026-04-14T16:21:13Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://claude.com/blog/multi-agent-coordination-patterns",
+    "note": "Anthropic's 5 multi-agent coordination patterns: generator-verifier, orchestrator-subagent, agent-teams, message-bus, shared-state — with selection framework",
+    "addedAt": "2026-04-14T16:38:31Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/thomasgauvin/status/2044039230595211761",
+    "note": "Cloudflare Mesh + Workers VPC: private networking for AI agents/Workers/Durable Objects, connects to private MCPs, APIs, DBs — 50 nodes + 50 users free",
+    "addedAt": "2026-04-14T16:39:52Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/claudeai/status/2044095086460309790",
+    "note": "Anthropic announces Claude Code Routines (research preview) — scheduled/API-triggered/event-driven agent runs on Anthropic cloud infra",
+    "addedAt": "2026-04-14T17:05:59Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://www.anthropic.com/research/automated-alignment-researchers",
+    "note": "Anthropic research: Claude Opus 4.6 as Automated Alignment Researcher — weak-to-strong supervision, PGR 0.97 vs human 0.23, reward hacking behaviors detected",
+    "addedAt": "2026-04-14T20:02:48Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/garrytan/status/2044291667138883650",
+    "note": "Garry Tan announces GBrain skillpacks that build YOUR personal agent setup via OpenClaw/Hermes install instructions",
+    "addedAt": "2026-04-15T08:39:15Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://tailscale.com/blog/tailscale-rs-rust-tsnet-library-preview",
+    "note": "tailscale-rs: Rust library for embedding Tailscale in any app — no Go runtime, FFI bindings for Python/Elixir/C, TCP/UDP comms within tailnets",
+    "addedAt": "2026-04-16T08:55:28Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/trq212/status/2044548257058328723",
+    "note": "Twitter Article by Thariq (Claude Code team, Anthropic): Session Management & 1M Context — context rot at 300-400k tokens, rewind habit, compact vs clear, subagent mental model",
+    "addedAt": "2026-04-16T08:57:59Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/OfficialLoganK/status/2044447596010435054",
+    "note": "Gemini 3.1 Flash TTS launch — scene direction, speaker specificity, 70 languages, available via Gemini API",
+    "addedAt": "2026-04-16T09:02:21Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/Alibaba_Qwen/status/2044768734234243427",
+    "note": "Qwen3.6-35B-A3B released: sparse MoE, 35B total/3B active params, Apache 2.0, multimodal, agentic coding parity with 10x-larger models",
+    "addedAt": "2026-04-16T13:44:33Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/noahzweben/status/2044812118063747341",
+    "note": "Noah Zweben (Claude Code PM) announces Routines + Opus 4.7 as the key unlock for background agentic work",
+    "addedAt": "2026-04-16T16:27:44Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/thomasgauvin/status/2044766954032951792",
+    "note": "Cloudflare Email Service public beta — send/receive emails from Workers or REST API, integrates with Agents SDK for email agents",
+    "addedAt": "2026-04-16T18:59:14Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://claude.com/blog/best-practices-for-using-claude-opus-4-7-with-claude-code",
+    "note": "Anthropic official best practices for Opus 4.7 in Claude Code: effort levels (xhigh default), adaptive thinking, subagent delegation, interactive vs async modes",
+    "addedAt": "2026-04-16T19:03:21Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/bcherny/status/2044847848035156457",
+    "note": "Boris Cherny (Claude Code creator) tweet on Opus 4.7 launch and tips - April 16 2026",
+    "addedAt": "2026-04-16T19:03:28Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/bcherny/status/2044822408826380440",
+    "note": "Boris Cherny (Claude Code creator) tweet on Opus 4.7 launch and tips - April 16 2026",
+    "addedAt": "2026-04-16T19:03:28Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/bcherny/status/2044802532388774313",
+    "note": "Boris Cherny (Claude Code creator) tweet on Opus 4.7 launch and tips - April 16 2026",
+    "addedAt": "2026-04-16T19:03:28Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/bcherny/status/2044847856872546639",
+    "note": "Boris Cherny Opus 4.7 tips thread: auto mode, /fewer-permission-prompts skill, recaps, focus mode, adaptive thinking effort levels (xhigh/max)",
+    "addedAt": "2026-04-16T19:56:51Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/garrytan/status/2045427057656729985",
+    "note": "GBrain v0.11 Minions — BullMQ-based job queue for reliable subagent execution, replacing timeout-prone ad-hoc spawning",
+    "addedAt": "2026-04-18T09:17:01Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/HuggingModels/status/2045337281775718800",
+    "note": "HuggingModels tweet on Lyra-2.0 — misleadingly described as audio; actually NVIDIA's generative 3D world model (single-image 3D scene generation, released 2026-04-15)",
+    "addedAt": "2026-04-18T10:26:39Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://github.com/garrytan/gstack",
+    "note": "GStack v1.0.0 — Garry Tan's open-source Claude Code skill suite: 23 specialist slash commands (CEO, designer, QA, security, release), sprint workflow, parallel sessions via Conductor, SLOC productivity tracking",
+    "addedAt": "2026-04-18T10:30:26Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/garrytan/status/2045447413050363927",
+    "note": "GBrain v0.12 self-wiring knowledge graph — typed links auto-created on put_page, zero LLM calls, graph-query command, 94% recall vs 83% before",
+    "addedAt": "2026-04-18T12:21:56Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://github.com/vercel-labs/wterm",
+    "note": "wterm — DOM-rendering terminal emulator with Zig/WASM core, React component, in-browser Bash shell, Markdown streaming from LLMs, and WebSocket-to-SSH bridge",
+    "addedAt": "2026-04-18T22:07:28Z",
+    "addedBy": "research-skill"
+  },
+  {
+    "url": "https://x.com/Hesamation/status/2045543985549017217",
+    "note": "Qwen3.6-35B-A3B fine-tuned on Claude Opus 4.6 distilled CoT — Qwen speed + Opus-level reasoning, follows Jackrong recipe",
+    "addedAt": "2026-04-19T08:58:44Z",
+    "addedBy": "research-skill"
+  }
+]
