@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(dotnet *)",
+      "Bash(npm *)",
+      "Bash(sed *)",
+      "Bash(file *)",
+      "Bash(python*)",
+      "Bash(curl*)",
+      "Bash(ls *)",
+      "Bash(pwd)",
+      "Bash(whoami)",
+      "Bash(env *)",
+      "Bash(echo *)"
+    ]
+  },
+  "env": {
+    "CLAUDE_CODE_USE_POWERSHELL_TOOL": "1"
+  },
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": true
+  }
+}

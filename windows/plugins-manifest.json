@@ -1,0 +1,12 @@
+{
+  "description": "Plugins to install on new machines. Used by setup-plugins.ps1",
+  "marketplace": "claude-plugins-official",
+  "marketplaceRepo": "anthropics/claude-plugins-official",
+  "plugins": [
+    "frontend-design",
+    "context7",
+    "superpowers",
+    "code-review",
+    "skill-creator"
+  ]
+}

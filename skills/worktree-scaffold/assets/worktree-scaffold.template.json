@@ -1,0 +1,33 @@
+{
+  "worktreeDir": "../",
+  "branchPrefix": "feature/",
+  "scaffolds": {
+    "default": [
+      { "path": "src/features/{name}/index.ts", "template": "feature-index" },
+      { "path": "src/features/{name}/types.ts", "template": "feature-types" },
+      { "path": "src/features/{name}/__tests__/{name}.test.ts", "template": "feature-test" }
+    ],
+    "component": [
+      { "path": "src/components/{Name}/{Name}.tsx", "template": "react-component" },
+      { "path": "src/components/{Name}/{Name}.test.tsx", "template": "component-test" },
+      { "path": "src/components/{Name}/index.ts", "template": "component-index" }
+    ],
+    "api": [
+      { "path": "src/api/{name}/route.ts", "template": "api-route" },
+      { "path": "src/api/{name}/handler.ts", "template": "api-handler" }
+    ]
+  },
+  "templates": {
+    "feature-index": "// {Name} Feature\n// Created: {date} by {author}\n\nexport * from './types';\n",
+    "feature-types": "export interface {Name}Props {\n  // TODO: Define props\n}\n\nexport interface {Name}State {\n  loading: boolean;\n  error: string | null;\n  data: unknown;\n}\n",
+    "feature-test": "import { describe, it, expect } from 'vitest';\n\ndescribe('{Name}', () => {\n  it('should work', () => {\n    expect(true).toBe(true);\n  });\n});\n",
+    "react-component": "import React from 'react';\n\nexport interface {Name}Props {\n  children?: React.ReactNode;\n}\n\nexport const {Name}: React.FC<{Name}Props> = ({ children }) => {\n  return (\n    <div>\n      {children}\n    </div>\n  );\n};\n",
+    "component-test": "import { render, screen } from '@testing-library/react';\nimport { {Name} } from './{Name}';\n\ndescribe('{Name}', () => {\n  it('renders children', () => {\n    render(<{Name}>Test</{Name}>);\n    expect(screen.getByText('Test')).toBeInTheDocument();\n  });\n});\n",
+    "component-index": "export { {Name} } from './{Name}';\nexport type { {Name}Props } from './{Name}';\n",
+    "api-route": "import { {name}Handler } from './handler';\n\nexport async function GET(request: Request) {\n  return {name}Handler.get(request);\n}\n\nexport async function POST(request: Request) {\n  return {name}Handler.post(request);\n}\n",
+    "api-handler": "export const {name}Handler = {\n  async get(request: Request): Promise<Response> {\n    return Response.json({ message: 'GET {name}' });\n  },\n  async post(request: Request): Promise<Response> {\n    return Response.json({ message: 'POST {name}' });\n  }\n};\n"
+  },
+  "hooks": {
+    "postScaffold": ""
+  }
+}

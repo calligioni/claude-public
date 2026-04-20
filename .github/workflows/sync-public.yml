@@ -1,0 +1,100 @@
+name: Sync to claude-public
+
+on:
+  push:
+    branches: [master]
+
+# Required secret: CLAUDE_PUBLIC_PAT
+# A fine-grained GitHub PAT with push access to escotilha/claude-public
+# Create at: https://github.com/settings/tokens?type=beta
+# Permissions needed: Contents (read+write) on escotilha/claude-public
+# Add as repository secret at: https://github.com/escotilha/claude/settings/secrets/actions
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout private repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Strip private content
+        run: |
+          # === Project-specific skills ===
+          rm -rf skills/qa-conta skills/qa-sourcerank skills/qa-stonegeo skills/virtual-user-testing \
+            skills/oci-health skills/proposal-source skills/chief-geo skills/deploy-conta-staging \
+            skills/deploy-conta-production skills/deploy-sourcerank skills/contably-guardian \
+            skills/sourcerank-guardian skills/health-report
+
+          # === Personal/internal skills ===
+          rm -rf skills/cs skills/cpr skills/sc skills/paperclip skills/paperclip-create-agent \
+            skills/slack skills/agentmail skills/tweet skills/gws skills/mini-remote skills/rex \
+            skills/nanoclaw skills/claude-setup-optimizer skills/memory-consolidation skills/meditate \
+            skills/computer-use skills/pr-impact
+
+          # === Nuvini-specific ===
+          rm -rf mcp-servers/nuvini-mna
+          rm -f rules/nuvini-sync-rules.md
+
+          # === Personal config/state ===
+          rm -f config/killswitch-ios-shortcut.md bin/killswitch
+          rm -f .deep-plan-state.json plan.md research.md
+          rm -rf plans/ backups/ .gstack/
+
+          # === Memory: sensitive/personal ===
+          rm -f memory/auto/reference_oci_contably.md memory/auto/reference_paperclip_vps.md \
+            memory/auto/reference_cloudflare.md memory/auto/reference_cloudflare_nuvini.md \
+            memory/auto/project_esocial_plan.md memory/auto/project_woodpecker_ci.md \
+            memory/auto/project_nuvini_ir_deploy.md memory/auto/project_claudia_migration_complete.md \
+            memory/auto/project_claudia_router.md memory/auto/feedback_run_guardian_before_deploy.md \
+            memory/auto/feedback_nuvini_ir_css_classes.md memory/auto/reference_resend_cli.md \
+            memory/auto/reference_search_api_keys.md memory/auto/reference_openrouter_api.md \
+            memory/auto/tech_openclaw_rl.md
+          rm -rf memory/sessions/ memory/imported/
+          rm -f memory/turso-replica.db memory/turso-replica.db-client_wal_index \
+            memory/skill-executions.jsonl memory/consolidation-report-*.md \
+            memory/core-memory.json memory/session-context.json
+
+          # === Settings/sensitive ===
+          rm -f settings.json settings.json.backup_* .env.example
+          rm -f SETUP-BASELINE.md
+
+          # === Misc ===
+          rm -f .DS_Store nohup.out
+
+          # === This workflow itself ===
+          rm -rf .github/
+
+          # === Scrub project-specific references from remaining files ===
+          find . -type f \( -name "*.md" -o -name "*.json" -o -name "*.sh" -o -name "*.py" -o -name "*.ts" \) \
+            -exec sed -i \
+              -e 's/contably/your-project/g' \
+              -e 's/Contably/YourProject/g' \
+              -e 's/sourcerank/your-project/g' \
+              -e 's/SourceRank/YourProject/g' \
+              -e 's/stonegeo/your-project/g' \
+              -e 's/StoneGEO/YourProject/g' \
+              -e 's/nuvini/your-org/g' \
+              -e 's/Nuvini/YourOrg/g' \
+              -e 's/OpenClaw/LocalAgentRuntime/g' \
+              -e 's/openclaw/local-agent-runtime/g' \
+              -e 's/escotilha@gmail\.com/your-email@example.com/g' \
+              -e 's/p@nove\.co/your-email@example.com/g' \
+              {} +
+
+          echo "::notice::Stripped to $(find . -type f | wc -l) files"
+
+      - name: Push to claude-public
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          rm -rf .git
+          git init
+          git add -A
+          git commit -m "sync: auto-update from private repo ($(date -u +%Y-%m-%d))"
+          git branch -M main
+
+          git remote add public https://x-access-token:${{ secrets.CLAUDE_PUBLIC_PAT }}@github.com/escotilha/claude-public.git
+          git push public main --force

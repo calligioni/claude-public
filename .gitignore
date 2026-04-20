@@ -28,3 +28,6 @@ __pycache__/
 
 # Backups
 backups/
+
+# Dependencies
+node_modules/
