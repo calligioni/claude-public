@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//h/Meu Drive/Adriano Pessoal/7 - Inteligencia Artificial/Claude/Xsquads/squads/**)"
+    ]
+  }
+}
