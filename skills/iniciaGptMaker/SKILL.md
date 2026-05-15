@@ -80,7 +80,7 @@ Para cada arquivo .md fonte:
 1. Atualizar `progresso.json` com status `em_andamento`
 2. Ler o conteudo completo do arquivo
 3. Extrair os nuggets de informacao uteis para suporte N1
-4. Gerar textos seguindo as Regras de Qualidade (abaixo)
+4. Gerar textos seguindo as Regras de Qualidade (abaixo) Sempre dizendo a tela.
 5. Gravar arquivo .txt de saida com mesmo nome do .md fonte
 6. Atualizar `progresso.json` com status `concluido` e contagem de textos
 
