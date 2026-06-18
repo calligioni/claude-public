@@ -1,0 +1,13 @@
+{
+  "name": "website-replicator-skill",
+  "type": "module",
+  "private": true,
+  "description": "Helper scripts for the website-replicator skill",
+  "scripts": {
+    "probe": "node scripts/probe-motion.mjs",
+    "parity": "node scripts/parity-check.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
+  }
+}

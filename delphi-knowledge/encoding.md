@@ -17,10 +17,11 @@
 
 ## KPL/Abacos — regra crítica
 
-Os arquivos SQL e .pas do KPL estão em **ISO-8859-1 (Latin-1)**.
+Os arquivos SQL e .pas do KPL estão em **ISO-8859-1 (Latin-1)** com **CRLF**.
 - NUNCA usar as ferramentas Edit/Write padrão para editar esses arquivos
-- Usar `sed` via Bash para edições pontuais
-- Verificar encoding antes e depois com `file --mime-encoding`
+- Para edições pontuais: `sed` via Bash — **ATENÇÃO: o `sed -i` do Git Bash converte CRLF→LF!** Sempre rodar `unix2dos -q arquivo` depois de qualquer `sed -i`
+- Para edições multi-linha: Perl com `open(..., '<:raw', ...)` / `'>:raw'` e strings terminadas em `\r\n` (preserva bytes e CRLF; acentos como `\xE7` ç, `\xE3` ã, `\xE9` é, `\xF5` õ, `\xF3` ó)
+- Verificar antes e depois com `file arquivo` (sem --mime-encoding): deve mostrar `ISO-8859 text, with CRLF line terminators` — a ausência de "with CRLF" indica que as quebras foram destruídas
 
 ## Verificação de encoding
 
