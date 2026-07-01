@@ -1,12 +1,58 @@
 {
-  "description": "Plugins to install on new machines. Used by setup-plugins.ps1",
-  "marketplace": "claude-plugins-official",
-  "marketplaceRepo": "anthropics/claude-plugins-official",
-  "plugins": [
-    "frontend-design",
-    "context7",
-    "superpowers",
-    "code-review",
-    "skill-creator"
-  ]
+    "description":  "Plugins/marketplaces a instalar em novas maquinas. Usado por setup-plugins.ps1. Gerado por export-plugins.ps1.",
+    "marketplaces":  [
+                         {
+                             "name":  "claude-plugins-official",
+                             "source":  "github",
+                             "repo":  "anthropics/claude-plugins-official"
+                         },
+                         {
+                             "name":  "claude-for-financial-services",
+                             "source":  "git",
+                             "url":  "https://github.com/anthropics/financial-services.git"
+                         },
+                         {
+                             "name":  "claude-video",
+                             "source":  "github",
+                             "repo":  "bradautomates/claude-video"
+                         }
+                     ],
+    "plugins":  [
+                    "claude-code-setup@claude-plugins-official",
+                    "claude-for-msft-365-install@claude-for-financial-services",
+                    "claude-md-management@claude-plugins-official",
+                    "cloudflare@claude-plugins-official",
+                    "code-review@claude-plugins-official",
+                    "code-simplifier@claude-plugins-official",
+                    "context7@claude-plugins-official",
+                    "earnings-reviewer@claude-for-financial-services",
+                    "equity-research@claude-for-financial-services",
+                    "figma@claude-plugins-official",
+                    "financial-analysis@claude-for-financial-services",
+                    "frontend-design@claude-plugins-official",
+                    "fund-admin@claude-for-financial-services",
+                    "github@claude-plugins-official",
+                    "gl-reconciler@claude-for-financial-services",
+                    "investment-banking@claude-for-financial-services",
+                    "kyc-screener@claude-for-financial-services",
+                    "lseg@claude-for-financial-services",
+                    "market-researcher@claude-for-financial-services",
+                    "meeting-prep-agent@claude-for-financial-services",
+                    "model-builder@claude-for-financial-services",
+                    "month-end-closer@claude-for-financial-services",
+                    "operations@claude-for-financial-services",
+                    "pitch-agent@claude-for-financial-services",
+                    "playwright@claude-plugins-official",
+                    "private-equity@claude-for-financial-services",
+                    "skill-creator@claude-plugins-official",
+                    "sp-global@claude-for-financial-services",
+                    "statement-auditor@claude-for-financial-services",
+                    "stripe@claude-plugins-official",
+                    "supabase@claude-plugins-official",
+                    "superpowers@claude-plugins-official",
+                    "valuation-reviewer@claude-for-financial-services",
+                    "vercel@claude-plugins-official",
+                    "watch@claude-video",
+                    "wealth-management@claude-for-financial-services"
+                ]
 }

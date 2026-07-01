@@ -224,6 +224,8 @@ Isso remove todas as junctions e restaura os arquivos originais do backup.
 | `setup-credentials.ps1` | Setup interativo de 17 credenciais no Credential Manager | `.\windows\setup-credentials.ps1` |
 | `load-secrets.ps1` | Carrega secrets do Credential Manager como env vars | Dot-sourced pelo `$PROFILE` |
 | `setup-mcp-servers.ps1` | `npm install` + build dos MCP servers locais | `.\windows\setup-mcp-servers.ps1` |
+| `setup-plugins.ps1` | **Reinstala** plugins/marketplaces do `plugins-manifest.json` (Claude re-baixa no proximo launch) | `.\windows\setup-plugins.ps1` |
+| `export-plugins.ps1` | **Gera** o `plugins-manifest.json` a partir do estado vivo em `~/.claude`. Rode antes de `claude-sync push` | `.\windows\export-plugins.ps1` |
 | `setup-task-scheduler.ps1` | Registra auto-sync no Task Scheduler (3 min) | `.\windows\setup-task-scheduler.ps1` |
 | `setup-desktop.ps1` | Gera `claude_desktop_config.json` a partir do template | `.\windows\setup-desktop.ps1` |
 | `claude-auto-sync.ps1` | Script de sync executado pelo Task Scheduler | Automatico (nao rodar manualmente) |
@@ -307,7 +309,7 @@ O CLI usa a pasta `~/.claude/` para tudo. Apos o setup, ela contem:
 
 **settings.json** inclui:
 - Permissions: git, dotnet, npm, python, curl, etc.
-- Plugins: frontend-design, context7, superpowers, code-review, skill-creator
+- Plugins: 36 plugins habilitados de 3 marketplaces (ver `windows/plugins-manifest.json`). Reinstalados por `setup-plugins.ps1`; a pasta `~/.claude/plugins` **nao** e symlinkada (contem cache/caminhos absolutos), so a lista viaja via manifesto.
 - Env: `CLAUDE_CODE_USE_POWERSHELL_TOOL=1`
 
 ### Claude Desktop (`%APPDATA%\Claude\`)
